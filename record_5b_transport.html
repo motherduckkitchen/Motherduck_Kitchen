@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MDK — Record 5b — Transport Log</title>
+  <link rel="stylesheet" href="/shared/styles.css"/>
+  <script type="module">
+    import {requireLogin} from '/shared/auth.js';
+    import {loadLive,saveLive,addToArchive,clearLive} from '/shared/archive.js';
+    import {AU, todayISO, id, mirrorAU} from '/shared/ui.js';
+    requireLogin();
+    const PAGE='record_5b_transport';
+    window.addEventListener('DOMContentLoaded',()=>{
+      const data = loadLive(PAGE);
+      for(const [k,v] of Object.entries(data)){ const el=document.querySelector(`[name="{${k}}"]`); if(el) el.value=v; }
+      const d=document.querySelector('input[type=date][name=date]');
+      const m=document.querySelector('#au-date');
+      if(d&&m){ if(!d.value) d.valueAsDate=new Date(); mirrorAU(d,m); }
+    });
+    function save(){ const fd=new FormData(document.querySelector('form')); const obj={}; fd.forEach((v,k)=>obj[k]=v); saveLive(PAGE,obj); alert('Saved locally'); }
+    function clearAll(){ if(confirm('Clear this sheet?')){ document.querySelector('form').reset(); saveLive(PAGE,{}); } }
+    function archiveWeek(){ const fd=new FormData(document.querySelector('form')); const obj={}; fd.forEach((v,k)=>obj[k]=v); const entry={ id:id(), dateISO: todayISO(), payload: obj }; addToArchive(PAGE, entry); clearLive(PAGE); alert('Archived to month bucket and cleared live copy'); }
+    window.MDK={save,clearAll,archiveWeek};
+  </script>
+</head>
+<body>
+  <div class="main-wrap">
+    <div class="container">
+      <header class="page">
+        <img src="/images/logo.png" alt="MDK"/>
+        <div><h1>Record 5b — Transport Log</h1><div class="label">Date (AU): <span id="au-date" class="small"></span></div></div>
+      </header>
+      <div class="toolbar">
+        <a class="btn secondary" href="/kitchen.html">← Back</a>
+        <button class="btn" onclick="MDK.save()">Save</button>
+        <button class="btn secondary" onclick="window.print()">Print</button>
+        <button class="btn secondary" onclick="MDK.clearAll()">Clear</button>
+        <button class="btn warning" onclick="MDK.archiveWeek()">Archive → Month</button>
+      </div>
+      <section class="card">
+        <form class="grid">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th style="width:160px">Date</th><th>Field 1</th><th>Field 2</th><th>Initials</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="date" name="date"></td>
+                  <td><input name="f1"></td>
+                  <td><input name="f2"></td>
+                  <td><input name="initials" maxlength="3" oninput="this.value=this.value.toUpperCase()"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="helper">Paste the exact table/wording from your Food Safety Program here.</footer>
+        </form>
+      </section>
+      <section class="card" style="margin-top:12px">
+        <details>
+          <summary>Load archived month (print old records)</summary>
+          <div class="grid">
+            <label>Year <input id="arch-year" placeholder="2025"></label>
+            <label>Month (01–12) <input id="arch-month" placeholder="10"></label>
+            <button class="btn" id="btn-load-arch" type="button">Load</button>
+            <div id="arch-out" class="small"></div>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+  <script type="module">
+    import {loadMonth} from '/shared/archive.js';
+    const PAGE='record_5b_transport';
+    document.getElementById('btn-load-arch').addEventListener('click',()=>{
+      const y=document.getElementById('arch-year').value.trim();
+      const m=document.getElementById('arch-month').value.trim();
+      const data = loadMonth(y,m, PAGE);
+      const out = document.getElementById('arch-out');
+      out.textContent = data.length? JSON.stringify(data,null,2) : 'No entries';
+    });
+  </script>
+</body>
+</html>

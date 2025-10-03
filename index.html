@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MDK — Home</title>
+  <link rel="stylesheet" href="/shared/styles.css"/>
+  <script type="module">
+    import {requireLogin} from '/shared/auth.js'; requireLogin();
+  </script>
+</head>
+<body>
+  <div class="main-wrap">
+    <div class="container">
+      <header class="page"><img src="/images/logo.png" alt="MDK"><h1>Mother Duck Kitchen</h1></header>
+      <div class="toolbar">
+        <a class="btn" href="/kitchen.html">Kitchen</a>
+        <a class="btn" href="/brewer.html">Brewer St</a>
+        <a class="btn secondary" href="/food_safety.html">Food Safety Bible</a>
+      </div>
+      <section class="card"><p>Welcome. Choose a section.</p></section>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MDK — Login</title>
+  <link rel="stylesheet" href="/shared/styles.css"/>
+  <script type="module">
+    import {login} from '/shared/auth.js';
+    window.doLogin=(e)=>{
+      e.preventDefault(); const u=document.getElementById('u').value.trim(); if(!u) return;
+      login(u); window.location.href='/index.html';
+    }
+  </script>
+</head>
+<body>
+  <div class="main-wrap">
+    <div class="container">
+      <section class="card" style="max-width:420px; margin:80px auto">
+        <header class="page"><img src="/images/logo.png" alt="MDK"><h1>Sign in</h1></header>
+        <form onsubmit="doLogin(event)" class="grid">
+          <label>Username<input id="u" autocomplete="username"></label>
+          <label>Password<input type="password" autocomplete="current-password"></label>
+          <button class="btn" type="submit">Enter</button>
+        </form>
+        <p class="small">Note: basic gate only; no personal data stored.</p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
