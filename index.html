@@ -1,36 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Mother Duck Kitchen</title>
-  <link rel="stylesheet" href="shared/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mother Duck Kitchen - Sign in</title>
+  <link rel="stylesheet" href="site.css">
+  <style>
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1}
+    .login-card{width:100%;max-width:420px}
+    .login-card img{width:110px;display:block;margin:0 auto 10px}
+    .status{margin-top:10px;min-height:22px;color:#b42318;font-weight:700;text-align:center}
+  </style>
 </head>
 <body>
-  <!-- soft overlay over the kitchen photo -->
-  <div class="mdk-wash"></div>
-
-  <main class="mdk-wrap">
-    <!-- Logo + title -->
-    <header class="mdk-brand">
-      <!-- logo now lives in /images -->
-      <img src="images/logo.png" alt="Mother Duck Logo">
-      <div class="mdk-title">Mother Duck Kitchen</div>
-    </header>
-
-    <section class="mdk-card">
-      <div class="mdk-button-row">
-        <a class="mdk-btn" href="kitchen.html">Kitchen</a>
-        <a class="mdk-btn" href="brewer_st.html">Brewer St</a>
-        <a class="mdk-btn" href="food_safety.html">Food Safety</a>
-        <a class="mdk-btn" href="invoices.html">Invoices</a>
-      </div>
-
-      <p class="mdk-help">
-        Keep <code>images/kitchen.jpg</code> and <code>images/logo.png</code> in the <b>/images</b> folder.
-        All pages use that background and logo automatically.
-      </p>
+  <div class="wash"></div>
+  <main class="login-wrap">
+    <section class="card-white login-card">
+      <img src="logo.png" alt="Mother Duck Logo">
+      <h2 style="text-align:center">Sign in</h2>
+      <input class="input" type="email" id="email" placeholder="Email">
+      <input class="input" type="password" id="password" placeholder="Password">
+      <button class="btn" id="loginBtn" type="button">Log in</button>
+      <div class="status" id="status"></div>
+      <p class="muted" style="text-align:center">Use your Firebase Authentication email/password user.</p>
     </section>
   </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="shared/firebase-config.js"></script>
+  <script>
+    if (!firebase.apps.length) firebase.initializeApp(window.MDK_FIREBASE_CONFIG);
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(function(user){
+      if (user) location.replace("dashboard.html");
+    });
+    document.getElementById("loginBtn").addEventListener("click", function(){
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const status = document.getElementById("status");
+      status.textContent = "";
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(function(){ location.replace("dashboard.html"); })
+        .catch(function(err){ status.textContent = err.message; });
+    });
+  </script>
 </body>
 </html>
