@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
+<style id="mdk-hide">html{visibility:hidden}</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  const cfg = {
+    apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
+    authDomain: "mother-duck-kitchen.firebaseapp.com",
+    projectId: "mother-duck-kitchen",
+    storageBucket: "mother-duck-kitchen.appspot.com",
+    messagingSenderId: "925762762893",
+    appId: "1:925762762893:web:715285c11b9b30c9bccac4",
+    measurementId: "G-1EGZ0PWQYE"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  const auth = firebase.auth();
+
+  // 30-minute inactivity
+  const TIMEOUT = 30*60*1000; let t;
+  function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
+  ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
+
+  auth.onAuthStateChanged(u=>{
+    if(!u){ location.replace("login.html"); }
+    else { document.getElementById("mdk-hide")?.remove(); reset(); window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html")); }
+  });
+})();
+</script>
+<!-- 🔒 end guard -->  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Record No. 1 – Approved Suppliers List</title>
+  <link rel="stylesheet" href="shared/styles.css">
+</head>
+<body>
+  <div class="mdk-wash"></div>
+  <main class="mdk-wrap">
+
+    <!-- Toolbar -->
+    <nav class="mdk-toolbar">
+      <a class="mdk-btn mdk-btn--light" href="kitchen.html">← Back</a>
+      <button class="mdk-btn mdk-btn--light" onclick="window.print()">🖨 Print</button>
+      <button class="mdk-btn mdk-btn--light" onclick="clearForm()">✖ Clear</button>
+      <button class="mdk-btn mdk-btn--primary" onclick="saveForm()">💾 Save</button>
+    </nav>
+
+    <h1>Record No. 1 – Approved Suppliers List</h1>
+
+    <div class="banner"><b>Guidance:</b> Maintain a current list of approved suppliers. Review annually or when suppliers change.</div>
+
+    <table>
+      <colgroup>
+        <col style="width:12%"><col style="width:22%"><col style="width:24%">
+        <col style="width:12%"><col style="width:12%"><col style="width:18%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Date Added</th>
+          <th>Supplier Name</th>
+          <th>Contact Details<br><span style="font-weight:600;color:#64748b">Phone / Email / Address</span></th>
+          <th>Approved By<br><span style="font-weight:600;color:#64748b">(Initials)</span></th>
+          <th>Review Date</th>
+          <th>Notes / Corrective Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div class="note">
+      <b>Notes:</b> Record reasons for approval (e.g., compliance evidence) and any corrective actions if supplier performance issues occur.
+    </div>
+
+    <div class="footer">
+      <div class="sig">
+        <div class="line"></div>
+        <div class="label">Supervisor signature</div>
+      </div>
+      <div class="sig">
+        <div class="line"></div>
+        <div class="label">Date</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const pad=n=>String(n).padStart(2,'0');
+    const fmtDate=(d=new Date())=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+
+    function addRow(){
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td><input class="center" data-autodate placeholder="dd/mm/yyyy"></td>
+        <td><input placeholder="Supplier / Company"></td>
+        <td><input placeholder="Phone, Email, Address"></td>
+        <td><input class="init center" maxlength="3" placeholder=""></td>
+        <td><input class="center" data-autodate placeholder="dd/mm/yyyy"></td>
+        <td><input placeholder="Notes / actions"></td>
+      `;
+      return tr;
+    }
+
+    function build(){
+      const tbody=document.getElementById('rows');
+      for(let i=0;i<12;i++) tbody.appendChild(addRow());
+      document.querySelectorAll('[data-autodate]').forEach(el=>{
+        el.addEventListener('focus',()=>{ if(!el.value) el.value=fmtDate(); });
+      });
+    }
+
+    function clearForm(){
+      document.querySelectorAll('input,textarea').forEach(el=>{
+        if(el.type==='checkbox'||el.type==='radio'){ el.checked=false; } else { el.value=''; }
+      });
+      try{ sessionStorage.removeItem('mdk_record1_cache'); }catch(e){}
+    }
+
+    function saveForm(){
+      const rows=[...document.querySelectorAll('#rows tr')].map(tr=>{
+        return [...tr.querySelectorAll('input')].map(i=>i.value);
+      });
+      sessionStorage.setItem('mdk_record1_cache', JSON.stringify(rows));
+      alert('Saved (temporary).');
+    }
+
+    function loadForm(){
+      try{
+        const raw=sessionStorage.getItem('mdk_record1_cache');
+        if(!raw) return;
+        const rows=JSON.parse(raw);
+        const trs=document.querySelectorAll('#rows tr');
+        rows.forEach((vals,rowIdx)=>{
+          const inputs=trs[rowIdx]?.querySelectorAll('input');
+          vals?.forEach((v,i)=>{ if(inputs?.[i]) inputs[i].value=v; });
+        });
+      }catch(e){}
+    }
+
+    build();
+    loadForm();
+  </script>
+</body>
+</html>

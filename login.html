@@ -1,1 +1,100 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>MDK — Login</title><link rel="stylesheet" href="shared/styles.css"/><script type="module">import {login} from './shared/auth.js';window.doLogin=(e)=>{e.preventDefault();const u=document.getElementById('u').value.trim();if(!u)return;login(u);window.location.href='index.html';}</script></head><body><div class="main-wrap"><div class="container"><section class="card" style="max-width:420px; margin:80px auto"><header class="page"><img src="images/logo.png" alt="MDK"><h1>Sign in</h1></header><form onsubmit="doLogin(event)" class="grid"><label>Username<input id="u" autocomplete="username"></label><label>Password<input type="password" autocomplete="current-password"></label><button class="btn" type="submit">Enter</button></form><p class="small">Note: basic gate only; no personal data stored.</p></section></div></div></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mother Duck Kitchen – Sign in</title>
+
+  <!-- Prevent caching so Back button won't revive this page -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <style>
+    :root{--line:#cfd6dd}
+    html,body{height:100%}
+    body{
+      margin:0; font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:url("kitchen.jpg") center/cover fixed no-repeat;
+      display:flex; align-items:center; justify-content:center; position:relative;
+    }
+    /* very light blue wash */
+    body::before{content:""; position:absolute; inset:0;
+      background:rgba(173,216,230,.55); backdrop-filter:blur(2px);}
+    .card{
+      position:relative; z-index:1; width:100%; max-width:380px; text-align:center;
+      background:#fff; border:1px solid var(--line); border-radius:16px;
+      box-shadow:0 8px 28px rgba(0,0,0,.15); padding:26px;
+    }
+    .logo{max-width:120px; display:block; margin:0 auto 14px}
+    h1{margin:0 0 16px; font-size:20px}
+    input{width:100%; padding:10px; margin:8px 0; border:1px solid #cfd6dd; border-radius:10px}
+    button{width:100%; padding:10px; margin-top:8px; border:0; border-radius:10px; font-weight:700; cursor:pointer}
+    .login{background:#0d6efd; color:#fff}
+    .error{color:#e11d48; min-height:1.2em; margin-top:8px}
+    .msg{color:#0f766e; margin-bottom:6px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="logo.png" alt="Mother Duck Kitchen" class="logo"/>
+    <h1>Sign in</h1>
+    <div id="msg" class="msg"></div>
+    <input type="email" id="email" placeholder="Email" autocomplete="username"/>
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="login" id="loginBtn">Log in</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <!-- Firebase CDN (compat version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    // ✅ Paste your exact CDN config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2KwHQ",
+      authDomain: "mother-duck-kitchen.firebaseapp.com",
+      projectId: "mother-duck-kitchen",
+      storageBucket: "mother-duck-kitchen.appspot.com",
+      messagingSenderId: "925762762893",
+      appId: "1:925762762893:web:1bcd3228ddc9481fbccac4",
+      measurementId: "G-FLXJB5YBCV"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Show message if timeout sent you here
+    const p = new URLSearchParams(location.search);
+    if (p.get('msg') === 'expired') {
+      document.getElementById('msg').textContent =
+        'Session ended after 30 minutes of inactivity. Please sign in again.';
+    }
+
+    // If already signed in, go inside (replace so login isn’t in history)
+    auth.onAuthStateChanged(u => { if (u) location.replace("index.html"); });
+
+    const emailEl = document.getElementById('email');
+    const passEl  = document.getElementById('password');
+    const btn     = document.getElementById('loginBtn');
+    const errEl   = document.getElementById('error');
+
+    async function doLogin(){
+      errEl.textContent = '';
+      const email = (emailEl.value||'').trim();
+      const pass  = passEl.value||'';
+      if(!email || !pass){ errEl.textContent = 'Please enter email and password.'; return; }
+      btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing in...';
+      try{
+        await auth.signInWithEmailAndPassword(email, pass);
+        location.replace("index.html"); // 🔑 replace, not href
+      }catch(e){
+        errEl.textContent = e.message || 'Sign-in failed.';
+        btn.disabled = false; btn.textContent = old;
+        console.error(e);
+      }
+    }
+    btn.addEventListener('click', doLogin);
+    [emailEl, passEl].forEach(el => el.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
+<style id="mdk-hide">html{visibility:hidden}</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  const cfg = {
+    apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
+    authDomain: "mother-duck-kitchen.firebaseapp.com",
+    projectId: "mother-duck-kitchen",
+    storageBucket: "mother-duck-kitchen.appspot.com",
+    messagingSenderId: "925762762893",
+    appId: "1:925762762893:web:715285c11b9b30c9bccac4",
+    measurementId: "G-1EGZ0PWQYE"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  const auth = firebase.auth();
+
+  // 30-minute inactivity
+  const TIMEOUT = 30*60*1000; let t;
+  function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
+  ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
+
+  auth.onAuthStateChanged(u=>{
+    if(!u){ location.replace("login.html"); }
+    else { document.getElementById("mdk-hide")?.remove(); reset(); window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html")); }
+  });
+})();
+</script>
+<!-- 🔒 end guard -->  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Record No. 2 – Supplier Agreement Register</title>
+  <link rel="stylesheet" href="shared/styles.css">
+</head>
+<body>
+  <!-- subtle background wash over kitchen.jpg from /images via styles.css -->
+  <div class="mdk-wash"></div>
+
+  <main class="mdk-wrap">
+    <!-- Toolbar -->
+    <nav class="mdk-toolbar">
+      <a class="mdk-btn mdk-btn--light" href="kitchen.html">← Back</a>
+      <button class="mdk-btn mdk-btn--light" onclick="window.print()">🖨 Print</button>
+      <button class="mdk-btn mdk-btn--light" onclick="clearForm()">✖ Clear</button>
+      <button class="mdk-btn mdk-btn--primary" onclick="saveForm()">💾 Save</button>
+    </nav>
+
+    <h1>Record No. 2 – Supplier Agreement Register</h1>
+
+    <table>
+      <colgroup>
+        <col style="width:12%"><col style="width:22%"><col style="width:24%">
+        <col style="width:12%"><col style="width:12%"><col style="width:18%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Supplier</th>
+          <th>Agreement / Terms Summary</th>
+          <th>Reviewed By (Init.)</th>
+          <th>Review Date</th>
+          <th>Notes / Corrective Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+
+    <div class="note">
+      <b>Note:</b> Use for supplier agreements, service levels, verified accreditations. Review annually or on change.
+    </div>
+  </main>
+
+  <script>
+    // --- Helpers
+    const pad=n=>String(n).padStart(2,'0');
+    const fmtDate=(d=new Date())=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+
+    // --- Build rows (structure preserved)
+    function addRow(){
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td><input class="center" data-autodate placeholder="dd/mm/yyyy"></td>
+        <td><input placeholder="Supplier name"></td>
+        <td><input placeholder="Summary of terms / accreditation"></td>
+        <td><input class="center init" maxlength="3" placeholder="ABC"></td>
+        <td><input class="center" data-autodate placeholder="dd/mm/yyyy"></td>
+        <td><input placeholder="Notes / actions"></td>
+      `;
+      return tr;
+    }
+
+    function build(){
+      const tbody=document.getElementById('rows');
+      for(let i=0;i<10;i++) tbody.appendChild(addRow());
+      document.querySelectorAll('[data-autodate]').forEach(el=>{
+        el.addEventListener('focus',()=>{ if(!el.value) el.value=fmtDate(); });
+      });
+    }
+
+    // --- Page actions
+    function clearForm(){
+      document.querySelectorAll('input,textarea').forEach(el=>{
+        if(el.type==='checkbox'||el.type==='radio'){ el.checked=false; } else { el.value=''; }
+      });
+      // remove any “saved” cache (when we wire Firebase we’ll replace this)
+      try{ sessionStorage.removeItem('mdk_record2_cache'); }catch(e){}
+    }
+
+    function saveForm(){
+      // Placeholder save (local session only). We’ll swap this for Firebase shortly.
+      const rows=[...document.querySelectorAll('#rows tr')].map(tr=>{
+        const tds=[...tr.querySelectorAll('input')];
+        return tds.map(i=>i.value);
+      });
+      sessionStorage.setItem('mdk_record2_cache', JSON.stringify(rows));
+      alert('Saved (temporary).');
+    }
+
+    function loadForm(){
+      try{
+        const raw=sessionStorage.getItem('mdk_record2_cache');
+        if(!raw) return;
+        const rows=JSON.parse(raw);
+        const trs=document.querySelectorAll('#rows tr');
+        rows.forEach((vals,rowIdx)=>{
+          const inputs=trs[rowIdx]?.querySelectorAll('input');
+          vals?.forEach((v,i)=>{ if(inputs?.[i]) inputs[i].value=v; });
+        });
+      }catch(e){}
+    }
+
+    build();
+    loadForm();
+  </script>
+</body>
+</html>

@@ -1,40 +1,48 @@
-:root{
-  --bg:#eaf4ff; --ink:#0f172a; --muted:#475569; --card:#ffffff; --brand:#0063ff;
-  --accent:#f6c738; --radius:16px; --edge:1px; --shadow:0 8px 24px rgba(2,6,23,.12);
+/* Toolbar container */
+.mdk-toolbar{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  margin:18px 0 22px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
-  background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.25)),url('/images/kitchen.jpg') center/cover fixed; 
-}
-.main-wrap{min-height:100%; backdrop-filter:saturate(1.1) blur(.5px);}
-.container{max-width:920px; margin:0 auto; padding:24px}
-.card{
-  background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-  padding:20px; border:var(--edge) solid rgba(2,6,23,.06)
-}
-.toolbar{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px}
-button, .btn{appearance:none; border:0; border-radius:999px; padding:10px 14px; cursor:pointer; font-weight:600;}
-.btn{background:var(--brand); color:#fff; box-shadow:var(--shadow)}
-.btn.secondary{background:#fff; color:var(--ink); border:1px solid rgba(2,6,23,.12)}
-.btn.warning{background:#e11d48}
-header.page{display:flex; align-items:center; gap:12px; margin:0 0 12px}
-header.page img{height:36px}
-h1{font-size:20px; margin:0}
-.label{font-size:12px; color:var(--muted)}
-.grid{display:grid; gap:12px}
-.table-wrap{overflow:auto; border-radius:12px; border:1px solid rgba(2,6,23,.08)}
-table{width:100%; border-collapse:collapse; background:white}
-th,td{border:1px solid rgba(2,6,23,.12); padding:8px 6px; vertical-align:top}
-input,select,textarea{width:100%; padding:8px; border-radius:10px; border:1px solid rgba(2,6,23,.20)}
-.small{font-size:12px; color:var(--muted)}
-footer.helper{margin-top:12px; font-size:12px; color:var(--muted)}
 
-@media print{
-  body{background:none}
-  .toolbar, .no-print{display:none !important}
-  .card{box-shadow:none; border:0; padding:0}
-  .container{max-width:100%; padding:0}
-  input,select,textarea{border:1px solid #000}
+/* Base button pill */
+.mdk-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  padding:18px 28px;
+  border:0;
+  border-radius:24px;              /* soft pill corners */
+  font: 700 24px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  text-decoration:none;
+  cursor:pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  transition: transform .05s ease, filter .15s ease, box-shadow .15s ease;
+}
+
+/* Yellow Back button */
+.mdk-btn--back{
+  background:#f6b900;              /* MD yellow vibe */
+  color:#3b1a8f;                   /* MD purple text */
+}
+.mdk-btn--back:hover{ filter:brightness(0.97); }
+.mdk-btn--back:active{ transform: translateY(1px); }
+
+/* Grey pills (Print / Clear) */
+.mdk-btn--pill{
+  background:#f3f5f8;              /* soft grey */
+  color:#0f172a;                   /* dark text */
+}
+.mdk-btn--pill:hover{ filter:brightness(0.98); }
+.mdk-btn--pill:active{ transform: translateY(1px); }
+
+/* Icon sizing & alignment */
+.mdk-ico{ font-size: 26px; line-height: 1; }
+
+/* Make it breathe on small screens */
+@media (max-width: 640px){
+  .mdk-btn{ padding:14px 22px; font-size:20px; border-radius:20px; }
+  .mdk-ico{ font-size:22px; }
+  .mdk-toolbar{ gap:12px; }
 }

@@ -1,7 +1,7 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
- <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
+  <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
 <style id="mdk-hide">html{visibility:hidden}</style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -31,7 +31,7 @@
 })();
 </script>
 <!-- 🔒 end guard --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Record 5 — Heating Log</title>
+<title>Record 5b — Transport (Dispatch)</title>
 <style>
   :root{--ink:#111827;--line:#e5e7eb;--grid:#eef2f7;--head:#f6f8fb;--muted:#6b7280;}
   body{margin:0;font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:url("kitchen.jpg") center/cover fixed no-repeat;padding:20px;color:var(--ink)}
@@ -40,7 +40,7 @@
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .btn{border:0;border-radius:12px;padding:8px 14px;font-weight:700;background:#eef2f7;color:#0f172a;cursor:pointer;box-shadow:0 2px 6px rgba(2,6,23,.06)}
   .btn:hover{filter:brightness(.97)} .btn--back{background:#ffc107;color:#1f2937} .btn--primary{background:#0d6efd;color:#fff}
-  h1{font-size:20px;margin:8px 0 8px}
+  h1{font-size:20px;margin:8px 0 6px}
   .targets{font-size:12px;color:#334155;border:1px dashed var(--grid);background:#fbfdff;border-radius:12px;padding:8px 10px;margin-bottom:8px}
   table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;border:1px solid var(--line);border-radius:12px;overflow:hidden}
   th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:6px 8px;vertical-align:middle;background:#fff}
@@ -63,26 +63,34 @@
     <button class="btn btn--primary" onclick="saveForm()">Save</button>
   </div>
 
-  <h1>Record 5 — Heating Log</h1>
-  <div class="targets"><b>Target:</b> Heat potentially hazardous food to ≥ 75 °C. If not reached, continue heating or discard and record corrective action.</div>
+  <h1>Record 5b — Transport (Dispatch)</h1>
+  <div class="targets"><b>Start in Kitchen, finish at Brewer St.</b> Cold foods ≤ 5 °C; hot foods ≥ 60 °C at dispatch/receiving. Record times and temps.</div>
 
   <table id="tbl">
     <colgroup>
-      <col style="width:12%"><col style="width:12%"><col style="width:24%"><col style="width:12%"><col style="width:12%"><col style="width:10%"><col style="width:18%">
+      <col style="width:12%"><col style="width:18%"><col style="width:10%"><col style="width:10%">
+      <col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:20%">
     </colgroup>
     <thead>
       <tr>
-        <th>Date</th><th>Time</th><th>Item</th><th>Temp (°C)</th><th>Holding (°C)</th><th>Initial</th><th>Corrective Actions / Notes</th>
+        <th>Date</th>
+        <th>Item</th>
+        <th>Dispatch Time</th>
+        <th>Temp (°C)</th>
+        <th>Arrive Time</th>
+        <th>Temp (°C)</th>
+        <th>Initials</th>
+        <th>Corrective Actions / Notes</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>
 
-  <div class="note"><b>Notes:</b> For hot holding, maintain ≥ 60 °C. Record corrective actions if limits are not met.</div>
+  <div class="note">If limits not met on arrival, record action (e.g., rapid chill/reheat/discard) and notify supervisor.</div>
 </div>
 
 <script>
-  const KEY='mdk_rec5_v1';
+  const KEY='mdk_rec5b_v1';
   function pad(n){return String(n).padStart(2,'0')}
   function today(){const d=new Date();return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()}
   function time(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
@@ -91,9 +99,10 @@
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td><input class="center d" placeholder="dd/mm/yyyy"></td>
+      <td><input placeholder="Product / batch"></td>
       <td><input class="center t" placeholder="HH:MM"></td>
-      <td><input placeholder="Dish / batch"></td>
       <td><input class="center" placeholder="°C"></td>
+      <td><input class="center t" placeholder="HH:MM"></td>
       <td><input class="center" placeholder="°C"></td>
       <td><input class="center" maxlength="3" placeholder=""></td>
       <td><input placeholder="If out of spec: action taken"></td>

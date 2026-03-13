@@ -1,1 +1,99 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>MDK — Kitchen</title><link rel="stylesheet" href="shared/styles.css"/><script type="module">import {requireLogin} from './shared/auth.js';requireLogin();</script></head><body><div class="main-wrap"><div class="container"><header class="page"><img src="images/logo.png" alt="MDK"><h1>Kitchen</h1></header><div class="toolbar"><a class="btn secondary" href="index.html">← Home</a></div><section class="card grid"><a class="btn" href="records/record_3a_incoming_goods.html">Record 3a — Incoming Goods</a><a class="btn" href="records/record_4_appliances.html">Record 4 — Appliances</a><a class="btn" href="records/record_5_heating_log.html">Record 5 — Heating Log</a><a class="btn" href="records/record_5a_cook_cool_reheat.html">Record 5a — Cook/Cool/Reheat</a><a class="btn" href="records/record_5b_transport.html">Record 5b — Transport Log</a><a class="btn" href="records/record_6a_daily_cleaning.html">Record 6a — Daily Cleaning</a><a class="btn" href="records/record_6b_weekly_cleaning.html">Record 6b — Weekly Cleaning</a><a class="btn" href="records/record_6c_monthly_cleaning.html">Record 6c — Monthly Cleaning</a><a class="btn" href="records/record_12_supervisor_checklist.html">Record 12 — Supervisor Checklist</a></section></div></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kitchen Records – Mother Duck Kitchen</title>
+
+  <style id="mdk-hide">html{visibility:hidden}</style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+  (function(){
+    const cfg = {
+      apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
+      authDomain: "mother-duck-kitchen.firebaseapp.com",
+      projectId: "mother-duck-kitchen",
+      storageBucket: "mother-duck-kitchen.appspot.com",
+      messagingSenderId: "925762762893",
+      appId: "1:925762762893:web:715285c11b9b30c9bccac4",
+      measurementId: "G-1EGZ0PWQYE"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    const auth = firebase.auth();
+
+    // 30-minute inactivity auto-logout
+    const TIMEOUT = 30 * 60 * 1000;
+    let timer;
+    function resetTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        auth.signOut().then(() => location.replace("login.html?msg=expired"));
+      }, TIMEOUT);
+    }
+
+    ["click","keydown","mousemove","touchstart","scroll","focus"]
+      .forEach(e => window.addEventListener(e, resetTimer, {passive:true}));
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        location.replace("login.html");
+      } else {
+        document.getElementById("mdk-hide")?.remove();
+        resetTimer();
+        window.mdkLogout = () => auth.signOut().then(() => location.replace("login.html"));
+      }
+    });
+  })();
+  </script>
+
+  <style>
+    :root{
+      --brand:#0d6efd;
+      --brand-hover:#0b5ed7;
+      --accent:#ffc107;
+      --card-bg: rgba(255,255,255,.85);
+      --text:#0f172a;
+    }
+
+    html,body{ height:100%; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--text); background:url("kitchen.jpg") center/cover fixed no-repeat; }
+    .overlay{ position:fixed; inset:0; background:rgba(173,216,230,.45); z-index:0; }
+    main.container{ position:relative; z-index:1; max-width:1100px; margin:40px auto; padding:28px 22px; background:var(--card-bg); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+    header{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    h1{ font-size:clamp(22px,2.6vw,30px); margin:0; display:flex; align-items:center; gap:10px; }
+    h1 img{ height:40px; }
+    .btn-back{ background:var(--accent); color:#000; text-decoration:none; font-weight:600; padding:10px 16px; border-radius:8px; }
+    .logout-btn{ background:#dc3545; color:#fff; border:none; border-radius:8px; padding:10px 16px; font-weight:600; cursor:pointer; }
+    .logout-btn:hover{ background:#bb2d3b; }
+    .btn-row{ display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; }
+    .btn{ background:var(--brand); color:#fff; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:600; box-shadow:0 2px 6px rgba(13,110,253,.25); transition:transform .06s ease,background .15s ease; }
+    .btn:hover{ background:var(--brand-hover); transform:translateY(-1px); }
+    @media(max-width:640px){ .btn{ flex:1 1 100%; text-align:center; } }
+  </style>
+</head>
+
+<body>
+  <div class="overlay" aria-hidden="true"></div>
+  <main class="container">
+    <header>
+      <a class="btn-back" href="index.html">← Back</a>
+      <h1><img src="logo.png" alt="Mother Duck Kitchen Logo"> Kitchen Records</h1>
+      <button class="logout-btn" onclick="mdkLogout()">Log out</button>
+    </header>
+
+    <div class="btn-row">
+      <a class="btn" href="record_3a_incoming_goods.html">Record 3a — Incoming Goods</a>
+      <a class="btn" href="record_4_appliances_fixed.html">Record 4 — Appliances</a>
+      <a class="btn" href="record_5_heating_log.html">Record 5 — Heating Log</a>
+      <a class="btn" href="record_5a_cook_cool_reheat_nobatch.html">Record 5a — Cook / Cool / Reheat</a>
+      <a class="btn" href="record_5b_transport_brewer_balanced.html">Record 5b — Transport (Dispatch)</a>
+      <a class="btn" href="record_6a_daily_cleaning.html">Record 6a — Daily Cleaning</a>
+      <a class="btn" href="record_6b_weekly_cleaning.html">Record 6b — Weekly Cleaning</a>
+      <a class="btn" href="record_6c_monthly_cleaning.html">Record 6c — Monthly Cleaning</a>
+      <a class="btn" href="record_12_supervisor_checklist.html">Supervisor Checklist</a>
+    </div>
+  </main>
+</body>
+</html>

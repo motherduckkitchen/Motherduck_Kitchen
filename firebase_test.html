@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Firebase Config Test</title>
+
+<!-- Only compat CDN scripts (no type="module", no imports) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script>
+  // ⛳ PASTE the CDN config from Firebase Console → Project settings → Your apps → Web → SDK setup → **CDN**
+  // Use the Web App that is NOT pending deletion
+  const firebaseConfig = {
+    apiKey: "PASTE_EXACT_API_KEY_HERE",
+    authDomain: "mother-duck-kitchen.firebaseapp.com",
+    projectId: "mother-duck-kitchen",
+    storageBucket: "mother-duck-kitchen.appspot.com", // <- must end with .appspot.com
+    messagingSenderId: "925762762893",
+    appId: "1:925762762893:web:1bcd3228ddc9481fbccac4",
+    measurementId: "G-FLXJB5YBCV"
+  };
+
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const opts = firebase.app().options;
+    document.write("<pre>"+JSON.stringify(opts, null, 2)+"</pre>");
+  } catch (e) {
+    document.write("<pre style='color:#b91c1c'>INIT ERROR:\n"+(e && e.message ? e.message : e)+"</pre>");
+    console.error(e);
+  }
+</script>
