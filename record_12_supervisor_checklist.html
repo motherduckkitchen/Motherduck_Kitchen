@@ -1,218 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  
-<style id="mdk-hide">html{visibility:hidden}</style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script>
-(function(){
-  const cfg = {
-    apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
-    authDomain: "mother-duck-kitchen.firebaseapp.com",
-    projectId: "mother-duck-kitchen",
-    storageBucket: "mother-duck-kitchen.appspot.com",
-    messagingSenderId: "925762762893",
-    appId: "1:925762762893:web:715285c11b9b30c9bccac4",
-    measurementId: "G-1EGZ0PWQYE"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(cfg);
-  const auth = firebase.auth();
-
-  // 30-minute inactivity
-  const TIMEOUT = 30*60*1000; let t;
-  function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
-  ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
-
-  auth.onAuthStateChanged(u=>{
-    if(!u){ location.replace("login.html"); }
-    else { document.getElementById("mdk-hide")?.remove(); reset(); window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html")); }
-  });
-})();
-</script>
-<!-- 🔒 end guard -->  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Record 12 — Supervisor Checklist</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Supervisor Checklist</title>
+  <link rel="stylesheet" href="site.css">
   <style>
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      background: url("kitchen.jpg") center/cover fixed no-repeat;
-      color:#0b1320;
-      padding:20px;
-    }
-    .overlay{
-      position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:-1;
-    }
-    .container{
-      max-width: 850px; margin: 0 auto;
-      background:#fff; border-radius:12px; padding:22px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.12);
-      border:1px solid #e5e7eb;
-    }
-
-    /* Toolbar */
-    .topbar{
-      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-      margin-bottom:16px;
-    }
-    .btn{
-      border:0; border-radius:8px; padding:8px 14px;
-      font-weight:600; cursor:pointer; background:#f3f4f6;
-      display:flex; align-items:center; gap:6px;
-    }
-    .btn:hover{filter:brightness(.96)}
-    .btn--back{background:#ffc107; color:#000;}
-    .btn--primary{background:#0d6efd; color:#fff;}
-
-    h1{margin:6px 0 14px; font-size:22px; text-align:center;}
-
-    /* Meta row */
-    .meta{
-      display:flex; gap:14px; flex-wrap:wrap; align-items:center;
-      justify-content:center; margin-bottom:14px;
-    }
-    label{font-weight:700;}
-    input[type="date"], input[type="text"]{
-      border:1px solid #d1d5db; border-radius:8px; padding:8px 10px;
-      min-width:190px;
-    }
-
-    /* Checklist table */
-    table{width:100%; border-collapse:collapse; margin-top:8px;
-      border-radius:10px; overflow:hidden;}
-    th, td{border:1px solid #e5e7eb; padding:10px; vertical-align:middle;}
-    th{background:#f3f4f6; text-align:left;}
-    td.check{width:70px; text-align:center;}
-    .section{background:#f9fafb; font-weight:700;}
-
-    /* Textareas */
-    textarea{
-      width:100%; min-height:90px; padding:10px; border:1px solid #e5e7eb;
-      border-radius:10px; margin-top:6px;
-    }
-
-    @page{size:A4 portrait; margin:14mm;}
-    @media print{ .topbar{display:none} body{background:#fff} .overlay{display:none} }
+    .sheet-wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .sheet-card{background:rgba(255,255,255,.95);border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:20px}
+    .toolbar2{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .back{background:#ffc107;color:#4b0082;text-decoration:none;font-weight:700;padding:10px 18px;border-radius:12px}
   </style>
 </head>
 <body>
-  <div class="overlay"></div>
-  <div class="container">
-
-    <!-- Toolbar -->
-    <div class="topbar">
-      <a href="kitchen.html"><button class="btn btn--back">← Back</button></a>
-      <button class="btn" onclick="window.print()">🖨 Print</button>
-      <button class="btn" onclick="clearForm()">✖ Clear</button>
-      <button class="btn btn--primary" onclick="saveForm()">💾 Save</button>
+  <div class="wash"></div>
+  <main class="sheet-wrap">
+    <div class="toolbar2">
+      <a class="back" href="kitchen.html">← Back</a>
     </div>
-
-    <h1>Record 12 — Supervisor Checklist</h1>
-
-    <!-- Meta -->
-    <div class="meta">
-      <div>
-        <label for="checkDate">Date:&nbsp;</label>
-        <input id="checkDate" type="date" />
-      </div>
-      <div>
-        <label for="supervisor">Supervisor:&nbsp;</label>
-        <input id="supervisor" type="text" placeholder="Name / Initials" />
-      </div>
+    <div class="sheet-card">
+      <h1>Supervisor Checklist</h1>
+      <p>This is the new clean Supervisor Checklist page.</p>
     </div>
-
-    <!-- Checklist -->
-    <table id="checklist">
-      <tr><th class="section" colspan="2">Equipment & Premises</th></tr>
-      <tr><td>All equipment operating correctly</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Premises structurally sound</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Maintenance records completed (Record 7)</td><td class="check"><input type="checkbox"></td></tr>
-
-      <tr><th class="section" colspan="2">Temperature Measuring Devices</th></tr>
-      <tr><td>Thermometers calibrated/accurate</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Staff trained in correct thermometer use</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Calibration log completed (Record 7a)</td><td class="check"><input type="checkbox"></td></tr>
-
-      <tr><th class="section" colspan="2">Pest Control</th></tr>
-      <tr><td>Cleanliness maintained; no evidence of pests</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Pest control treatments up to date</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Cleaning records completed (6a, 6b, 6c)</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Pest control log completed (Record 8)</td><td class="check"><input type="checkbox"></td></tr>
-
-      <tr><th class="section" colspan="2">Staff Instruction / Training</th></tr>
-      <tr><td>All staff trained in hygiene and safe food handling</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Training records completed</td><td class="check"><input type="checkbox"></td></tr>
-
-      <tr><th class="section" colspan="2">Customer Complaints</th></tr>
-      <tr><td>Complaints monitored and addressed</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Complaint log completed (Record 10)</td><td class="check"><input type="checkbox"></td></tr>
-
-      <tr><th class="section" colspan="2">Annual Food Safety Program Review</th></tr>
-      <tr><td>Forms & flow diagrams are current</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Corrective actions implemented where required</td><td class="check"><input type="checkbox"></td></tr>
-      <tr><td>Review details & auditor findings recorded</td><td class="check"><input type="checkbox"></td></tr>
-    </table>
-
-    <!-- Notes -->
-    <div style="margin-top:14px;">
-      <label for="comments">Comments / Observations</label>
-      <textarea id="comments" placeholder="Notes, observations, non-conformances…"></textarea>
-    </div>
-    <div style="margin-top:10px;">
-      <label for="actions">Corrective Actions</label>
-      <textarea id="actions" placeholder="Describe action(s), person responsible, and completion date."></textarea>
-    </div>
-
-  </div>
-
-  <script>
-    const KEY = 'mdk_supervisor_checklist_v1';
-
-    function collect(){
-      return {
-        date: document.getElementById('checkDate').value || '',
-        supervisor: document.getElementById('supervisor').value || '',
-        checks: Array.from(document.querySelectorAll('#checklist input[type=checkbox]')).map(c=>c.checked),
-        comments: document.getElementById('comments').value || '',
-        actions: document.getElementById('actions').value || ''
-      };
-    }
-
-    function saveForm(){
-      localStorage.setItem(KEY, JSON.stringify(collect()));
-      alert('Saved locally.');
-    }
-
-    function loadForm(){
-      const raw = localStorage.getItem(KEY);
-      if(!raw) return;
-      try{
-        const d = JSON.parse(raw);
-        if(d.date) document.getElementById('checkDate').value = d.date;
-        if(d.supervisor) document.getElementById('supervisor').value = d.supervisor;
-        const boxes = document.querySelectorAll('#checklist input[type=checkbox]');
-        (d.checks||[]).forEach((v,i)=>{ if(boxes[i]) boxes[i].checked = !!v; });
-        if(d.comments) document.getElementById('comments').value = d.comments;
-        if(d.actions) document.getElementById('actions').value = d.actions;
-      }catch(e){}
-    }
-
-    function clearForm(){
-      document.getElementById('checkDate').value = '';
-      document.getElementById('supervisor').value = '';
-      document.querySelectorAll('#checklist input[type=checkbox]').forEach(c=>c.checked=false);
-      document.getElementById('comments').value = '';
-      document.getElementById('actions').value = '';
-      localStorage.removeItem(KEY);
-    }
-
-    // Auto-save
-    document.addEventListener('input', ()=> {
-      localStorage.setItem(KEY, JSON.stringify(collect()));
-    });
-
-    window.addEventListener('load', loadForm);
-  </script>
+  </main>
 </body>
 </html>
