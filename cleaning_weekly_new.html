@@ -66,23 +66,14 @@ th,td{
   padding:6px;
   font-size:13px;
   text-align:center;
-  vertical-align:top;
+  vertical-align:middle;
 }
 th{
   background:#efede4;
 }
 .area{
   text-align:left;
-  width:36%;
-}
-.daybox{
-  width:100%;
-  border:none;
-  outline:none;
-  background:transparent;
-  text-align:center;
-  font-size:13px;
-  min-height:28px;
+  width:38%;
 }
 .week-input{
   width:180px;
@@ -91,6 +82,9 @@ th{
   background:transparent;
   font-size:14px;
   font-weight:600;
+}
+.chk{
+  transform:scale(1.2);
 }
 .footer{
   margin-top:16px;
@@ -138,7 +132,7 @@ th{
 </main>
 
 <script>
-const STORAGE_KEY = "weekly_clean_blocks_v1";
+const STORAGE_KEY = "weekly_clean_blocks_v2";
 
 const tasks = [
   "Clean out fridge (wipe over shelves and inside doors)",
@@ -148,13 +142,6 @@ const tasks = [
   "Sweep and mop pantry floor"
 ];
 
-function formatAusDate(date){
-  const d = String(date.getDate()).padStart(2,'0');
-  const m = String(date.getMonth()+1).padStart(2,'0');
-  const y = date.getFullYear();
-  return d + " / " + m + " / " + y;
-}
-
 function buildBlocks(){
   const wrap = document.getElementById("weeklyBlocks");
   wrap.innerHTML = "";
@@ -162,12 +149,12 @@ function buildBlocks(){
   for(let block = 0; block < 4; block++){
     const table = document.createElement("table");
 
-    const thead = `
+    let html = `
       <thead>
         <tr>
           <th class="area">
             Week Commencing:
-            <input class="week-input" type="date" data-block="${block}" data-type="weekstart">
+            <input class="week-input" type="date" data-type="weekstart" data-block="${block}">
           </th>
           <th colspan="5">Initial as Completed</th>
         </tr>
@@ -180,20 +167,19 @@ function buildBlocks(){
           <th>F</th>
         </tr>
       </thead>
+      <tbody>
     `;
 
-    let tbody = "<tbody>";
-
     tasks.forEach((task, rowIndex) => {
-      tbody += `<tr><td class="area">${task}</td>`;
-
+      html += `<tr><td class="area">${task}</td>`;
       for(let day = 0; day < 5; day++){
-        tbody += `<td><input type="checkbox" class="daybox" data-block="${block}" data-row="${rowIndex}" data-day="${day}"></td>`;
-        tbody += `</tr>`; });
+        html += `<td><input type="checkbox" class="chk" data-type="tick" data-block="${block}" data-row="${rowIndex}" data-day="${day}"></td>`;
+      }
+      html += `</tr>`;
+    });
 
-    tbody += "</tbody>";
-
-    table.innerHTML = thead + tbody;
+    html += `</tbody>`;
+    table.innerHTML = html;
     wrap.appendChild(table);
   }
 }
@@ -201,15 +187,15 @@ function buildBlocks(){
 function saveForm(){
   const data = {
     weeks: [],
-    boxes: []
+    ticks: []
   };
 
   document.querySelectorAll('input[data-type="weekstart"]').forEach(el => {
     data.weeks.push(el.value);
   });
 
-  document.querySelectorAll('.daybox').forEach(el => {
-    data.boxes.push(el.value);
+  document.querySelectorAll('input[data-type="tick"]').forEach(el => {
+    data.ticks.push(el.checked);
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -227,17 +213,21 @@ function loadForm(){
     el.value = (data.weeks && data.weeks[i]) || "";
   });
 
-  const boxes = document.querySelectorAll('.daybox');
-  boxes.forEach((el, i) => {
-    el.value = (data.boxes && data.boxes[i]) || "";
+  const tickInputs = document.querySelectorAll('input[data-type="tick"]');
+  tickInputs.forEach((el, i) => {
+    el.checked = !!(data.ticks && data.ticks[i]);
   });
 }
 
 function clearForm(){
   if(!confirm("Clear form?")) return;
 
-  document.querySelectorAll('input').forEach(el => {
+  document.querySelectorAll('input[data-type="weekstart"]').forEach(el => {
     el.value = "";
+  });
+
+  document.querySelectorAll('input[data-type="tick"]').forEach(el => {
+    el.checked = false;
   });
 
   localStorage.removeItem(STORAGE_KEY);
