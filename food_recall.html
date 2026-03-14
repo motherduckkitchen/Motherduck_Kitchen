@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record 9 - Food Recall</title>
+
+<link rel="stylesheet" href="site.css">
+
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="toolbar">
+<a class="btn secondary" href="dashboard.html">Home</a>
+<button onclick="window.print()" class="btn secondary">Print</button>
+<button onclick="clearForm()" class="btn secondary">Clear</button>
+<button onclick="saveForm()" class="btn save">Save</button>
+</div>
+
+<section class="card-wide">
+
+<h2>Record 9 – Food Recall</h2>
+
+<table class="log-table">
+
+<tr>
+<th>Supplier / Manufacturer Details</th>
+<th>Reason for Recall</th>
+<th>Product Name</th>
+<th>Batch No</th>
+<th>Use By Date</th>
+<th>No. of Units in Stock</th>
+<th>Corrective Action</th>
+<th>Checked By</th>
+</tr>
+
+<script>
+for(let i=0;i<10;i++){
+document.write(`
+<tr>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="date"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+</tr>
+`)
+}
+</script>
+
+</table>
+
+</section>
+
+</main>
+
+<script>
+
+function saveForm(){
+const inputs=document.querySelectorAll("input");
+let data=[];
+inputs.forEach(i=>data.push(i.value));
+localStorage.setItem("foodRecall",JSON.stringify(data));
+alert("Saved");
+}
+
+function loadForm(){
+let saved=localStorage.getItem("foodRecall");
+if(!saved)return;
+let data=JSON.parse(saved);
+let inputs=document.querySelectorAll("input");
+inputs.forEach((i,x)=>i.value=data[x]||"");
+}
+
+function clearForm(){
+if(!confirm("Clear form?"))return;
+localStorage.removeItem("foodRecall");
+location.reload();
+}
+
+loadForm();
+
+</script>
+
+</body>
+</html>
