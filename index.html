@@ -29,8 +29,17 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
   <script>
+    window.MDK_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBRTV9KfMYjCGk1XYnsCoOBZaZ9h-sU6UA",
+      authDomain: "motherduckkitchen-e2e1c.firebaseapp.com",
+      projectId: "motherduckkitchen-e2e1c",
+      storageBucket: "motherduckkitchen-e2e1c.firebasestorage.app",
+      messagingSenderId: "459081978963",
+      appId: "1:459081978963:web:8ac93c105b4a86c504a2a6",
+      measurementId: "G-F1933BLB5H"
+    };
+
     const statusBox = document.getElementById("status");
     const debugBox = document.getElementById("debug");
     const loginBtn = document.getElementById("loginBtn");
@@ -41,59 +50,51 @@
     }
 
     function showDebug() {
-      if (!window.MDK_FIREBASE_CONFIG) {
-        debugBox.textContent = "No config loaded";
-        return;
-      }
       debugBox.textContent =
         "apiKey: " + window.MDK_FIREBASE_CONFIG.apiKey +
-        "\\nauthDomain: " + window.MDK_FIREBASE_CONFIG.authDomain +
-        "\\nprojectId: " + window.MDK_FIREBASE_CONFIG.projectId +
-        "\\npage: " + location.href;
+        "\nauthDomain: " + window.MDK_FIREBASE_CONFIG.authDomain +
+        "\nprojectId: " + window.MDK_FIREBASE_CONFIG.projectId +
+        "\npage: " + location.href;
     }
 
     showDebug();
 
     try {
-      if (!window.MDK_FIREBASE_CONFIG) {
-        showStatus("firebase-config.js did not load.");
-      } else {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(window.MDK_FIREBASE_CONFIG);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.MDK_FIREBASE_CONFIG);
+      }
+
+      const auth = firebase.auth();
+      showStatus("Firebase ready.", true);
+
+      auth.onAuthStateChanged(function(user) {
+        if (user) {
+          showStatus("Login success. Opening dashboard...", true);
+          setTimeout(function () {
+            location.href = "dashboard.html";
+          }, 500);
+        }
+      });
+
+      loginBtn.onclick = function() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+          showStatus("Enter email and password.");
+          return;
         }
 
-        const auth = firebase.auth();
-        showStatus("Firebase ready.", true);
+        showStatus("Signing in...", true);
 
-        auth.onAuthStateChanged(function(user) {
-          if (user) {
-            showStatus("Login success. Opening dashboard...", true);
-            setTimeout(function () {
-              location.href = "dashboard.html";
-            }, 500);
-          }
-        });
-
-        loginBtn.onclick = function() {
-          const email = document.getElementById("email").value.trim();
-          const password = document.getElementById("password").value;
-
-          if (!email || !password) {
-            showStatus("Enter email and password.");
-            return;
-          }
-
-          showStatus("Signing in...", true);
-
-          auth.signInWithEmailAndPassword(email, password)
-            .then(function() {
-              showStatus("Signed in successfully.", true);
-            })
-            .catch(function(err) {
-              showStatus("Login failed: " + err.message);
-            });
-        };
-      }
+        auth.signInWithEmailAndPassword(email, password)
+          .then(function() {
+            showStatus("Signed in successfully.", true);
+          })
+          .catch(function(err) {
+            showStatus("Login failed: " + err.message);
+          });
+      };
     } catch (err) {
       showStatus("Script error: " + err.message);
     }
