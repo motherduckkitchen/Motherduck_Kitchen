@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equipment Maintenance Log</title>
+<link rel="stylesheet" href="site.css">
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="top">
+<img class="logo" src="logo.png">
+<div class="site-title">Equipment Maintenance Log</div>
+</div>
+
+<section class="card-wide">
+
+<div class="toolbar">
+<a class="btn secondary" href="dashboard.html">Home</a>
+<button onclick="window.print()" class="btn secondary">Print</button>
+<button onclick="clearForm()" class="btn secondary">Clear</button>
+</div>
+
+<table class="log-table">
+
+<tr>
+<th>Date</th>
+<th>Area / Equipment Checked</th>
+<th>Result (Repair or Service Required)</th>
+<th>Corrective Action</th>
+<th>Checked By</th>
+</tr>
+
+<script>
+for(let i=0;i<12;i++){
+document.write(`
+<tr>
+<td><input type="date"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+</tr>
+`)
+}
+</script>
+
+</table>
+
+</section>
+
+</main>
+
+<script>
+function clearForm(){
+location.reload();
+}
+</script>
+
+</body>
+</html>
