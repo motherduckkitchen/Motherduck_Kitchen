@@ -1,243 +1,229 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve
-<style>
-
-body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:url("kitchen.jpg") center/cover fixed no-repeat;
-}
-
-.wash{
-position:fixed;
-inset:0;
-background:rgba(255,255,255,.45);
-backdrop-filter:blur(2px);
-}
-
-.page{
-position:relative;
-z-index:1;
-max-width:1400px;
-margin:auto;
-padding:20px;
-}
-
-.mdk-toolbar{
-display:flex;
-gap:10px;
-margin-bottom:14px;
-flex-wrap:wrap;
-align-items:center;
-}
-
-.mdk-btn--back{
-background:#ffc107;
-border:none;
-color:#4b0082;
-font-weight:700;
-padding:10px 18px;
-border-radius:12px;
-text-decoration:none;
-}
-
-.mdk-btn--pill{
-background:#f8fafc;
-border:1px solid #cfd6dd;
-border-radius:12px;
-padding:8px 14px;
-font-weight:600;
-cursor:pointer;
-}
-
-.mdk-btn--primary{
-background:#007bff;
-border:none;
-border-radius:12px;
-padding:10px 18px;
-font-weight:600;
-color:white;
-cursor:pointer;
-}
-
-.sheet-card{
-background:rgba(255,255,255,.95);
-border-radius:20px;
-box-shadow:0 12px 30px rgba(0,0,0,.14);
-padding:20px;
-}
-
-.sheet-title{
-font-size:28px;
-font-weight:700;
-margin-bottom:16px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid #222;
-padding:8px;
-font-size:14px;
-text-align:center;
-}
-
-th{
-background:#f4f6f8;
-}
-
-td.left{
-text-align:left;
-}
-
-@page{
-size:A4 landscape;
-margin:10mm;
-}
-
-@media print{
-
-body{
-background:white;
-}
-
-.wash{
-display:none;
-}
-
-.mdk-toolbar{
-display:none;
-}
-
-.sheet-card{
-box-shadow:none;
-border-radius:0;
-padding:0;
-}
-
-}
-
-</style>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 5a - Temperature Control Log - Cook/Cool/Reheat &amp; Serve</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:url("kitchen.jpg") center center / cover no-repeat fixed;}
+    .wash{position:fixed;inset:0;background:rgba(255,255,255,.45);backdrop-filter:blur(2px);}
+    .page{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:20px;}
+    .toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+    .btn{padding:10px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;color:#222;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+    .back{background:#ffc107;color:#4b0082;}
+    .home,.print,.clear{background:#f8fafc;border:1px solid #cfd6dd;font-weight:600;}
+    .save{background:#007bff;color:#fff;font-weight:600;}
+    .card{background:rgba(255,255,255,.95);padding:20px;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.14);overflow:auto;}
+    h1{margin:0 0 16px;font-size:28px;font-weight:700;color:#1f2937;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;}
+    th,td{border:1px solid #222;padding:4px;text-align:center;vertical-align:middle;font-size:12px;}
+    th{background:#f4f6f8;font-weight:700;}
+    input,select{width:100%;border:none;outline:none;background:transparent;text-align:center;font-size:12px;padding:3px;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+    td:nth-child(2) input{text-align:left;}
+    select{appearance:none;-webkit-appearance:none;-moz-appearance:none;}
+    .notes{margin-top:16px;font-size:13px;line-height:1.5;color:#222;}
+    .corrective{margin-top:18px;font-size:13px;color:#222;}
+    .line{border-bottom:2px solid #555;height:20px;margin-top:8px;}
+    .footer{margin-top:22px;font-size:12px;color:#333;}
+    @page{size:A4 landscape;margin:10mm;}
+    @media print{
+      .toolbar{display:none;}
+      body{background:#fff;}
+      .wash{display:none;}
+      .page{max-width:none;padding:0;}
+      .card{box-shadow:none;border-radius:0;padding:0;}
+      h1{font-size:24px;}
+      th,td,input,select{font-size:11px;}
+      .notes,.corrective,.footer{font-size:11px;}
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wash"></div>
 
-<div class="wash"></div>
+  <main class="page">
+    <div class="toolbar">
+      <a href="kitchen.html" class="btn back">← Back</a>
+      <a href="dashboard.html" class="btn home">Home</a>
+      <button class="btn print" onclick="window.print()" type="button">Print</button>
+      <button class="btn clear" onclick="clearForm()" type="button">Clear</button>
+      <button class="btn save" onclick="saveForm()" type="button">Save</button>
+    </div>
 
-<main class="page">
+    <div class="card">
+      <h1>Record 5a - Temperature Control Log - Cook/Cool/Reheat &amp; Serve</h1>
 
-<div class="mdk-toolbar">
+      <table>
+        <colgroup>
+          <col style="width:9%">
+          <col style="width:18%">
+          <col style="width:6%">
+          <col style="width:5%">
+          <col style="width:5%">
+          <col style="width:5%">
+          <col style="width:4.5%">
+          <col style="width:5.5%">
+          <col style="width:4.5%">
+          <col style="width:5.5%">
+          <col style="width:4.5%">
+          <col style="width:5.5%">
+          <col style="width:4.5%">
+          <col style="width:5.5%">
+          <col style="width:4.5%">
+        </colgroup>
 
-<a href="kitchen.html" class="mdk-btn--back">← Back</a>
+        <thead>
+          <tr>
+            <th rowspan="2">Date Produced/Batch No</th>
+            <th rowspan="2">Item Description</th>
+            <th>Process</th>
+            <th colspan="2">Cook 75°C</th>
+            <th>Reheat 60°C</th>
+            <th colspan="2">Cool 60-21°C in 2 hrs</th>
+            <th colspan="4">21-5°C in 4 hrs</th>
+            <th colspan="2">Serve</th>
+            <th rowspan="2">Initial</th>
+          </tr>
+          <tr>
+            <th>Cook (Ck)<br>Cool (Cl)<br>Reheat (Rh)</th>
+            <th>Start Time</th>
+            <th>Finish Time</th>
+            <th>Temp °C</th>
+            <th>Time 1</th>
+            <th>Temp °C (60°)</th>
+            <th>Time 2</th>
+            <th>Temp °C (21°)</th>
+            <th>Time 3</th>
+            <th>Temp °C (5°)</th>
+            <th>Time</th>
+            <th>Temp °C</th>
+          </tr>
+        </thead>
 
-<a href="dashboard.html" class="mdk-btn--pill">Home</a>
+        <tbody id="rows"></tbody>
+      </table>
 
-<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+      <div class="notes">
+        <strong>Processes:</strong><br>
+        Cook all potentially hazardous Food To at least 75°C<br>
+        Reheat cooled potentially hazardous food that is to be served hot to at least 60°C<br><br>
+        Cooked Potentially hazardous food that is being cooled for later use must be cooled from:<br>
+        60°C to 21°C within the first 2 hours. It must then be cooled from<br>
+        21°C to below 5°C within the next 4 hours ( 6 hours in all)
+      </div>
 
-<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+      <div class="corrective">
+        <strong>CORRECTIVE ACTIONS:</strong>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
 
-<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+      <div class="footer">
+        Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+        Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor (Authorised Person Moreton Bay Regional Council) 23 March 2021
+      </div>
+    </div>
+  </main>
 
-</div>
+  <script>
+    const STORAGE_KEY = "record5a_safe_final";
 
-<div class="sheet-card">
+    function todayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return dd + "/" + mm + "/" + yyyy;
+    }
 
-<h1 class="sheet-title">Record 13 – Food Safety Supervisor Checklist</h1>
+    function currentTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return hh + ":" + mm;
+    }
 
-<table>
+    function makeProcessSelect() {
+      const select = document.createElement("select");
+      ["", "Ck", "Cl", "Rh"].forEach(function(v) {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+      return select;
+    }
 
-<tr>
-<th>Date</th>
-<th>Item Checked</th>
-<th>Yes</th>
-<th>No</th>
-<th>Corrective Action</th>
-<th>Initial</th>
-</tr>
+    function buildRows() {
+      const tbody = document.getElementById("rows");
+      tbody.innerHTML = "";
 
-<tbody id="tbody"></tbody>
+      for (let i = 0; i < 10; i++) {
+        const tr = document.createElement("tr");
 
-</table>
+        for (let c = 0; c < 15; c++) {
+          const td = document.createElement("td");
 
-</div>
+          if (c === 2) {
+            td.appendChild(makeProcessSelect());
+            tr.appendChild(td);
+            continue;
+          }
 
-</main>
+          const input = document.createElement("input");
+          input.type = "text";
 
-<script>
+          if (c === 0) {
+            input.addEventListener("focus", function() {
+              if (!input.value) input.value = todayDate();
+            });
+          }
 
-const rows=[
-"Food handled hygienically",
-"Cold food stored below 5°C",
-"Hot food stored above 60°C",
-"Food protected from contamination",
-"Cleaning completed",
-"Hand washing facilities stocked",
-"No pest activity observed",
-"Food stored correctly",
-"Cross contamination prevented"
-];
+          if (c === 3 || c === 4 || c === 6 || c === 8 || c === 10 || c === 12) {
+            input.addEventListener("focus", function() {
+              if (!input.value) input.value = currentTime();
+            });
+          }
 
-function build(){
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
 
-const body=document.getElementById("tbody");
+        tbody.appendChild(tr);
+      }
+    }
 
-rows.forEach(r=>{
+    function saveForm() {
+      const data = [];
+      document.querySelectorAll("#rows input, #rows select").forEach(function(el) {
+        data.push(el.value);
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
 
-let tr=document.createElement("tr");
+    function loadForm() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      const fields = document.querySelectorAll("#rows input, #rows select");
+      fields.forEach(function(field, i) {
+        field.value = data[i] || "";
+      });
+    }
 
-tr.innerHTML=`
-<td><input type="text"></td>
-<td class="left">${r}</td>
-<td><input type="checkbox"></td>
-<td><input type="checkbox"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-`;
+    function clearForm() {
+      if (!confirm("Clear form?")) return;
+      document.querySelectorAll("#rows input, #rows select").forEach(function(el) {
+        el.value = "";
+      });
+      localStorage.removeItem(STORAGE_KEY);
+    }
 
-body.appendChild(tr);
-
-});
-
-}
-
-function saveForm(){
-
-let data=[];
-
-document.querySelectorAll("input").forEach(i=>{
-data.push(i.value||i.checked);
-});
-
-localStorage.setItem("record13",JSON.stringify(data));
-
-alert("Saved");
-
-}
-
-function clearForm(){
-
-if(!confirm("Clear form?")) return;
-
-document.querySelectorAll("input").forEach(i=>{
-if(i.type==="checkbox") i.checked=false;
-else i.value="";
-});
-
-localStorage.removeItem("record13");
-
-}
-
-build();
-
-</script>
-
+    buildRows();
+    loadForm();
+  </script>
 </body>
 </html>
