@@ -1,130 +1,224 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Record 9 - Food Recall</title>
-
-<link rel="stylesheet" href="site.css">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 9 - Food Recall</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center center / cover no-repeat fixed;
+    }
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1500px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#222;
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
+    }
+    .back{
+      background:#ffc107;
+      color:#4b0082;
+      border:none;
+    }
+    .save{
+      background:#007bff;
+      color:#fff;
+      border:none;
+    }
+    .card{
+      background:rgba(255,255,255,.95);
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      overflow:auto;
+    }
+    h1{
+      margin:0 0 16px;
+      font-size:28px;
+      font-weight:700;
+      color:#1f2937;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+    th,td{
+      border:1px solid #222;
+      padding:6px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-size:12px;
+      padding:4px;
+      box-sizing:border-box;
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    td:nth-child(1) input,
+    td:nth-child(2) input,
+    td:nth-child(3) input,
+    td:nth-child(4) input,
+    td:nth-child(7) input{
+      text-align:left;
+    }
+    .notes{
+      margin-top:16px;
+      font-size:13px;
+      line-height:1.5;
+      color:#222;
+    }
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+    @media print{
+      .toolbar{display:none;}
+      body{background:#fff;}
+      .wash{display:none;}
+      .page{max-width:none;padding:0;}
+      .card{box-shadow:none;border-radius:0;padding:0;}
+      h1{font-size:24px;}
+      th,td,input{font-size:11px;}
+      .notes{font-size:11px;}
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wash"></div>
 
-<div class="wash"></div>
+  <main class="page">
+    <div class="toolbar">
+      <a href="dashboard.html" class="btn back">← Back</a>
+      <a href="dashboard.html" class="btn">🏠 Home</a>
+      <button class="btn" onclick="window.print()" type="button">🖨 Print</button>
+      <button class="btn" onclick="clearForm()" type="button">🧹 Clear</button>
+      <button class="btn save" onclick="saveForm()" type="button">💾 Save</button>
+    </div>
 
-<main class="page">
+    <div class="card">
+      <h1>Record 9 – Food Recall</h1>
 
-<div class="toolbar">
-<a class="btn secondary" href="dashboard.html">Home</a>
-<button onclick="window.print()" class="btn secondary">Print</button>
-<button onclick="clearForm()" class="btn secondary">Clear</button>
-<button onclick="saveForm()" class="btn save">Save</button>
-</div>
+      <table>
+        <colgroup>
+          <col style="width:20%">
+          <col style="width:12%">
+          <col style="width:10%">
+          <col style="width:6%">
+          <col style="width:8%">
+          <col style="width:8%">
+          <col style="width:12%">
+          <col style="width:8%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Supplier / Manufacturer Details</th>
+            <th>Reason for Recall</th>
+            <th>Product Name</th>
+            <th>Batch No.</th>
+            <th>Use by date</th>
+            <th>No. of units in stock</th>
+            <th>Corrective action</th>
+            <th>Checked by</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
 
-<section class="card-wide">
+  <script>
+    const STORAGE_KEY = "food_recall_v2";
 
-<h2>Record 9 – Food Recall</h2>
+    function buildRows() {
+      const tbody = document.getElementById("rows");
+      tbody.innerHTML = "";
 
-<table class="log-table">
+      for (let i = 0; i < 12; i++) {
+        const tr = document.createElement("tr");
 
-<tr>
-<th>Supplier / Manufacturer Details</th>
-<th>Reason for Recall</th>
-<th>Product Name</th>
-<th>Batch No</th>
-<th>Use By Date</th>
-<th>No. of Units in Stock</th>
-<th>Corrective Action</th>
-<th>Checked By</th>
-</tr>
+        for (let c = 0; c < 8; c++) {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
 
-<script>
-for(let i=0;i<10;i++){
-document.write(`
-<tr>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="date"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-</tr>
-`)
-}
-</script>
+        tbody.appendChild(tr);
+      }
+    }
 
-</table>
+    function saveForm() {
+      const data = [];
+      document.querySelectorAll("#rows input").forEach(function(el) {
+        data.push(el.value);
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
 
-</section>
-  
-<h2>Record 9 – Food Recall</h2>
+    function loadForm() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      const fields = document.querySelectorAll("#rows input");
+      fields.forEach(function(field, i) {
+        field.value = data[i] || "";
+      });
+    }
 
-<table class="log-table">
+    function clearForm() {
+      if (!confirm("Clear form?")) return;
+      document.querySelectorAll("#rows input").forEach(function(el) {
+        el.value = "";
+      });
+      localStorage.removeItem(STORAGE_KEY);
+    }
 
-<tr>
-<th>Supplier / Manufacturer Details</th>
-<th>Reason for Recall</th>
-<th>Product Name</th>
-<th>Batch No</th>
-<th>Use By Date</th>
-<th>No. of Units in Stock</th>
-<th>Corrective Action</th>
-<th>Checked By</th>
-</tr>
-
-<script>
-for(let i=0;i<10;i++){
-document.write(`
-<tr>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="date"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-<td><input type="text"></td>
-</tr>
-`)
-}
-</script>
-
-</table>
-
-</section>
-
-</main>
-
-<script>
-
-function saveForm(){
-const inputs=document.querySelectorAll("input");
-let data=[];
-inputs.forEach(i=>data.push(i.value));
-localStorage.setItem("foodRecall",JSON.stringify(data));
-alert("Saved");
-}
-
-function loadForm(){
-let saved=localStorage.getItem("foodRecall");
-if(!saved)return;
-let data=JSON.parse(saved);
-let inputs=document.querySelectorAll("input");
-inputs.forEach((i,x)=>i.value=data[x]||"");
-}
-
-function clearForm(){
-if(!confirm("Clear form?"))return;
-localStorage.removeItem("foodRecall");
-location.reload();
-}
-
-loadForm();
-
-</script>
-
+    buildRows();
+    loadForm();
+  </script>
 </body>
 </html>
