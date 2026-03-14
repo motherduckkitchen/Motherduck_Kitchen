@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 5a - Temperature Control Log</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:url("kitchen.jpg") center/cover fixed no-repeat;
+}
+
+.wash{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.45);
+backdrop-filter:blur(2px);
+}
+
+.page{
+position:relative;
+z-index:1;
+max-width:1500px;
+margin:auto;
+padding:20px;
+}
+
+.mdk-toolbar{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+}
+
+.mdk-btn--back{
+background:#ffc107;
+border:none;
+color:#4b0082;
+font-weight:700;
+padding:10px 18px;
+border-radius:12px;
+text-decoration:none;
+}
+
+.mdk-btn--pill{
+background:#f8fafc;
+border:1px solid #cfd6dd;
+border-radius:12px;
+padding:8px 14px;
+font-weight:600;
+cursor:pointer;
+}
+
+.mdk-btn--primary{
+background:#007bff;
+border:none;
+border-radius:12px;
+padding:10px 18px;
+font-weight:600;
+color:white;
+cursor:pointer;
+}
+
+.sheet-card{
+background:rgba(255,255,255,.95);
+border-radius:20px;
+box-shadow:0 12px 30px rgba(0,0,0,.14);
+padding:20px;
+overflow:auto;
+}
+
+.sheet-title{
+font-size:28px;
+font-weight:700;
+margin-bottom:16px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #222;
+padding:6px;
+font-size:12px;
+text-align:center;
+}
+
+th{
+background:#f4f6f8;
+}
+
+input{
+width:100%;
+border:none;
+background:transparent;
+text-align:center;
+}
+
+.notes{
+margin-top:16px;
+font-size:13px;
+}
+
+@page{
+size:A4 landscape;
+margin:10mm;
+}
+
+@media print{
+
+body{
+background:white;
+}
+
+.wash{
+display:none;
+}
+
+.mdk-toolbar{
+display:none;
+}
+
+.sheet-card{
+box-shadow:none;
+border-radius:0;
+padding:0;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="mdk-toolbar">
+
+<a href="kitchen.html" class="mdk-btn--back">← Back</a>
+
+<a href="dashboard.html" class="mdk-btn--pill">Home</a>
+
+<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+
+<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+
+<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+
+</div>
+
+<div class="sheet-card">
+
+<h1 class="sheet-title">
+Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve
+</h1>
+
+<table>
+
+<tr>
+<th>Date Produced / Batch No</th>
+<th>Item Description</th>
+<th>Process</th>
+<th>Start Time</th>
+<th>Finish Time</th>
+<th>Temp °C</th>
+<th>Time 1</th>
+<th>Temp °C (60°)</th>
+<th>Time 2</th>
+<th>Temp °C (21°)</th>
+<th>Time 3</th>
+<th>Temp °C (5°)</th>
+<th>Serve Time</th>
+<th>Serve Temp °C</th>
+<th>Initial</th>
+</tr>
+
+<tbody id="rows"></tbody>
+
+</table>
+
+<div class="notes">
+
+<b>Processes:</b><br><br>
+
+Cook all potentially hazardous Food To at least 75°C<br>
+
+Reheat cooled potentially hazardous food that is to be served hot to at least 60°C<br><br>
+
+Cooked Potentially hazardous food that is being cooled for later use must be cooled from:<br>
+
+60°C to 21°C within the first 2 hours. It must then be cooled from<br>
+
+21°C to below 5°C within the next 4 hours (6 hours in all)
+
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+function buildRows(){
+
+const tbody=document.getElementById("rows");
+
+for(let i=0;i<12;i++){
+
+let tr=document.createElement("tr");
+
+for(let c=0;c<15;c++){
+
+let td=document.createElement("td");
+
+let input=document.createElement("input");
+
+td.appendChild(input);
+
+tr.appendChild(td);
+
+}
+
+tbody.appendChild(tr);
+
+}
+
+}
+
+function saveForm(){
+
+let data=[];
+
+document.querySelectorAll("input").forEach(i=>{
+data.push(i.value);
+});
+
+localStorage.setItem("record5a",JSON.stringify(data));
+
+alert("Saved");
+
+}
+
+function clearForm(){
+
+if(!confirm("Clear form?")) return;
+
+document.querySelectorAll("input").forEach(i=>{
+i.value="";
+});
+
+localStorage.removeItem("record5a");
+
+}
+
+function loadForm(){
+
+let data=localStorage.getItem("record5a");
+
+if(!data) return;
+
+data=JSON.parse(data);
+
+document.querySelectorAll("input").forEach((i,index)=>{
+i.value=data[index]||"";
+});
+
+}
+
+buildRows();
+loadForm();
+
+</script>
+
+</body>
+</html>
