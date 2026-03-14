@@ -20,7 +20,7 @@ body{
 .page{
   position:relative;
   z-index:1;
-  max-width:1300px;
+  max-width:1400px;
   margin:auto;
   padding:20px;
 }
@@ -52,54 +52,48 @@ body{
   overflow:auto;
 }
 h1{
-  margin:0 0 12px 0;
+  margin:0 0 14px 0;
   font-size:28px;
-}
-.topline{
-  margin:10px 0 20px 0;
-  display:flex;
-  gap:25px;
-  flex-wrap:wrap;
-  align-items:center;
-  font-weight:600;
-}
-.topline input[type="date"]{
-  padding:8px;
-  font-size:14px;
 }
 table{
   width:100%;
   border-collapse:collapse;
   table-layout:fixed;
+  margin-bottom:18px;
 }
 th,td{
   border:1px solid black;
-  padding:8px;
-  font-size:14px;
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+  vertical-align:top;
 }
 th{
-  background:#f1f1f1;
+  background:#efede4;
 }
 .area{
-  width:55%;
   text-align:left;
+  width:36%;
 }
-.center{
-  text-align:center;
-}
-.chk{
-  transform:scale(1.2);
-}
-.init{
+.daybox{
   width:100%;
   border:none;
   outline:none;
   background:transparent;
   text-align:center;
+  font-size:13px;
+  min-height:28px;
+}
+.week-input{
+  width:180px;
+  border:none;
+  outline:none;
+  background:transparent;
   font-size:14px;
+  font-weight:600;
 }
 .footer{
-  margin-top:22px;
+  margin-top:16px;
   font-size:12px;
   color:#333;
 }
@@ -112,6 +106,7 @@ th{
   body{background:white;}
   .wash{display:none;}
   .page{max-width:none;padding:0;}
+  .card{box-shadow:none;border-radius:0;padding:0;}
 }
 </style>
 </head>
@@ -132,37 +127,7 @@ th{
 
 <h1>Record 6b – Weekly Cleaning Schedule</h1>
 
-<div class="topline">
-  <label>
-    Week Starting:
-    <input id="weekStart" type="date">
-  </label>
-
-  <div>
-    Week Ending:
-    <span id="weekEnd"></span>
-  </div>
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th class="area">Area / Equipment</th>
-      <th class="center">✓</th>
-      <th class="center">Initials</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td class="area">Clean inside refrigerators</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Clean inside freezers</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Clean dry storage shelves</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Clean inside cupboards</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Clean walls around food prep areas</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Clean behind movable equipment</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Deep clean sinks and drains</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-    <tr><td class="area">Check pest traps</td><td class="center"><input type="checkbox" class="chk"></td><td><input class="init" type="text"></td></tr>
-  </tbody>
-</table>
+<div id="weeklyBlocks"></div>
 
 <div class="footer">
   Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
@@ -173,7 +138,15 @@ th{
 </main>
 
 <script>
-const STORAGE_KEY = "weekly_clean_v2";
+const STORAGE_KEY = "weekly_clean_blocks_v1";
+
+const tasks = [
+  "Clean out fridge (wipe over shelves and inside doors)",
+  "Clean inside of ovens",
+  "Clean out chemical cupboard (refill chemicals when required)",
+  "Clean pantry (wiping over every shelf and checking for expired food items) if expired discard food items. Wipe over pantry windowsill.",
+  "Sweep and mop pantry floor"
+];
 
 function formatAusDate(date){
   const d = String(date.getDate()).padStart(2,'0');
@@ -182,28 +155,64 @@ function formatAusDate(date){
   return d + " / " + m + " / " + y;
 }
 
-function updateWeek(){
-  const startVal = document.getElementById("weekStart").value;
-  if(!startVal){
-    document.getElementById("weekEnd").innerText = "";
-    return;
+function buildBlocks(){
+  const wrap = document.getElementById("weeklyBlocks");
+  wrap.innerHTML = "";
+
+  for(let block = 0; block < 4; block++){
+    const table = document.createElement("table");
+
+    const thead = `
+      <thead>
+        <tr>
+          <th class="area">
+            Week Commencing:
+            <input class="week-input" type="date" data-block="${block}" data-type="weekstart">
+          </th>
+          <th colspan="5">Initial as Completed</th>
+        </tr>
+        <tr>
+          <th class="area">WEEKLY or more often if required</th>
+          <th>M</th>
+          <th>T</th>
+          <th>W</th>
+          <th>T</th>
+          <th>F</th>
+        </tr>
+      </thead>
+    `;
+
+    let tbody = "<tbody>";
+
+    tasks.forEach((task, rowIndex) => {
+      tbody += `<tr><td class="area">${task}</td>`;
+
+      for(let day = 0; day < 5; day++){
+        tbody += `<td><input class="daybox" type="text" data-block="${block}" data-row="${rowIndex}" data-day="${day}"></td>`;
+      }
+
+      tbody += `</tr>`;
+    });
+
+    tbody += "</tbody>";
+
+    table.innerHTML = thead + tbody;
+    wrap.appendChild(table);
   }
-
-  const start = new Date(startVal + "T00:00:00");
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-
-  document.getElementById("weekEnd").innerText = formatAusDate(end);
 }
 
 function saveForm(){
   const data = {
-    weekStart: document.getElementById("weekStart").value,
-    fields: []
+    weeks: [],
+    boxes: []
   };
 
-  document.querySelectorAll("table input").forEach(el => {
-    data.fields.push(el.type === "checkbox" ? el.checked : el.value);
+  document.querySelectorAll('input[data-type="weekstart"]').forEach(el => {
+    data.weeks.push(el.value);
+  });
+
+  document.querySelectorAll('.daybox').forEach(el => {
+    data.boxes.push(el.value);
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -215,33 +224,29 @@ function loadForm(){
   if(!saved) return;
 
   const data = JSON.parse(saved);
-  document.getElementById("weekStart").value = data.weekStart || "";
-  updateWeek();
 
-  const inputs = document.querySelectorAll("table input");
-  inputs.forEach((el, i) => {
-    if(typeof data.fields[i] === "undefined") return;
-    if(el.type === "checkbox") el.checked = !!data.fields[i];
-    else el.value = data.fields[i] || "";
+  const weekInputs = document.querySelectorAll('input[data-type="weekstart"]');
+  weekInputs.forEach((el, i) => {
+    el.value = (data.weeks && data.weeks[i]) || "";
+  });
+
+  const boxes = document.querySelectorAll('.daybox');
+  boxes.forEach((el, i) => {
+    el.value = (data.boxes && data.boxes[i]) || "";
   });
 }
 
 function clearForm(){
   if(!confirm("Clear form?")) return;
 
-  document.getElementById("weekStart").value = "";
-  document.getElementById("weekEnd").innerText = "";
-
-  document.querySelectorAll("table input").forEach(el => {
-    if(el.type === "checkbox") el.checked = false;
-    else el.value = "";
+  document.querySelectorAll('input').forEach(el => {
+    el.value = "";
   });
 
   localStorage.removeItem(STORAGE_KEY);
 }
 
-document.getElementById("weekStart").addEventListener("change", updateWeek);
-
+buildBlocks();
 loadForm();
 </script>
 
