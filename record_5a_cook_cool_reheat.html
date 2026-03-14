@@ -1,116 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 13 - Food Safety Supervisor Checklist</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:url("kitchen.jpg") center/cover fixed no-repeat;
+}
+
+.wash{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.45);
+backdrop-filter:blur(2px);
+}
+
+.page{
+position:relative;
+z-index:1;
+max-width:1400px;
+margin:auto;
+padding:20px;
+}
+
+.mdk-toolbar{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+align-items:center;
+}
+
+.mdk-btn--back{
+background:#ffc107;
+border:none;
+color:#4b0082;
+font-weight:700;
+padding:10px 18px;
+border-radius:12px;
+text-decoration:none;
+}
+
+.mdk-btn--pill{
+background:#f8fafc;
+border:1px solid #cfd6dd;
+border-radius:12px;
+padding:8px 14px;
+font-weight:600;
+cursor:pointer;
+}
+
+.mdk-btn--primary{
+background:#007bff;
+border:none;
+border-radius:12px;
+padding:10px 18px;
+font-weight:600;
+color:white;
+cursor:pointer;
+}
+
+.sheet-card{
+background:rgba(255,255,255,.95);
+border-radius:20px;
+box-shadow:0 12px 30px rgba(0,0,0,.14);
+padding:20px;
+}
+
+.sheet-title{
+font-size:28px;
+font-weight:700;
+margin-bottom:16px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #222;
+padding:8px;
+font-size:14px;
+text-align:center;
+}
+
+th{
+background:#f4f6f8;
+}
+
+td.left{
+text-align:left;
+}
+
+@page{
+size:A4 landscape;
+margin:10mm;
+}
+
+@media print{
+
+body{
+background:white;
+}
+
+.wash{
+display:none;
+}
+
+.mdk-toolbar{
+display:none;
+}
+
+.sheet-card{
+box-shadow:none;
+border-radius:0;
+padding:0;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="mdk-toolbar">
+
+<a href="kitchen.html" class="mdk-btn--back">← Back</a>
+
+<a href="dashboard.html" class="mdk-btn--pill">Home</a>
+
+<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+
+<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+
+<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+
+</div>
+
+<div class="sheet-card">
+
+<h1 class="sheet-title">Record 13 – Food Safety Supervisor Checklist</h1>
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Item Checked</th>
+<th>Yes</th>
+<th>No</th>
+<th>Corrective Action</th>
+<th>Initial</th>
+</tr>
+
+<tbody id="tbody"></tbody>
+
+</table>
+
+</div>
+
+</main>
+
 <script>
-const STORAGE_KEY = "record5a_exact_v3";
 
-function todayDate() {
-  const d = new Date();
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
+const rows=[
+"Food handled hygienically",
+"Cold food stored below 5°C",
+"Hot food stored above 60°C",
+"Food protected from contamination",
+"Cleaning completed",
+"Hand washing facilities stocked",
+"No pest activity observed",
+"Food stored correctly",
+"Cross contamination prevented"
+];
+
+function build(){
+
+const body=document.getElementById("tbody");
+
+rows.forEach(r=>{
+
+let tr=document.createElement("tr");
+
+tr.innerHTML=`
+<td><input type="text"></td>
+<td class="left">${r}</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="text"></td>
+<td><input type="text"></td>
+`;
+
+body.appendChild(tr);
+
+});
+
 }
 
-function currentTime() {
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
+function saveForm(){
+
+let data=[];
+
+document.querySelectorAll("input").forEach(i=>{
+data.push(i.value||i.checked);
+});
+
+localStorage.setItem("record13",JSON.stringify(data));
+
+alert("Saved");
+
 }
 
-function makeProcessSelect() {
-  const select = document.createElement("select");
+function clearForm(){
 
-  const opts = ["", "Ck", "Cl", "Rh"];
-  opts.forEach(val => {
-    const option = document.createElement("option");
-    option.value = val;
-    option.textContent = val;
-    select.appendChild(option);
-  });
+if(!confirm("Clear form?")) return;
 
-  select.style.width = "100%";
-  select.style.border = "none";
-  select.style.background = "transparent";
-  select.style.fontSize = "12px";
-  select.style.textAlign = "center";
-  select.style.outline = "none";
+document.querySelectorAll("input").forEach(i=>{
+if(i.type==="checkbox") i.checked=false;
+else i.value="";
+});
 
-  return select;
+localStorage.removeItem("record13");
+
 }
 
-function buildRows() {
-  const tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
+build();
 
-  for (let i = 0; i < 12; i++) {
-    const tr = document.createElement("tr");
-
-    for (let c = 0; c < 15; c++) {
-      const td = document.createElement("td");
-
-      // Process column
-      if (c === 2) {
-        const select = makeProcessSelect();
-        td.appendChild(select);
-        tr.appendChild(td);
-        continue;
-      }
-
-      const input = document.createElement("input");
-      input.type = "text";
-
-      // Date Produced/Batch No
-      if (c === 0) {
-        input.addEventListener("focus", function () {
-          if (!input.value) input.value = todayDate();
-        });
-      }
-
-      // Time columns
-      if (c === 3 || c === 4 || c === 6 || c === 8 || c === 10 || c === 12) {
-        input.addEventListener("focus", function () {
-          if (!input.value) input.value = currentTime();
-        });
-      }
-
-      td.appendChild(input);
-      tr.appendChild(td);
-    }
-
-    tbody.appendChild(tr);
-  }
-}
-
-function saveForm() {
-  const data = [];
-  document.querySelectorAll("#rows input, #rows select").forEach(el => {
-    data.push(el.value);
-  });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
-}
-
-function loadForm() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return;
-
-  const data = JSON.parse(saved);
-  const fields = document.querySelectorAll("#rows input, #rows select");
-
-  fields.forEach((field, index) => {
-    field.value = data[index] || "";
-  });
-}
-
-function clearForm() {
-  if (!confirm("Clear form?")) return;
-
-  document.querySelectorAll("#rows input, #rows select").forEach(el => {
-    el.value = "";
-  });
-
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-buildRows();
-loadForm();
 </script>
+
+</body>
+</html>
