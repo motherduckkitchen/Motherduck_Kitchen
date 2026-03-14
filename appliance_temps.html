@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 4 - Temperature Control Log ~ Appliances</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center center / cover no-repeat fixed;
+    }
+
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1500px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .mdk-toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .mdk-btn--back{
+      background:#ffc107;
+      border:none;
+      color:#4b0082;
+      font-weight:700;
+      padding:10px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .mdk-btn--pill{
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      border-radius:12px;
+      padding:8px 14px;
+      font-weight:600;
+      cursor:pointer;
+      text-decoration:none;
+      color:#222;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .mdk-btn--primary{
+      background:#007bff;
+      border:none;
+      border-radius:12px;
+      padding:10px 18px;
+      font-weight:600;
+      color:white;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .sheet-card{
+      background:rgba(255,255,255,.95);
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      padding:20px;
+      overflow:auto;
+    }
+
+    .sheet-title{
+      font-size:28px;
+      font-weight:700;
+      margin:0 0 16px;
+      color:#1f2937;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+
+    th, td{
+      border:1px solid #222;
+      padding:6px;
+      font-size:13px;
+      text-align:center;
+      vertical-align:middle;
+    }
+
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+
+    input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:13px;
+      padding:4px;
+      box-sizing:border-box;
+      text-align:center;
+    }
+
+    td.left input{
+      text-align:left;
+    }
+
+    .notes{
+      margin-top:16px;
+      font-size:14px;
+      line-height:1.5;
+      color:#222;
+    }
+
+    .notes ul{
+      margin:8px 0 0 28px;
+    }
+
+    .notes li{
+      margin:8px 0;
+    }
+
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+
+    @media print{
+      body{ background:#fff; }
+      .wash{ display:none; }
+      .mdk-toolbar{ display:none; }
+      .page{ max-width:none; padding:0; }
+      .sheet-card{
+        box-shadow:none;
+        border-radius:0;
+        padding:0;
+      }
+      .sheet-title{
+        font-size:22px;
+        margin:0 0 10px;
+      }
+      th, td{
+        font-size:11px;
+        padding:4px;
+      }
+      input{
+        font-size:11px;
+        padding:2px;
+      }
+      .notes{
+        font-size:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wash"></div>
+
+  <main class="page">
+    <div class="mdk-toolbar">
+      <a href="kitchen.html" class="mdk-btn--back">← Back</a>
+      <a href="dashboard.html" class="mdk-btn--pill">🏠 Home</a>
+      <button class="mdk-btn--pill" onclick="window.print()" type="button">🖨 Print</button>
+      <button class="mdk-btn--pill" onclick="clearForm()" type="button">🧹 Clear</button>
+      <button class="mdk-btn--primary" onclick="saveForm()" type="button">💾 Save</button>
+    </div>
+
+    <div class="sheet-card">
+      <h1 class="sheet-title">Record 4 – Temperature Control Log ~ Appliances</h1>
+
+      <table>
+        <colgroup>
+          <col style="width:11%">
+          <col style="width:6%">
+          <col style="width:9%">
+          <col style="width:4.5%">
+          <col style="width:9%">
+          <col style="width:4.5%">
+          <col style="width:9%">
+          <col style="width:4.5%">
+          <col style="width:11%">
+          <col style="width:19%">
+          <col style="width:11%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Kitchen Fridge Food item</th>
+            <th>°C</th>
+            <th>Kitchen Freezer Food Item</th>
+            <th>°C</th>
+            <th>Dishwasher</th>
+            <th>°C</th>
+            <th>Visual Check</th>
+            <th>Corrective Action</th>
+            <th>Sign</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div class="notes">
+        Record the Temperature of a Potentially Hazardous food item in each chilled storage area Twice a Day.<br><br>
+
+        If the food item or Fridge temperature is above 5°C adjust the thermostat and recheck the temperature in 30 minutes.<br>
+        Cold Food ........ &lt;5°C<br>
+        Frozen Food ....... Hard frozen (HF) or &lt;-15°C<br>
+        Visual Checks:
+        <ul>
+          <li>Use by date (foods past this date are prohibited from being sold)</li>
+          <li>Best before date (foods past this date can be sold provided the food is not damaged, deteriorated or perished)</li>
+          <li>Packaging (damaged, deteriorated, perished or appropriate material)</li>
+          <li>Labelling (name of food, name and address of supplier, lot identification)</li>
+          <li>Pest contamination (droppings, eggs, webs, feathers etc.)</li>
+          <li>Foreign objects (dirt, metal, hair)</li>
+        </ul>
+        <br>
+        Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+        Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor (Authorised Person Moreton Bay Regional Council) 23 March 2021
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "appliance_temps_v1";
+
+    function todayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function currentTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    function buildRow() {
+      const tr = document.createElement("tr");
+      const defs = [
+        { kind: "date", left: false },
+        { kind: "time", left: false },
+        { kind: "text", left: true },
+        { kind: "text", left: false },
+        { kind: "text", left: true },
+        { kind: "text", left: false },
+        { kind: "text", left: true },
+        { kind: "text", left: false },
+        { kind: "text", left: true },
+        { kind: "text", left: true },
+        { kind: "text", left: false }
+      ];
+
+      defs.forEach(def => {
+        const td = document.createElement("td");
+        if (def.left) td.className = "left";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.dataset.kind = def.kind;
+
+        input.addEventListener("focus", function() {
+          if (!input.value) {
+            if (def.kind === "date") input.value = todayDate();
+            if (def.kind === "time") input.value = currentTime();
+          }
+        });
+
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      return tr;
+    }
+
+    function loadRows() {
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+      for (let i = 0; i < 10; i++) {
+        tbody.appendChild(buildRow());
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        const inputs = document.querySelectorAll("#tbody input");
+        inputs.forEach((input, i) => {
+          input.value = data[i] || "";
+        });
+      }
+    }
+
+    function saveForm() {
+      const inputs = document.querySelectorAll("#tbody input");
+      const data = Array.from(inputs).map(i => i.value);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
+
+    function clearForm() {
+      if (!confirm("Clear this form?")) return;
+      document.querySelectorAll("#tbody input").forEach(i => i.value = "");
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    loadRows();
+  </script>
+</body>
+</html>
