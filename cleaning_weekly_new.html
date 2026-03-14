@@ -188,10 +188,8 @@ function buildBlocks(){
       tbody += `<tr><td class="area">${task}</td>`;
 
       for(let day = 0; day < 5; day++){
-        tbody += `<td><input class="daybox" type="text" data-block="${block}" data-row="${rowIndex}" data-day="${day}"></td>`;
-      }
-
-      tbody += `</tr>`;
+        tbody += `<td><input type="checkbox" class="daybox" data-block="${block}" data-row="${rowIndex}" data-day="${day}"></td>`;
+        tbody += `</tr>`;
     });
 
     tbody += "</tbody>";
