@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 5b - Brewer St Transport Log</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center center / cover no-repeat fixed;
+    }
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1500px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#222;
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
+    }
+    .back{
+      background:#ffc107;
+      color:#4b0082;
+      border:none;
+    }
+    .save{
+      background:#007bff;
+      color:#fff;
+      border:none;
+    }
+    .card{
+      background:rgba(255,255,255,.95);
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      overflow:auto;
+    }
+    .driver{
+      text-align:center;
+      font-size:18px;
+      margin:0 0 10px 0;
+      font-weight:600;
+    }
+    .driver input{
+      width:260px;
+      max-width:100%;
+      border:none;
+      border-bottom:2px solid #444;
+      background:transparent;
+      outline:none;
+      font-size:18px;
+      text-align:center;
+      padding:4px;
+    }
+    h1{
+      margin:0;
+      font-size:28px;
+      font-weight:700;
+      color:#1f2937;
+    }
+    .title-row{
+      display:flex;
+      justify-content:flex-start;
+      gap:40px;
+      align-items:flex-end;
+      margin-top:8px;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+    }
+    .title-row .left{
+      font-size:24px;
+      font-weight:700;
+    }
+    .title-row .main{
+      font-size:26px;
+      font-weight:700;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+    th,td{
+      border:1px solid #222;
+      padding:4px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-size:12px;
+      padding:3px;
+      box-sizing:border-box;
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    td:nth-child(2) input{
+      text-align:left;
+    }
+    .footer{
+      margin-top:22px;
+      font-size:12px;
+      color:#333;
+    }
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+    @media print{
+      .toolbar{display:none;}
+      body{background:#fff;}
+      .wash{display:none;}
+      .page{max-width:none;padding:0;}
+      .card{box-shadow:none;border-radius:0;padding:0;}
+      h1,.title-row .left,.title-row .main,.driver{font-size:22px;}
+      th,td,input{font-size:11px;}
+      .footer{font-size:11px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wash"></div>
+
+  <main class="page">
+    <div class="toolbar">
+      <a href="kitchen.html" class="btn back">← Back</a>
+      <a href="dashboard.html" class="btn">Home</a>
+      <button class="btn" onclick="window.print()" type="button">Print</button>
+      <button class="btn" onclick="clearForm()" type="button">Clear</button>
+      <button class="btn save" onclick="saveForm()" type="button">Save</button>
+    </div>
+
+    <div class="card">
+      <div class="driver">
+        Drivers Name:
+        <input type="text" id="driverName">
+      </div>
+
+      <table>
+        <colgroup>
+          <col style="width:11%">
+          <col style="width:28%">
+          <col style="width:11%">
+          <col style="width:12%">
+          <col style="width:9%">
+          <col style="width:10%">
+          <col style="width:9%">
+          <col style="width:10%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description of Meal</th>
+            <th>Time Meal dispatched</th>
+            <th>Temperature °C of Meal at dispatch</th>
+            <th>Time of Meal Delivery</th>
+            <th>Temp at Delivery °C</th>
+            <th>Transit time</th>
+            <th>Sign off</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <div class="title-row">
+        <div class="left">Record 5b</div>
+        <div class="main">Brewer St Transport Log</div>
+      </div>
+
+      <div class="footer">
+        Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+        Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor (Authorised Person Moreton Bay Regional Council) 23 March 2021
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "transport_log_shared_v1";
+
+    function todayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return dd + "/" + mm + "/" + yyyy;
+    }
+
+    function currentTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return hh + ":" + mm;
+    }
+
+    function minutesBetween(start, end) {
+      if (!start || !end || !start.includes(":") || !end.includes(":")) return "";
+      const [sh, sm] = start.split(":").map(Number);
+      const [eh, em] = end.split(":").map(Number);
+      if (Number.isNaN(sh) || Number.isNaN(sm) || Number.isNaN(eh) || Number.isNaN(em)) return "";
+      let startMins = sh * 60 + sm;
+      let endMins = eh * 60 + em;
+      if (endMins < startMins) endMins += 24 * 60;
+      const diff = endMins - startMins;
+      return diff + " min";
+    }
+
+    function buildRows() {
+      const tbody = document.getElementById("rows");
+      tbody.innerHTML = "";
+
+      for (let i = 0; i < 16; i++) {
+        const tr = document.createElement("tr");
+
+        for (let c = 0; c < 8; c++) {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          input.dataset.row = i;
+          input.dataset.col = c;
+
+          if (c === 0) {
+            input.addEventListener("focus", function () {
+              if (!input.value) input.value = todayDate();
+            });
+          }
+
+          if (c === 2 || c === 4) {
+            input.addEventListener("focus", function () {
+              if (!input.value) input.value = currentTime();
+            });
+
+            input.addEventListener("input", function () {
+              updateTransit(i);
+            });
+          }
+
+          if (c === 6) {
+            input.readOnly = true;
+          }
+
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function updateTransit(rowIndex) {
+      const dispatch = document.querySelector(`#rows input[data-row="${rowIndex}"][data-col="2"]`);
+      const delivery = document.querySelector(`#rows input[data-row="${rowIndex}"][data-col="4"]`);
+      const transit = document.querySelector(`#rows input[data-row="${rowIndex}"][data-col="6"]`);
+      if (!dispatch || !delivery || !transit) return;
+      transit.value = minutesBetween(dispatch.value, delivery.value);
+    }
+
+    function saveForm() {
+      const data = {
+        driverName: document.getElementById("driverName").value,
+        rows: []
+      };
+
+      for (let r = 0; r < 16; r++) {
+        const row = [];
+        for (let c = 0; c < 8; c++) {
+          const field = document.querySelector(`#rows input[data-row="${r}"][data-col="${c}"]`);
+          row.push(field ? field.value : "");
+        }
+        data.rows.push(row);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
+
+    function loadForm() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+
+      const data = JSON.parse(saved);
+      document.getElementById("driverName").value = data.driverName || "";
+
+      if (Array.isArray(data.rows)) {
+        data.rows.forEach((row, r) => {
+          row.forEach((value, c) => {
+            const field = document.querySelector(`#rows input[data-row="${r}"][data-col="${c}"]`);
+            if (field) field.value = value || "";
+          });
+          updateTransit(r);
+        });
+      }
+    }
+
+    function clearForm() {
+      if (!confirm("Clear form?")) return;
+
+      document.getElementById("driverName").value = "";
+      document.querySelectorAll("#rows input").forEach(function (el) {
+        el.value = "";
+      });
+
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    buildRows();
+    loadForm();
+  </script>
+</body>
+</html>
