@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Record 6c – Monthly Cleaning</title>
+
+<link rel="stylesheet" href="site.css">
+
+<style>
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+border:1px solid black;
+padding:8px;
+}
+
+th{
+background:#eee;
+}
+
+.area{
+width:50%;
+}
+
+.chk{
+transform:scale(1.2);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="mdk-toolbar">
+
+<a class="mdk-btn--back" href="kitchen.html">Back</a>
+
+<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+
+<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+
+<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+
+</div>
+
+<div class="card-white">
+
+<h2>Record 6c – Monthly Cleaning Schedule</h2>
+
+<div style="margin-bottom:15px;font-weight:600">
+
+Month:
+<input type="text" placeholder="Month / Year">
+
+</div>
+
+<table>
+
+<tr>
+<th class="area">Task</th>
+<th>✓</th>
+<th>Initials</th>
+</tr>
+
+<tr>
+<td>Clean exhaust vents</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Deep clean ovens</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Deep clean refrigerators</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean walls and ceilings</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Inspect pest control areas</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Deep clean floors</td>
+<td><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+</table>
+
+</div>
+
+</main>
+
+</body>
+</html>
