@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Cleaning & Sanitising Schedule</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:url("kitchen.jpg") center/cover no-repeat fixed;
+}
+
+.wash{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.45);
+backdrop-filter:blur(2px);
+}
+
+.page{
+position:relative;
+z-index:1;
+max-width:1300px;
+margin:auto;
+padding:20px;
+}
+
+.toolbar{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+}
+
+.btn{
+padding:10px 16px;
+border-radius:10px;
+border:none;
+font-weight:bold;
+cursor:pointer;
+text-decoration:none;
+background:#204a9b;
+color:white;
+}
+
+.back{
+background:#ffc107;
+color:black;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+h1{
+margin:0;
+font-size:28px;
+}
+
+.date{
+margin-top:10px;
+font-size:18px;
+font-weight:bold;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid black;
+padding:6px;
+font-size:13px;
+text-align:center;
+}
+
+th{
+background:#eee;
+}
+
+.area{
+text-align:left;
+}
+
+input{
+width:100%;
+border:none;
+text-align:center;
+font-size:13px;
+}
+
+@page{
+size:A4 landscape;
+margin:10mm;
+}
+
+@media print{
+.toolbar{display:none;}
+body{background:white;}
+.wash{display:none;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="toolbar">
+<a class="btn back" href="kitchen.html">Back</a>
+<button class="btn" onclick="window.print()">Print</button>
+<button class="btn" onclick="clearForm()">Clear</button>
+<button class="btn" onclick="saveForm()">Save</button>
+</div>
+
+<div class="card">
+
+<h1>Record 6a – Daily Cleaning & Sanitising Schedule</h1>
+
+<div class="date">
+Date: <span id="today"></span>
+</div>
+
+<table>
+
+<tr>
+<th class="area">Area / Equipment</th>
+<th>M</th>
+<th>T</th>
+<th>W</th>
+<th>T</th>
+<th>F</th>
+</tr>
+
+<tr>
+<td class="area">Chopping boards</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Benches</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Serving utensils</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Bowls, cups, plates</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Cupboards clean</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Microwave clean</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Fridge front wiped</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Dishwasher wiped</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Door handles cleaned</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Bins emptied</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+<tr>
+<td class="area">Floors mopped</td>
+<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
+</tr>
+
+</table>
+
+</div>
+</main>
+
+<script>
+
+function todayDate(){
+
+let d=new Date()
+
+let day=String(d.getDate()).padStart(2,'0')
+let month=String(d.getMonth()+1).padStart(2,'0')
+let year=d.getFullYear()
+
+return day+" / "+month+" / "+year
+
+}
+
+document.getElementById("today").innerText=todayDate()
+
+function saveForm(){
+
+let data=[]
+document.querySelectorAll("input").forEach(i=>data.push(i.value))
+localStorage.setItem("cleaning",JSON.stringify(data))
+alert("Saved")
+
+}
+
+function loadForm(){
+
+let saved=localStorage.getItem("cleaning")
+
+if(!saved)return
+
+let data=JSON.parse(saved)
+
+document.querySelectorAll("input").forEach((i,index)=>{
+i.value=data[index]||""
+})
+
+}
+
+function clearForm(){
+
+if(!confirm("Clear form?"))return
+
+document.querySelectorAll("input").forEach(i=>i.value="")
+
+localStorage.removeItem("cleaning")
+
+}
+
+loadForm()
+
+</script>
+
+</body>
+</html>
