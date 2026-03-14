@@ -1,13 +1,251 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Record 5a New</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record 5a - Cook / Cool / Reheat</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:url("kitchen.jpg") center/cover no-repeat fixed;
+}
+
+.page{
+max-width:1500px;
+margin:auto;
+padding:20px;
+}
+
+.toolbar{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 16px;
+border-radius:10px;
+border:none;
+cursor:pointer;
+font-weight:600;
+}
+
+.back{background:#ffc107;}
+.home{background:#ddd;}
+.print{background:#eee;}
+.clear{background:#eee;}
+.save{background:#1e88e5;color:white;}
+
+.card{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 8px 25px rgba(0,0,0,0.2);
+}
+
+h1{
+margin-top:0;
+font-size:28px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:12px;
+}
+
+th,td{
+border:1px solid #222;
+padding:5px;
+text-align:center;
+}
+
+th{
+background:#eee;
+}
+
+input,select{
+width:100%;
+border:none;
+background:transparent;
+text-align:center;
+}
+
+.notes{
+margin-top:20px;
+font-size:13px;
+line-height:1.5;
+}
+
+@media print{
+.toolbar{display:none;}
+body{background:white;}
+}
+</style>
 </head>
-<body style="font-family:Arial;padding:40px">
-  <h1 style="background:green;color:white;padding:20px">
-    RECORD 5A NEW PAGE
-  </h1>
-  <p>This is the correct new Cook / Cool / Reheat page.</p>
+
+<body>
+
+<div class="page">
+
+<div class="toolbar">
+<a href="kitchen.html"><button class="btn back">← Back</button></a>
+<a href="dashboard.html"><button class="btn home">Home</button></a>
+<button class="btn print" onclick="window.print()">Print</button>
+<button class="btn clear" onclick="clearForm()">Clear</button>
+<button class="btn save" onclick="saveForm()">Save</button>
+</div>
+
+<div class="card">
+
+<h1>Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</h1>
+
+<table>
+<thead>
+<tr>
+<th>Date Produced/Batch No</th>
+<th>Item Description</th>
+<th>Process</th>
+<th>Start Time</th>
+<th>Finish Time</th>
+<th>Temp °C</th>
+<th>Time 1</th>
+<th>Temp °C (60°)</th>
+<th>Time 2</th>
+<th>Temp °C (21°)</th>
+<th>Time 3</th>
+<th>Temp °C (5°)</th>
+<th>Serve Time</th>
+<th>Temp °C</th>
+<th>Initial</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+
+<div class="notes">
+<b>Processes:</b><br>
+Cook all potentially hazardous food to at least 75°C.<br>
+Reheat cooled potentially hazardous food to at least 60°C.<br><br>
+
+Cooked potentially hazardous food being cooled must be cooled:<br>
+60°C → 21°C within 2 hours<br>
+21°C → below 5°C within next 4 hours (6 hours total)
+</div>
+
+</div>
+</div>
+
+<script>
+
+function today(){
+let d=new Date();
+return d.toLocaleDateString();
+}
+
+function now(){
+let d=new Date();
+return d.toTimeString().slice(0,5);
+}
+
+function buildRows(){
+
+let body=document.getElementById("rows");
+
+for(let i=0;i<12;i++){
+
+let row=document.createElement("tr");
+
+for(let c=0;c<15;c++){
+
+let td=document.createElement("td");
+
+if(c==2){
+
+let sel=document.createElement("select");
+
+["","Ck","Cl","Rh"].forEach(v=>{
+let o=document.createElement("option");
+o.text=v;
+sel.appendChild(o);
+});
+
+td.appendChild(sel);
+
+}else{
+
+let input=document.createElement("input");
+
+if(c==0){
+input.addEventListener("focus",()=>{if(!input.value)input.value=today();});
+}
+
+if([3,4,6,8,10,12].includes(c)){
+input.addEventListener("focus",()=>{if(!input.value)input.value=now();});
+}
+
+td.appendChild(input);
+
+}
+
+row.appendChild(td);
+
+}
+
+body.appendChild(row);
+
+}
+
+}
+
+function saveForm(){
+
+let data=[];
+
+document.querySelectorAll("input,select").forEach(el=>{
+data.push(el.value);
+});
+
+localStorage.setItem("record5a",JSON.stringify(data));
+
+alert("Saved");
+
+}
+
+function loadForm(){
+
+let saved=localStorage.getItem("record5a");
+
+if(!saved) return;
+
+let data=JSON.parse(saved);
+
+let fields=document.querySelectorAll("input,select");
+
+fields.forEach((f,i)=>{
+
+f.value=data[i]||"";
+
+});
+
+}
+
+function clearForm(){
+
+if(!confirm("Clear form?"))return;
+
+document.querySelectorAll("input,select").forEach(e=>e.value="");
+
+localStorage.removeItem("record5a");
+
+}
+
+buildRows();
+loadForm();
+
+</script>
+
 </body>
 </html>
