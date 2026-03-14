@@ -3,110 +3,116 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Daily Cleaning & Sanitising Schedule</title>
+<title>Record 6a - Daily Cleaning & Sanitising Schedule</title>
 
 <style>
-
 body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:url("kitchen.jpg") center/cover no-repeat fixed;
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center/cover no-repeat fixed;
 }
-
 .wash{
-position:fixed;
-inset:0;
-background:rgba(255,255,255,.45);
-backdrop-filter:blur(2px);
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.45);
+  backdrop-filter:blur(2px);
 }
-
 .page{
-position:relative;
-z-index:1;
-max-width:1300px;
-margin:auto;
-padding:20px;
+  position:relative;
+  z-index:1;
+  max-width:1500px;
+  margin:auto;
+  padding:20px;
 }
-
 .toolbar{
-display:flex;
-gap:10px;
-margin-bottom:14px;
+  display:flex;
+  gap:10px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
 }
-
 .btn{
-padding:10px 16px;
-border-radius:10px;
-border:none;
-font-weight:bold;
-cursor:pointer;
-text-decoration:none;
-background:#204a9b;
-color:white;
+  padding:10px 16px;
+  border-radius:10px;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  text-decoration:none;
+  background:#204a9b;
+  color:white;
 }
-
 .back{
-background:#ffc107;
-color:black;
+  background:#ffc107;
+  color:black;
 }
-
 .card{
-background:white;
-padding:20px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.2);
+  background:white;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  overflow:auto;
 }
-
 h1{
-margin:0;
-font-size:28px;
+  margin:0;
+  font-size:28px;
 }
-
-.date{
-margin-top:10px;
-font-size:18px;
-font-weight:bold;
+.topline{
+  margin-top:12px;
+  margin-bottom:14px;
+  font-size:16px;
+  font-weight:bold;
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  align-items:center;
 }
-
+.topline input[type="date"]{
+  padding:6px;
+  font-size:14px;
+}
 table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  table-layout:fixed;
 }
-
 th,td{
-border:1px solid black;
-padding:6px;
-font-size:13px;
-text-align:center;
+  border:1px solid black;
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+  vertical-align:middle;
 }
-
 th{
-background:#eee;
+  background:#eee;
 }
-
 .area{
-text-align:left;
+  text-align:left;
 }
-
-input{
-width:100%;
-border:none;
-text-align:center;
-font-size:13px;
+.init-box{
+  width:100%;
+  border:none;
+  background:transparent;
+  text-align:center;
+  font-size:13px;
 }
-
+.chk{
+  transform:scale(1.1);
+}
+.footer{
+  margin-top:22px;
+  font-size:12px;
+  color:#333;
+}
 @page{
-size:A4 landscape;
-margin:10mm;
+  size:A4 landscape;
+  margin:10mm;
 }
-
 @media print{
-.toolbar{display:none;}
-body{background:white;}
-.wash{display:none;}
+  .toolbar{display:none;}
+  body{background:white;}
+  .wash{display:none;}
+  .page{max-width:none;padding:0;}
 }
-
 </style>
 </head>
 
@@ -117,147 +123,214 @@ body{background:white;}
 <main class="page">
 
 <div class="toolbar">
-<a class="btn back" href="kitchen.html">Back</a>
-<button class="btn" onclick="window.print()">Print</button>
-<button class="btn" onclick="clearForm()">Clear</button>
-<button class="btn" onclick="saveForm()">Save</button>
+  <a class="btn back" href="kitchen.html">Back</a>
+  <button class="btn" onclick="window.print()">Print</button>
+  <button class="btn" onclick="clearForm()">Clear</button>
+  <button class="btn" onclick="saveForm()">Save</button>
 </div>
 
 <div class="card">
 
 <h1>Record 6a – Daily Cleaning & Sanitising Schedule</h1>
 
-<<div class="date">
-Week Starting:
-<input type="date" id="weekStart">
+<div class="topline">
+  <label>Week Starting:
+    <input type="date" id="weekStart">
+  </label>
 
-&nbsp;&nbsp;
-
-Week Ending:
-<span id="weekEnd"></span>
+  <div>Week Ending: <span id="weekEnd"></span></div>
 </div>
-  <table>
 
-<tr>
-<th class="area">Area / Equipment</th>
-<th>M</th>
-<th>T</th>
-<th>W</th>
-<th>T</th>
-<th>F</th>
-</tr>
+<table>
+  <colgroup>
+    <col style="width:28%">
+    <col style="width:4%">
+    <col style="width:6%">
+    <col style="width:4%">
+    <col style="width:6%">
+    <col style="width:4%">
+    <col style="width:6%">
+    <col style="width:4%">
+    <col style="width:6%">
+    <col style="width:4%">
+    <col style="width:6%">
+  </colgroup>
 
-<tr>
-<td class="area">Chopping boards</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
+  <thead>
+    <tr>
+      <th class="area">Area / Equipment</th>
+      <th colspan="2">M</th>
+      <th colspan="2">T</th>
+      <th colspan="2">W</th>
+      <th colspan="2">T</th>
+      <th colspan="2">F</th>
+    </tr>
+    <tr>
+      <th class="area"></th>
+      <th>✓</th><th>Init</th>
+      <th>✓</th><th>Init</th>
+      <th>✓</th><th>Init</th>
+      <th>✓</th><th>Init</th>
+      <th>✓</th><th>Init</th>
+    </tr>
+  </thead>
 
-<tr>
-<td class="area">Benches</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Serving utensils</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Bowls, cups, plates</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Cupboards clean</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Microwave clean</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Fridge front wiped</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Dishwasher wiped</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Door handles cleaned</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Bins emptied</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
-<tr>
-<td class="area">Floors mopped</td>
-<td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-</tr>
-
+  <tbody id="rows"></tbody>
 </table>
+
+<div class="footer">
+  Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+  Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor (Authorised Person Moreton Bay Regional Council) 23 March 2021
+</div>
 
 </div>
 </main>
 
 <script>
+const STORAGE_KEY = "cleaning_schedule_ticks_v1";
 
-function todayDate(){
+const tasks = [
+  "AFTER EACH USE - Chopping boards (if knife marks discard and order new ones)",
+  "Benches",
+  "Serving utensils",
+  "Bowls, Cups, Plates etc",
+  "Drinking jugs are clean/sanitised and put away",
+  "DAILY OR MORE OFTEN IF REQUIRED - Cupboards clean and tidy",
+  "Microwave clean inside and outside",
+  "Wipe over/clean front of ovens",
+  "Wipe over front of fridge",
+  "Wipe over front of dishwasher",
+  "Wipe over/clean windowsill, skirting and sink splash back",
+  "All cooking utensils etc put away in cupboards",
+  "Door handles and entrance doors are clean",
+  "Bin is emptied each day and bin lid/bin is wiped over and cleaned",
+  "Disinfect benches and clear of clutter",
+  "Floors mopped (PM)",
+  "All tea towels and dish cloths are cleaned",
+  "Oven trays are cleaned after each use",
+  "Sanitise all fixtures, fittings and equipment appropriately"
+];
 
-let d=new Date()
-
-let day=String(d.getDate()).padStart(2,'0')
-let month=String(d.getMonth()+1).padStart(2,'0')
-let year=d.getFullYear()
-
-return day+" / "+month+" / "+year
-
+function formatDate(date){
+  let d = String(date.getDate()).padStart(2,'0');
+  let m = String(date.getMonth()+1).padStart(2,'0');
+  let y = date.getFullYear();
+  return d + " / " + m + " / " + y;
 }
 
-document.getElementById("today").innerText=todayDate()
+function updateWeek(){
+  let startVal = document.getElementById("weekStart").value;
+  if(!startVal) return;
+
+  let start = new Date(startVal + "T00:00:00");
+  let end = new Date(start);
+  end.setDate(start.getDate() + 4);
+
+  document.getElementById("weekEnd").innerText = formatDate(end);
+}
+
+function buildRows(){
+  const body = document.getElementById("rows");
+  body.innerHTML = "";
+
+  tasks.forEach((task, rowIndex) => {
+    let tr = document.createElement("tr");
+
+    let tdTask = document.createElement("td");
+    tdTask.className = "area";
+    tdTask.textContent = task;
+    tr.appendChild(tdTask);
+
+    for(let d = 0; d < 5; d++){
+      let tdTick = document.createElement("td");
+      let chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.className = "chk";
+      chk.dataset.row = rowIndex;
+      chk.dataset.day = d;
+      chk.dataset.type = "tick";
+      tdTick.appendChild(chk);
+      tr.appendChild(tdTick);
+
+      let tdInit = document.createElement("td");
+      let init = document.createElement("input");
+      init.type = "text";
+      init.maxLength = 4;
+      init.className = "init-box";
+      init.dataset.row = rowIndex;
+      init.dataset.day = d;
+      init.dataset.type = "init";
+      tdInit.appendChild(init);
+      tr.appendChild(tdInit);
+    }
+
+    body.appendChild(tr);
+  });
+}
 
 function saveForm(){
+  const data = {
+    weekStart: document.getElementById("weekStart").value,
+    checks: []
+  };
 
-let data=[]
-document.querySelectorAll("input").forEach(i=>data.push(i.value))
-localStorage.setItem("cleaning",JSON.stringify(data))
-alert("Saved")
+  document.querySelectorAll("#rows input").forEach(el => {
+    data.checks.push({
+      type: el.dataset.type,
+      value: el.type === "checkbox" ? el.checked : el.value
+    });
+  });
 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  alert("Saved");
 }
 
 function loadForm(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(!saved) return;
 
-let saved=localStorage.getItem("cleaning")
+  const data = JSON.parse(saved);
 
-if(!saved)return
+  if(data.weekStart){
+    document.getElementById("weekStart").value = data.weekStart;
+    updateWeek();
+  }
 
-let data=JSON.parse(saved)
-
-document.querySelectorAll("input").forEach((i,index)=>{
-i.value=data[index]||""
-})
-
+  const inputs = document.querySelectorAll("#rows input");
+  if(Array.isArray(data.checks)){
+    inputs.forEach((el, i) => {
+      if(!data.checks[i]) return;
+      if(el.type === "checkbox"){
+        el.checked = !!data.checks[i].value;
+      } else {
+        el.value = data.checks[i].value || "";
+      }
+    });
+  }
 }
 
 function clearForm(){
+  if(!confirm("Clear form?")) return;
 
-if(!confirm("Clear form?"))return
+  document.getElementById("weekStart").value = "";
+  document.getElementById("weekEnd").innerText = "";
 
-document.querySelectorAll("input").forEach(i=>i.value="")
+  document.querySelectorAll("#rows input").forEach(el => {
+    if(el.type === "checkbox") el.checked = false;
+    else el.value = "";
+  });
 
-localStorage.removeItem("cleaning")
-
+  localStorage.removeItem(STORAGE_KEY);
 }
 
-loadForm()
+buildRows();
 
+const today = new Date();
+document.getElementById("weekStart").value = today.toISOString().substring(0,10);
+updateWeek();
+document.getElementById("weekStart").addEventListener("change", updateWeek);
+
+loadForm();
 </script>
 
 </body>
