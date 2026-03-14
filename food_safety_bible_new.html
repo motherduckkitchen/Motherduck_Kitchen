@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Food Safety Bible</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center/cover no-repeat fixed;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.wash{
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.45);
+  backdrop-filter:blur(3px);
+}
+.page{
+  position:relative;
+  z-index:1;
+  text-align:center;
+}
+.card{
+  width:700px;
+  max-width:92%;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(10px);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+h1{
+  margin-top:0;
+  font-size:34px;
+}
+.text{
+  font-size:16px;
+  line-height:1.5;
+  color:#333;
+  margin-bottom:24px;
+}
+.menu-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+.btn{
+  padding:18px;
+  background:#204a9b;
+  color:white;
+  border-radius:14px;
+  font-weight:bold;
+  text-decoration:none;
+  display:block;
+  font-size:18px;
+}
+.btn:hover{
+  background:#183c80;
+}
+.back{
+  background:#ddd;
+  color:#333;
+}
+</style>
+</head>
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+  <section class="card">
+    <h1>Food Safety Bible</h1>
+
+    <div class="text">
+      Keep your Food Safety Program here so you can open it any time and print pages when needed.
+    </div>
+
+    <div class="menu-grid">
+      <a class="btn" href="food-safety-bible.pdf" target="_blank">Open Food Safety Bible PDF</a>
+      <a class="btn" href="record13.html">Food Safety Program Review</a>
+      <a class="btn" href="incoming_goods_new.html">Incoming Goods</a>
+      <a class="btn" href="record_5a_cook_cool_reheat.html">Cook / Cool / Reheat</a>
+      <a class="btn" href="appliance_temps.html">Appliance Temps</a>
+    </div>
+
+    <div style="margin-top:20px">
+      <a class="btn back" href="dashboard.html">Back</a>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
