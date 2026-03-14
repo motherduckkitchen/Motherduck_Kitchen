@@ -1,1 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 5c - Nursery Temperature & Puree Reheat Log</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center center / cover no-repeat fixed;
+    }
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1500px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#222;
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
+    }
+    .back{
+      background:#ffc107;
+      color:#4b0082;
+      border:none;
+    }
+    .save{
+      background:#007bff;
+      color:#fff;
+      border:none;
+    }
+    .card{
+      background:rgba(255,255,255,.95);
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      overflow:auto;
+    }
+    h1{
+      margin:0 0 16px;
+      font-size:28px;
+      font-weight:700;
+      color:#1f2937;
+    }
+    .month-row{
+      text-align:center;
+      margin-bottom:15px;
+      font-weight:bold;
+      font-size:16px;
+    }
+    .month-row input{
+      width:120px;
+      border:none;
+      border-bottom:2px solid #333;
+      background:transparent;
+      text-align:center;
+      font-size:14px;
+      margin:0 10px;
+      outline:none;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+    th,td{
+      border:1px solid #222;
+      padding:4px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-size:12px;
+      padding:3px;
+      box-sizing:border-box;
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    td:nth-child(4) input,
+    td:nth-child(7) input{
+      text-align:left;
+    }
+    .notes{
+      margin-top:16px;
+      font-size:13px;
+      line-height:1.5;
+      color:#222;
+    }
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+    @media print{
+      .toolbar{display:none;}
+      body{background:#fff;}
+      .wash{display:none;}
+      .page{max-width:none;padding:0;}
+      .card{box-shadow:none;border-radius:0;padding:0;}
+      h1{font-size:24px;}
+      th,td,input{font-size:11px;}
+      .notes,.month-row{font-size:11px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wash"></div>
 
+  <main class="page">
+    <div class="toolbar">
+      <a href="nursery_new.html" class="btn back">← Back</a>
+      <a href="dashboard.html" class="btn">Home</a>
+      <button class="btn" onclick="window.print()" type="button">Print</button>
+      <button class="btn" onclick="clearForm()" type="button">Clear</button>
+      <button class="btn save" onclick="saveForm()" type="button">Save</button>
+    </div>
+
+    <div class="card">
+      <h1>Record 5c – Nursery Temperature &amp; Puree Reheat Log</h1>
+
+      <div class="month-row">
+        Month: <input id="month">
+        Year: <input id="year">
+      </div>
+
+      <table>
+        <colgroup>
+          <col style="width:10%">
+          <col style="width:10%">
+          <col style="width:10%">
+          <col style="width:12%">
+          <col style="width:28%">
+          <col style="width:10%">
+          <col style="width:20%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th rowspan="2">Date</th>
+            <th colspan="2">Fridge</th>
+            <th colspan="4">Puree Reheat</th>
+          </tr>
+          <tr>
+            <th>AM</th>
+            <th>PM</th>
+            <th>Batch Date</th>
+            <th>Description</th>
+            <th>°C</th>
+            <th>Corrective Action</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <div class="notes">
+        The Fridge temperature should be at or below 5°C<br><br>
+        Purees should be reheated to 75°C and then cooled to a safe temperature prior to serving
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "nursery_puree_log_new_v1";
+
+    function todayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return dd + "/" + mm + "/" + yyyy;
+    }
+
+    function buildRows() {
+      const tbody = document.getElementById("rows");
+      tbody.innerHTML = "";
+
+      for (let i = 0; i < 25; i++) {
+        const tr = document.createElement("tr");
+
+        for (let c = 0; c < 7; c++) {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+
+          if (c === 0 || c === 3) {
+            input.addEventListener("focus", function() {
+              if (!input.value) input.value = todayDate();
+            });
+          }
+
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function saveForm() {
+      const data = {
+        month: document.getElementById("month").value,
+        year: document.getElementById("year").value,
+        fields: []
+      };
+
+      document.querySelectorAll("#rows input").forEach(function(el) {
+        data.fields.push(el.value);
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
+
+    function loadForm() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+
+      const data = JSON.parse(saved);
+      document.getElementById("month").value = data.month || "";
+      document.getElementById("year").value = data.year || "";
+
+      const fields = document.querySelectorAll("#rows input");
+      fields.forEach(function(field, i) {
+        field.value = (data.fields && data.fields[i]) || "";
+      });
+    }
+
+    function clearForm() {
+      if (!confirm("Clear form?")) return;
+
+      document.getElementById("month").value = "";
+      document.getElementById("year").value = "";
+      document.querySelectorAll("#rows input").forEach(function(el) {
+        el.value = "";
+      });
+
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    buildRows();
+    loadForm();
+  </script>
+</body>
+</html>
