@@ -1,251 +1,155 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Record 5a - Cook / Cool / Reheat</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:url("kitchen.jpg") center/cover no-repeat fixed;
-}
-
-.page{
-max-width:1500px;
-margin:auto;
-padding:20px;
-}
-
-.toolbar{
-display:flex;
-gap:10px;
-margin-bottom:15px;
-}
-
-.btn{
-padding:10px 16px;
-border-radius:10px;
-border:none;
-cursor:pointer;
-font-weight:600;
-}
-
-.back{background:#ffc107;}
-.home{background:#ddd;}
-.print{background:#eee;}
-.clear{background:#eee;}
-.save{background:#1e88e5;color:white;}
-
-.card{
-background:white;
-padding:20px;
-border-radius:16px;
-box-shadow:0 8px 25px rgba(0,0,0,0.2);
-}
-
-h1{
-margin-top:0;
-font-size:28px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-font-size:12px;
-}
-
-th,td{
-border:1px solid #222;
-padding:5px;
-text-align:center;
-}
-
-th{
-background:#eee;
-}
-
-input,select{
-width:100%;
-border:none;
-background:transparent;
-text-align:center;
-}
-
-.notes{
-margin-top:20px;
-font-size:13px;
-line-height:1.5;
-}
-
-@media print{
-.toolbar{display:none;}
-body{background:white;}
-}
-</style>
-</head>
-
-<body>
-
-<div class="page">
-
-<div class="toolbar">
-<a href="kitchen.html"><button class="btn back">← Back</button></a>
-<a href="dashboard.html"><button class="btn home">Home</button></a>
-<button class="btn print" onclick="window.print()">Print</button>
-<button class="btn clear" onclick="clearForm()">Clear</button>
-<button class="btn save" onclick="saveForm()">Save</button>
-</div>
-
-<div class="card">
-
-<h1>Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</h1>
-
-<table>
-<thead>
-<tr>
-<th>Date Produced/Batch No</th>
-<th>Item Description</th>
-<th>Process</th>
-<th>Start Time</th>
-<th>Finish Time</th>
-<th>Temp °C</th>
-<th>Time 1</th>
-<th>Temp °C (60°)</th>
-<th>Time 2</th>
-<th>Temp °C (21°)</th>
-<th>Time 3</th>
-<th>Temp °C (5°)</th>
-<th>Serve Time</th>
-<th>Temp °C</th>
-<th>Initial</th>
-</tr>
-</thead>
-<tbody id="rows"></tbody>
-</table>
-
-<div class="notes">
-<b>Processes:</b><br>
-Cook all potentially hazardous food to at least 75°C.<br>
-Reheat cooled potentially hazardous food to at least 60°C.<br><br>
-
-Cooked potentially hazardous food being cooled must be cooled:<br>
-60°C → 21°C within 2 hours<br>
-21°C → below 5°C within next 4 hours (6 hours total)
-</div>
-
-</div>
-</div>
-
 <script>
+  const STORAGE_KEY = "record5a_new_final_locked";
 
-function today(){
-let d=new Date();
-return d.toLocaleDateString();
-}
+  function todayDate() {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
 
-function now(){
-let d=new Date();
-return d.toTimeString().slice(0,5);
-}
+  function currentTime() {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
+  }
 
-function buildRows(){
+  function makeProcessSelect() {
+    const select = document.createElement("select");
+    ["", "Ck", "Cl", "Rh"].forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+    return select;
+  }
 
-let body=document.getElementById("rows");
+  function lockField(el) {
+    el.disabled = true;
+    el.style.color = "#222";
+    el.style.opacity = "1";
+    el.style.background = "transparent";
+  }
 
-for(let i=0;i<12;i++){
+  function unlockField(el) {
+    el.disabled = false;
+  }
 
-let row=document.createElement("tr");
+  function buildRows() {
+    const tbody = document.getElementById("rows");
+    tbody.innerHTML = "";
 
-for(let c=0;c<15;c++){
+    for (let i = 0; i < 10; i++) {
+      const tr = document.createElement("tr");
+      tr.dataset.row = i;
 
-let td=document.createElement("td");
+      for (let c = 0; c < 15; c++) {
+        const td = document.createElement("td");
 
-if(c==2){
+        if (c === 2) {
+          const select = makeProcessSelect();
+          select.dataset.row = i;
+          select.dataset.col = c;
+          td.appendChild(select);
+          tr.appendChild(td);
+          continue;
+        }
 
-let sel=document.createElement("select");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.dataset.row = i;
+        input.dataset.col = c;
 
-["","Ck","Cl","Rh"].forEach(v=>{
-let o=document.createElement("option");
-o.text=v;
-sel.appendChild(o);
-});
+        if (c === 0) {
+          input.addEventListener("focus", function () {
+            if (!input.value) input.value = todayDate();
+          });
+        }
 
-td.appendChild(sel);
+        if (c === 3 || c === 4 || c === 6 || c === 8 || c === 10 || c === 12) {
+          input.addEventListener("focus", function () {
+            if (!input.value) input.value = currentTime();
+          });
+        }
 
-}else{
+        td.appendChild(input);
+        tr.appendChild(td);
+      }
 
-let input=document.createElement("input");
+      tbody.appendChild(tr);
+    }
+  }
 
-if(c==0){
-input.addEventListener("focus",()=>{if(!input.value)input.value=today();});
-}
+  function getRowFields(rowIndex) {
+    return document.querySelectorAll(`#rows [data-row="${rowIndex}"]`);
+  }
 
-if([3,4,6,8,10,12].includes(c)){
-input.addEventListener("focus",()=>{if(!input.value)input.value=now();});
-}
+  function rowHasData(rowIndex) {
+    const fields = getRowFields(rowIndex);
+    for (const field of fields) {
+      if ((field.value || "").trim() !== "") return true;
+    }
+    return false;
+  }
 
-td.appendChild(input);
+  function saveForm() {
+    const rows = [];
 
-}
+    for (let r = 0; r < 10; r++) {
+      const fields = Array.from(getRowFields(r)).map(el => el.value || "");
+      const locked = rowHasData(r);
+      rows.push({ fields, locked });
+    }
 
-row.appendChild(td);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
 
-}
+    for (let r = 0; r < 10; r++) {
+      const row = rows[r];
+      if (row.locked) {
+        getRowFields(r).forEach(lockField);
+      }
+    }
 
-body.appendChild(row);
+    alert("Saved and locked");
+  }
 
-}
+  function loadForm() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
 
-}
+    const rows = JSON.parse(saved);
 
-function saveForm(){
+    rows.forEach((row, r) => {
+      const fields = getRowFields(r);
+      fields.forEach((field, i) => {
+        field.value = row.fields[i] || "";
+        if (row.locked) {
+          lockField(field);
+        }
+      });
+    });
+  }
 
-let data=[];
+  function clearForm() {
+    if (!confirm("Clear all rows and unlock the form?")) return;
 
-document.querySelectorAll("input,select").forEach(el=>{
-data.push(el.value);
-});
+    document.querySelectorAll("#rows input, #rows select").forEach(el => {
+      el.value = "";
+      unlockField(el);
+    });
 
-localStorage.setItem("record5a",JSON.stringify(data));
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
-alert("Saved");
+  buildRows();
+  loadForm();
 
-}
-
-function loadForm(){
-
-let saved=localStorage.getItem("record5a");
-
-if(!saved) return;
-
-let data=JSON.parse(saved);
-
-let fields=document.querySelectorAll("input,select");
-
-fields.forEach((f,i)=>{
-
-f.value=data[i]||"";
-
-});
-
-}
-
-function clearForm(){
-
-if(!confirm("Clear form?"))return;
-
-document.querySelectorAll("input,select").forEach(e=>e.value="");
-
-localStorage.removeItem("record5a");
-
-}
-
-buildRows();
-loadForm();
-
+  // auto-fill first row date
+  const firstDate = document.querySelector('#rows input[data-row="0"][data-col="0"]');
+  if (firstDate && !firstDate.value) {
+    firstDate.value = todayDate();
+  }
 </script>
-
-</body>
-</html>
