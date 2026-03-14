@@ -1,8 +1,10 @@
+
 :root{
   --blue:#118ad7;
   --blue-dark:#0b6fb0;
   --navy:rgba(6,18,38,.78);
   --line:rgba(255,255,255,.18);
+  --card:#ffffff;
 }
 *{box-sizing:border-box}
 html,body{min-height:100%}
