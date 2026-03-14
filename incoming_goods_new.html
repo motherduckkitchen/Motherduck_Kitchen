@@ -1,41 +1,329 @@
-<table style="width:100%;border-collapse:collapse;font-size:14px">
-<tr style="background:#eee">
-<th style="border:1px solid #999;padding:8px">Date</th>
-<th style="border:1px solid #999;padding:8px">Supplier</th>
-<th style="border:1px solid #999;padding:8px">Product</th>
-<th style="border:1px solid #999;padding:8px">Temperature °C</th>
-<th style="border:1px solid #999;padding:8px">Condition OK</th>
-<th style="border:1px solid #999;padding:8px">Use By Date</th>
-<th style="border:1px solid #999;padding:8px">Checked By</th>
-</tr>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 3a - Incoming Goods</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center center / cover no-repeat fixed;
+    }
 
-<tr>
-<td style="border:1px solid #999;height:40px"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-</tr>
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
 
-<tr>
-<td style="border:1px solid #999;height:40px"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-</tr>
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1400px;
+      margin:0 auto;
+      padding:20px;
+    }
 
-<tr>
-<td style="border:1px solid #999;height:40px"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-<td style="border:1px solid #999"></td>
-</tr>
-</table>
+    .mdk-toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .mdk-btn--back{
+      background:#ffc107;
+      border:none;
+      color:#4b0082;
+      font-weight:700;
+      padding:10px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .mdk-btn--back:hover{
+      background:#e0a800;
+    }
+
+    .mdk-btn--pill{
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      border-radius:12px;
+      padding:8px 14px;
+      font-weight:600;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      text-decoration:none;
+      color:#222;
+    }
+
+    .mdk-btn--pill:hover{
+      background:#e5eaf0;
+    }
+
+    .mdk-btn--primary{
+      background:#007bff;
+      border:none;
+      border-radius:12px;
+      padding:10px 18px;
+      font-weight:600;
+      color:white;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .mdk-btn--primary:hover{
+      background:#0056b3;
+    }
+
+    .sheet-card{
+      background:rgba(255,255,255,.95);
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      padding:20px;
+      overflow:auto;
+    }
+
+    .sheet-title{
+      font-size:28px;
+      font-weight:700;
+      margin:0 0 16px;
+      color:#1f2937;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+
+    th, td{
+      border:1px solid #222;
+      padding:6px;
+      font-size:13px;
+      text-align:center;
+      vertical-align:middle;
+    }
+
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+
+    input, select{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:13px;
+      padding:4px;
+      box-sizing:border-box;
+      text-align:center;
+    }
+
+    td.left input{
+      text-align:left;
+    }
+
+    .notes{
+      margin-top:16px;
+      font-size:14px;
+      line-height:1.5;
+      color:#222;
+    }
+
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+
+    @media print{
+      body{
+        background:#fff;
+      }
+
+      .wash{
+        display:none;
+      }
+
+      .mdk-toolbar{
+        display:none;
+      }
+
+      .page{
+        max-width:none;
+        padding:0;
+      }
+
+      .sheet-card{
+        box-shadow:none;
+        border-radius:0;
+        padding:0;
+      }
+
+      .sheet-title{
+        font-size:22px;
+        margin:0 0 10px;
+      }
+
+      th, td{
+        font-size:11px;
+        padding:4px;
+      }
+
+      input, select{
+        font-size:11px;
+        padding:2px;
+      }
+
+      .notes{
+        font-size:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wash"></div>
+
+  <main class="page">
+    <div class="mdk-toolbar">
+      <a href="kitchen.html" class="mdk-btn--back">← Back</a>
+      <a href="dashboard.html" class="mdk-btn--pill">🏠 Home</a>
+      <button class="mdk-btn--pill" onclick="window.print()" type="button">🖨 Print</button>
+      <button class="mdk-btn--pill" onclick="clearForm()" type="button">🧹 Clear</button>
+      <button class="mdk-btn--primary" onclick="saveForm()" type="button">💾 Save</button>
+    </div>
+
+    <div class="sheet-card">
+      <h1 class="sheet-title">Record 3a - Incoming Goods</h1>
+
+      <table>
+        <colgroup>
+          <col style="width:11%">
+          <col style="width:16%">
+          <col style="width:18%">
+          <col style="width:10%">
+          <col style="width:12%">
+          <col style="width:11%">
+          <col style="width:12%">
+          <col style="width:10%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th>Food Item</th>
+            <th>Packaging Intact</th>
+            <th>Use By Date</th>
+            <th>Temp °C</th>
+            <th>Accepted / Rejected</th>
+            <th>Initial</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div class="notes">
+        <strong>Checks when receiving food:</strong><br>
+        • Food is protected from contamination<br>
+        • Packaging is intact<br>
+        • Use-by date has not expired<br>
+        • Potentially hazardous food is below 5°C or above 60°C<br>
+        • Food is rejected if unsafe
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "incoming_goods_new_v2";
+
+    function todayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function buildRow() {
+      const tr = document.createElement("tr");
+
+      const defs = [
+        { kind: "date", left: false },
+        { kind: "text", left: true },
+        { kind: "text", left: true },
+        { kind: "text", left: false },
+        { kind: "date", left: false },
+        { kind: "text", left: false },
+        { kind: "text", left: false },
+        { kind: "text", left: false }
+      ];
+
+      defs.forEach(def => {
+        const td = document.createElement("td");
+        if (def.left) td.className = "left";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.dataset.kind = def.kind;
+
+        input.addEventListener("focus", function () {
+          if (!input.value && def.kind === "date") {
+            input.value = todayDate();
+          }
+        });
+
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      return tr;
+    }
+
+    function loadRows() {
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+
+      for (let i = 0; i < 15; i++) {
+        tbody.appendChild(buildRow());
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        const inputs = document.querySelectorAll("#tbody input");
+        inputs.forEach((input, i) => {
+          input.value = data[i] || "";
+        });
+      }
+    }
+
+    function saveForm() {
+      const inputs = document.querySelectorAll("#tbody input");
+      const data = Array.from(inputs).map(i => i.value);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      alert("Saved");
+    }
+
+    function clearForm() {
+      if (!confirm("Clear this form?")) return;
+      document.querySelectorAll("#tbody input").forEach(i => i.value = "");
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    loadRows();
+  </script>
+</body>
+</html>
