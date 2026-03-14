@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 13 - Food Safety Program Review</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center/cover fixed no-repeat;
+}
+.wash{
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.45);
+  backdrop-filter:blur(2px);
+}
+.page{
+  position:relative;
+  z-index:1;
+  max-width:1500px;
+  margin:auto;
+  padding:20px;
+}
+.mdk-toolbar{
+  display:flex;
+  gap:10px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.mdk-btn--back{
+  background:#ffc107;
+  border:none;
+  color:#4b0082;
+  font-weight:700;
+  padding:10px 18px;
+  border-radius:12px;
+  cursor:pointer;
+  text-decoration:none;
+}
+.mdk-btn--pill{
+  background:#f8fafc;
+  border:1px solid #cfd6dd;
+  border-radius:12px;
+  padding:8px 14px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:none;
+  color:#222;
+}
+.mdk-btn--primary{
+  background:#007bff;
+  border:none;
+  border-radius:12px;
+  padding:10px 18px;
+  font-weight:600;
+  color:white;
+  cursor:pointer;
+}
+.sheet-card{
+  background:rgba(255,255,255,.95);
+  border-radius:20px;
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
+  padding:20px;
+  overflow:auto;
+}
+.sheet-title{
+  font-size:28px;
+  font-weight:700;
+  margin:0 0 16px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  background:#fff;
+}
+th,td{
+  border:1px solid #222;
+  padding:8px;
+  font-size:13px;
+  vertical-align:top;
+}
+th{
+  background:#e9e6dc;
+  font-weight:700;
+  text-align:left;
+}
+.center{
+  text-align:center;
+}
+.blue{
+  color:#2495d3;
+  font-weight:700;
+  font-size:16px;
+}
+.tickline{
+  margin:6px 0;
+  line-height:1.45;
+}
+.indent{
+  padding-left:18px;
+}
+.smallhead{
+  background:#f5f5f5;
+  font-weight:700;
+}
+input[type="text"]{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  font-size:13px;
+  box-sizing:border-box;
+}
+textarea{
+  width:100%;
+  min-height:90px;
+  border:none;
+  outline:none;
+  resize:vertical;
+  background:transparent;
+  font-size:13px;
+  box-sizing:border-box;
+}
+.chk{
+  transform:scale(1.2);
+}
+.footer-note{
+  margin-top:12px;
+  font-size:12px;
+  color:#222;
+}
+@page{
+  size:A4 landscape;
+  margin:10mm;
+}
+@media print{
+  body{background:#fff;}
+  .wash,.mdk-toolbar{display:none;}
+  .page{max-width:none;padding:0;}
+  .sheet-card{box-shadow:none;border-radius:0;padding:0;}
+}
+</style>
+</head>
+<body>
+<div class="wash"></div>
+
+<main class="page">
+  <div class="mdk-toolbar">
+    <a href="kitchen.html" class="mdk-btn--back">← Back</a>
+    <a href="dashboard.html" class="mdk-btn--pill">Home</a>
+    <button class="mdk-btn--pill" onclick="window.print()" type="button">Print</button>
+    <button class="mdk-btn--pill" onclick="clearForm()" type="button">Clear</button>
+    <button class="mdk-btn--primary" onclick="saveForm()" type="button">Save</button>
+  </div>
+
+  <div class="sheet-card">
+    <h1 class="sheet-title">Record 13 – Food Safety Program Review</h1>
+
+    <table>
+      <colgroup>
+        <col style="width:65%">
+        <col style="width:4%">
+        <col style="width:4%">
+        <col style="width:27%">
+      </colgroup>
+
+      <tr>
+        <th colspan="4">Monthly Food Safety Program review</th>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Date of Review:</strong> <input type="text" class="date-auto"></td>
+        <td colspan="2"><strong>Reviewed By:</strong> The Food Safety Supervisor</td>
+      </tr>
+      <tr>
+        <th>Activity<br><span style="font-weight:600">(To be checked by manager, supervisor etc.)</span></th>
+        <th class="center">✔</th>
+        <th class="center">☐</th>
+        <th>Observations/Corrective Action</th>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">1. Purchasing and Receiving goods</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 1 &amp; 2?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 1 – Approved food suppliers list</div>
+          <div class="indent">• Record No. 2 – Approved food supplier agreement form</div>
+          <div class="indent">• Record No. 3a – Incoming Goods</div>
+          <div class="indent">• Record No.3b - Bottle Receipt</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">2. Dry Storage</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 3?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 6a,b &amp; c – Cleaning schedules Daily, Weekly Monthly</div>
+          <div class="indent">• Record No. 8 – Pest control</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">3. Cold Storage</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 4?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 4 – Temperature control log ~ Appliances</div>
+          <div class="indent">• Record No. 5c - Nursery Temperature &amp; Puree Reheat Log</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">4. Frozen Storage</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 5?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 4 – Temperature control log ~ Appliances</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">5. Thawing frozen food</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 6?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 4 – Temperature control log ~ Appliances</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">6. Preparation</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 7?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 6a - Daily Cleaning &amp; Sanitising</div>
+          <div class="indent">• Record No. 6a,b &amp; c – Cleaning schedules</div>
+          <div class="indent">• Record No. 7 – Equipment maintenance</div>
+          <div class="indent">• Record No. 8 – Pest control</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">7. Cooking food</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 8?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool Reheat &amp; Serve</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">8. Cooling food</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 9?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool Reheat &amp; Serve</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">9. Reheating</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 10?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 5 – Heating Log</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool/Reheat &amp; Serve</div>
+          <div class="indent">• Record No. 5c - Nursery Temperature &amp; Puree Reheat Log</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">10. Hot Holding</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 11?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 5 – Heating Log</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool/Reheat &amp; Serve</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">10. Serving food</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 12?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 5 – Heating Log</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool/Reheat &amp; Serve</div>
+          <div class="indent">• Record No. 5c - Nursery Temperature &amp; Puree Reheat Log</div>
+          <div class="indent">• Record No. 6a – Daily Cleaning &amp; Sanitising Schedule</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">11. Allergens and Food Packaging</div>
+          <div class="tickline">✔ Are staff following the checks contained in Activity 13?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 9 – Food recall Record</div>
+          <div class="indent">• Record No. 10 – Customer complaints</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">12. Other</div>
+          <div class="tickline">✔ Have there been any changes in staff, processes or activities?</div>
+          <div class="tickline">✔ If so, have the necessary amendments to the food safety program, records and task allocations been made?</div>
+          <div class="tickline">✔ Are any new or replacement utensils/appliances/equipment needed?</div>
+          <div class="tickline">✔ Have there been any changes to the cleaning schedules?</div>
+          <div class="tickline">✔ Have there been any problems with waste disposal?</div>
+          <div class="tickline">✔ Have any of the staff been ill, particularly with a food-borne illness?</div>
+          <div class="tickline">✔ Were there any food complaints/incidents/recalls?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 9 – Food recall</div>
+          <div class="indent">• Record No. 10 – Customer complaints</div>
+          <div class="indent">• Record No. 11 – Staff Illness/accidents</div>
+          <div class="indent">• Record No. 12 – Staff Instruction and Training</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+    </table>
+
+    <br><br>
+
+    <table>
+      <colgroup>
+        <col style="width:55%">
+        <col style="width:4%">
+        <col style="width:4%">
+        <col style="width:37%">
+      </colgroup>
+      <tr>
+        <td colspan="4" style="border:none;font-size:18px;font-weight:700;padding:10px 0 14px 0;">
+          Please record the details of any other issues identified and the corrective action undertaken
+        </td>
+      </tr>
+      <tr>
+        <th>Activity<br><span style="font-weight:600">(To be checked by manager, supervisor etc.)</span></th>
+        <th class="center">✔</th>
+        <th class="center">☐</th>
+        <th>Observations/Corrective Action</th>
+      </tr>
+      <tr><td><input type="text"></td><td class="center"><input class="chk" type="checkbox"></td><td class="center"><input class="chk" type="checkbox"></td><td><textarea></textarea></td></tr>
+      <tr><td><input type="text"></td><td class="center"><input class="chk" type="checkbox"></td><td class="center"><input class="chk" type="checkbox"></td><td><textarea></textarea></td></tr>
+      <tr><td><input type="text"></td><td class="center"><input class="chk" type="checkbox"></td><td class="center"><input class="chk" type="checkbox"></td><td><textarea></textarea></td></tr>
+      <tr><td><input type="text"></td><td class="center"><input class="chk" type="checkbox"></td><td class="center"><input class="chk" type="checkbox"></td><td><textarea></textarea></td></tr>
+    </table>
+
+    <br><br>
+
+    <table>
+      <colgroup>
+        <col style="width:65%">
+        <col style="width:4%">
+        <col style="width:4%">
+        <col style="width:27%">
+      </colgroup>
+
+      <tr>
+        <th colspan="4">Annual Food Safety Program review</th>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Date of Review:</strong> <input type="text" class="date-auto"></td>
+        <td colspan="2"><strong>Reviewed By:</strong> The Food Safety Supervisor</td>
+      </tr>
+      <tr>
+        <th>Program Component</th>
+        <th class="center">✔</th>
+        <th class="center">☐</th>
+        <th>Observations/Corrective Action</th>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">Food Safety Program</div>
+          <div class="tickline">✔ Have there been any changes to the forms used in my food safety program?</div>
+          <div class="tickline">✔ Are the activities listed in the flow diagram still applicable to my business?</div>
+          <div class="tickline">✔ Have there been any updates to the Tool?</div>
+          <div class="tickline">✔ If so have the relevant sections in Food Safety Program folder been replaced?</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">Food Safety Program audit</div>
+          <div class="tickline">✔ Has an audit been conducted at the correct frequency?</div>
+          <div class="tickline">✔ Have any problems been identified?</div>
+          <div class="tickline">✔ Have these problems been rectified?</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">Record keeping</div>
+          <div class="tickline">✔ Are all records being filled out correctly?</div>
+          <div class="tickline">✔ Are corrective actions being undertaken where problems have been identified?</div>
+          <div class="tickline">✔ Is additional training required?</div>
+          <div class="tickline">✔ Note any problems</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">1. Facility and equipment maintenance</div>
+          <div class="tickline">✔ Has all equipment been checked?</div>
+          <div class="tickline">✔ Is all equipment operating correctly?</div>
+          <div class="tickline">✔ Has the entire food premises been thoroughly checked for structural problems?</div>
+          <div class="tickline">✔ Are there any structural problems?</div>
+          <div class="tickline">✔ Has the following record been completed?</div>
+          <div class="indent">• Record No. 7 – Equipment maintenance</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">2. Temperature measuring devices</div>
+          <div class="tickline">✔ Have all temperature-measuring devices been checked for calibration?</div>
+          <div class="tickline">✔ Are temperature measuring devices calibrated to standard procedures?</div>
+          <div class="tickline">✔ Do all staff know how to take accurate temperatures with each temperature-measuring device?</div>
+          <div class="tickline">✔ Has the following record been completed?</div>
+          <div class="indent">• Record No. 7a - Thermometer Calibration Log</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">3. Pest control</div>
+          <div class="tickline">✔ Are all activities and support programs followed that identify where pests may breed or enter?</div>
+          <div class="tickline">✔ Are all areas clean and free from food particles and other waste that may attract pests?</div>
+          <div class="tickline">✔ Has your premises been treated by your Pest control operator at the correct intervals as in your support program?</div>
+          <div class="tickline">✔ Have the following records been completed?</div>
+          <div class="indent">• Record No. 6a,b &amp; c – Cleaning Schedules</div>
+          <div class="indent">• Record No. 8 – Pest control</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">4. Staff Instruction/training</div>
+          <div class="tickline">✔ Have all staff been instructed/trained so that they have the appropriate skills and knowledge in food hygiene and handling for the tasks they do?</div>
+          <div class="tickline">✔ Do staff understand their food safety responsibilities?</div>
+          <div class="tickline">✔ Has the following record been completed?</div>
+          <div class="indent">• Record No. 12 – Staff Instruction and Training</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+
+      <tr>
+        <td>
+          <div class="blue">5. Customer complaints</div>
+          <div class="tickline">✔ Are Customer complaints addressed?</div>
+          <div class="tickline">✔ Are there any recurring problems identified as a result of Customer complaints?</div>
+          <div class="tickline">✔ Has the following record been completed?</div>
+          <div class="indent">• Record No. 10 – Customer complaints</div>
+        </td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td class="center"><input class="chk" type="checkbox"></td>
+        <td><textarea></textarea></td>
+      </tr>
+    </table>
+
+    <div class="footer-note">
+      Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+      Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor<br>
+      (Authorised Person Moreton Bay Regional Council) 23 March 2021
+    </div>
+  </div>
+</main>
+
+<script>
+const STORAGE_KEY = "record13_review_v1";
+
+function todayDate() {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function fillDates(){
+  document.querySelectorAll(".date-auto").forEach(el=>{
+    el.addEventListener("focus", function(){
+      if(!el.value) el.value = todayDate();
+    });
+  });
+}
+
+function saveForm(){
+  const fields = [];
+  document.querySelectorAll("input, textarea").forEach(el=>{
+    if(el.type === "checkbox"){
+      fields.push({t:"c", v:el.checked});
+    } else {
+      fields.push({t:"v", v:el.value});
+    }
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(fields));
+  alert("Saved");
+}
+
+function loadForm(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  const fields = JSON.parse(raw);
+  const els = document.querySelectorAll("input, textarea");
+  els.forEach((el,i)=>{
+    if(!fields[i]) return;
+    if(el.type === "checkbox"){
+      el.checked = !!fields[i].v;
+    } else {
+      el.value = fields[i].v || "";
+    }
+  });
+}
+
+function clearForm(){
+  if(!confirm("Clear this form?")) return;
+  document.querySelectorAll("input, textarea").forEach(el=>{
+    if(el.type === "checkbox") el.checked = false;
+    else el.value = "";
+  });
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+fillDates();
+loadForm();
+</script>
+</body>
+</html>
