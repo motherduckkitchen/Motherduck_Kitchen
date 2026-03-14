@@ -1,0 +1,1 @@
+Fresh Mother Duck Kitchen starter\n\nPages included: Login, Dashboard, Kitchen, Brewer St, Invoices, Transfer Log.\nReplace firebase-config.js placeholder values with your current Firebase Web App config.\n

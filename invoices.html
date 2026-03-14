@@ -1,18 +1,1 @@
-
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Invoices</title>
-<link rel="stylesheet" href="shared/styles.css"/>
-</head><body class="has-bg">
-  <div class="container">
-    <header class="header">
-      <div class="brand"><img src="logo.png" alt="MD"/></div>
-      <h1 class="title">Invoices</h1>
-    </header>
-    <section class="panel">
-      <p>Use your current invoices upload/scan page here (placeholder).</p>
-    </section>
-    <div style="height:18px"></div>
-    <a class="btn" href="index.html">Home</a>
-  </div>
-</body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mother Duck Kitchen - Invoices</title><link rel="stylesheet" href="site.css"></head><body><div class="wash"></div><main class="page"><div class="top"><img class="logo" src="logo.png" alt="Mother Duck Logo"><div class="site-title">Mother Duck Kitchen</div><div class="subtitle">Invoices</div></div><section class="card-wide"><div class="toolbar"><a class="btn secondary" href="dashboard.html">Home</a><a class="btn secondary" href="kitchen.html">Kitchen</a><a class="btn secondary" href="brewer_st.html">Brewer St</a></div><div class="two-col"><section class="panel"><h2>Add Invoice</h2><label>Site</label><select id="siteSelect"><option>Kitchen</option><option>Brewer St</option></select><label>Note</label><input class="input" id="noteInput" placeholder="Supplier or note"><label>Photo upload</label><input class="input" id="photoInput" type="file" accept="image/*" capture="environment"><button class="btn" id="saveInvoiceBtn" type="button">Save Invoice</button><p class="note">Auto date/time stamp is added when saved.</p></section><section class="panel"><h2>Saved Invoices</h2><div id="invoiceList" class="list"></div></section></div></section></main><script>const KEY="mdk_invoices_v2";function stampNow(){const d=new Date(),z=n=>String(n).padStart(2,"0");return{date:`${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()}`,time:`${z(d.getHours())}:${z(d.getMinutes())}`}}function getItems(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return[]}}function setItems(items){localStorage.setItem(KEY,JSON.stringify(items))}function renderInvoices(){const box=document.getElementById("invoiceList"),items=getItems().slice().reverse();if(!items.length){box.innerHTML="<div class='small'>No invoices saved yet.</div>";return}box.innerHTML="";items.forEach(item=>{const el=document.createElement("div");el.className="item";el.innerHTML=`<strong>${item.site}</strong><br><span class="small">${item.date} ${item.time}</span><br>${item.note?"<div>"+item.note+"</div>":""}${item.image?`<img src="${item.image}" alt="Invoice photo">`:""}`;box.appendChild(el)})}document.getElementById("saveInvoiceBtn").addEventListener("click",function(){const site=document.getElementById("siteSelect").value,note=document.getElementById("noteInput").value.trim(),file=document.getElementById("photoInput").files[0];if(!file){alert("Choose or take a photo first.");return}const s=stampNow(),items=getItems(),reader=new FileReader();reader.onload=function(){items.push({site,note,date:s.date,time:s.time,image:reader.result});setItems(items);document.getElementById("noteInput").value="";document.getElementById("photoInput").value="";renderInvoices();alert("Invoice saved.")};reader.readAsDataURL(file)});renderInvoices();</script></body></html>
