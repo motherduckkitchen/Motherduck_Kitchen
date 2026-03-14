@@ -1,188 +1,259 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
-<style id="mdk-hide">html{visibility:hidden}</style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script>
-(function(){
-  const cfg = {
-    apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
-    authDomain: "mother-duck-kitchen.firebaseapp.com",
-    projectId: "mother-duck-kitchen",
-    storageBucket: "mother-duck-kitchen.appspot.com",
-    messagingSenderId: "925762762893",
-    appId: "1:925762762893:web:715285c11b9b30c9bccac4",
-    measurementId: "G-1EGZ0PWQYE"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(cfg);
-  const auth = firebase.auth();
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 3a - Incoming Goods</title>
 
-  // 30-minute inactivity
-  const TIMEOUT = 30*60*1000; let t;
-  function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
-  ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
-
-  auth.onAuthStateChanged(u=>{
-    if(!u){ location.replace("login.html"); }
-    else { document.getElementById("mdk-hide")?.remove(); reset(); window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html")); }
-  });
-})();
-</script>
-<!-- 🔒 end guard --><meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Record 3a — Incoming Goods</title>
 <style>
-  /* Page & background */
-  body{
-    margin:0;
-    font-family: Arial, sans-serif;
-    background: url("kitchen.jpg") center/cover fixed no-repeat;
-    color:#0b1320;
-    padding:20px;
-  }
-  .overlay{ position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:-1; }
-  .container{
-    max-width: 1100px; margin: 0 auto;
-    background:#fff; border-radius:14px; padding:22px;
-    box-shadow: 0 8px 28px rgba(0,0,0,.12);
-    border:1px solid #e5e7eb;
-  }
 
-  /* Toolbar */
-  .topbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
-  .btn{border:0; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; background:#e5e7eb;}
-  .btn:hover{filter:brightness(.97)}
-  .btn--back{background:#ffc107; color:#000;}
-  .btn--primary{background:#0d6efd; color:#fff;}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:url("kitchen.jpg") center/cover fixed no-repeat;
+}
 
-  h1{margin:6px 0 14px; font-size:22px; text-align:center;}
+.wash{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.45);
+backdrop-filter:blur(2px);
+}
 
-  /* Meta row */
-  .meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px; justify-content:center}
-  .meta label{font-weight:700; margin-right:6px}
-  .meta input{height:34px; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; min-width:200px}
+.page{
+position:relative;
+z-index:1;
+max-width:1400px;
+margin:auto;
+padding:20px;
+}
 
-  /* Table */
-  table{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; border:1px solid #cfd6dd; border-radius:12px; overflow:hidden;}
-  th,td{border-right:1px solid #e5eaf0; border-bottom:1px solid #e5eaf0; padding:8px; vertical-align:middle; background:#fff; text-align:center;}
-  th:last-child,td:last-child{border-right:0}
-  tr:last-child td{border-bottom:0}
-  thead th{background:#f6f8fb; font-weight:700}
-  input,select,textarea{
-    width:100%; height:32px; border:1px solid #cfd6dd; border-radius:8px; padding:6px 8px; font:inherit; background:#fff; box-sizing:border-box
-  }
-  input.center{text-align:center}
-  .init{width:60px; text-transform:uppercase; text-align:center; margin:0 auto}
-  textarea{min-height:90px; border-radius:10px; width:100%}
-  .guidance{font-size:13px; color:#334155; margin-top:12px; line-height:1.45}
-  .guidance b{color:#0f172a}
-  ul{margin:6px 0 0 18px}
+.mdk-toolbar{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+align-items:center;
+}
 
-  @page{size:A4 landscape; margin:12mm;}
-  @media print{ .topbar{display:none!important} body{background:#fff} .overlay{display:none} }
+.mdk-btn--back{
+background:#ffc107;
+border:none;
+color:#4b0082;
+font-weight:700;
+padding:10px 18px;
+border-radius:12px;
+cursor:pointer;
+text-decoration:none;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.mdk-btn--pill{
+background:#f8fafc;
+border:1px solid #cfd6dd;
+border-radius:12px;
+padding:8px 14px;
+font-weight:600;
+cursor:pointer;
+}
+
+.mdk-btn--primary{
+background:#007bff;
+border:none;
+border-radius:12px;
+padding:10px 18px;
+font-weight:600;
+color:white;
+cursor:pointer;
+}
+
+.sheet-card{
+background:rgba(255,255,255,.95);
+border-radius:20px;
+box-shadow:0 12px 30px rgba(0,0,0,.14);
+padding:20px;
+overflow:auto;
+}
+
+.sheet-title{
+font-size:28px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+table-layout:fixed;
+background:white;
+}
+
+th,td{
+border:1px solid #222;
+padding:6px;
+font-size:13px;
+text-align:center;
+}
+
+th{
+background:#f4f6f8;
+}
+
+input{
+width:100%;
+border:none;
+outline:none;
+background:transparent;
+text-align:center;
+}
+
+td.item input{
+text-align:left;
+}
+
+.notes{
+margin-top:16px;
+font-size:14px;
+line-height:1.4;
+}
+
+@media print{
+.mdk-toolbar{display:none;}
+body{background:white}
+.wash{display:none}
+.sheet-card{box-shadow:none;border-radius:0}
+}
+
 </style>
 </head>
+
 <body>
-  <div class="overlay"></div>
-  <div class="container">
 
-    <!-- Toolbar -->
-    <div class="topbar">
-      <a href="kitchen.html"><button class="btn btn--back">← Back</button></a>
-      <button class="btn" onclick="window.print()">Print</button>
-      <button class="btn" onclick="clearForm()">Clear</button>
-      <button class="btn btn--primary" onclick="saveForm()">Save</button>
-    </div>
+<div class="wash"></div>
 
-    <h1>Record 3a — Incoming Goods</h1>
+<main class="page">
 
-    <!-- Meta -->
-    <div class="meta">
-      <label for="rdate">Date:</label>
-      <input id="rdate" type="date">
-      <label for="rsupplier">Supplier:</label>
-      <input id="rsupplier" type="text" placeholder="Company name">
-      <label for="rrecv">Receiver (Initials):</label>
-      <input id="rrecv" class="init" maxlength="3" type="text" placeholder="">
-    </div>
+<div class="mdk-toolbar">
+<a href="kitchen.html" class="mdk-btn--back">← Back</a>
+<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+</div>
 
-    <table>
-      <colgroup>
-        <col style="width:20%"><col style="width:16%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:28%">
-      </colgroup>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Batch / Lot</th>
-          <th>Temp (°C)</th>
-          <th>Accept / Reject</th>
-          <th>Initials</th>
-          <th>Notes / Corrective Action</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
+<div class="sheet-card">
 
-    <!-- Guidance (from your FSP wording) -->
-    <div class="guidance">
-      <b>Temperature information</b>
-      <ul>
-        <li>Cold foods – at or below 5 °C</li>
-        <li>Frozen foods – Frozen hard (does not include partially thawed)</li>
-        <li>Hot foods – at or above 60 °C</li>
-      </ul>
-      <b>Designated storage areas</b>
-      <div>Store incoming goods promptly in: Refrigerators/Freezers, Dry storage, or Hot holding equipment (as appropriate).</div>
-      <b>Visual check</b>
-      <ul>
-        <li>Use by / Best before date</li>
-        <li>Packaging (damaged, deteriorated, perished or inappropriate material)</li>
-        <li>Labelling (name of food, name &amp; address of supplier, lot identification)</li>
-        <li>Pest contamination (droppings, eggs, webs, feathers etc.)</li>
-        <li>Foreign objects (dirt, metal, hair)</li>
-      </ul>
-    </div>
-  </div>
+<h1 class="sheet-title">Record 3a - Incoming Goods</h1>
+
+<table id="goodsTable">
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Supplier</th>
+<th class="item">Food Item</th>
+<th>Packaging Intact</th>
+<th>Use By Date</th>
+<th>Temperature °C</th>
+<th>Accepted / Rejected</th>
+<th>Initial</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+
+</table>
+
+<div class="notes">
+
+<strong>Checks when receiving food:</strong><br>
+• Food is protected from contamination<br>
+• Packaging is intact<br>
+• Use-by date has not expired<br>
+• Potentially hazardous food is below 5°C or above 60°C<br>
+• Food is rejected if unsafe<br>
+
+</div>
+
+</div>
+
+</main>
 
 <script>
-  function addRow(){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input placeholder="Description of goods"></td>
-      <td><input placeholder="Batch / Lot"></td>
-      <td><input class="center" placeholder="°C"></td>
-      <td>
-        <select class="center">
-          <option value=""></option>
-          <option>Accept</option>
-          <option>Reject</option>
-        </select>
-      </td>
-      <td><input class="init center" maxlength="3"></td>
-      <td><input placeholder="Notes / corrective action"></td>
-    `;
-    return tr;
-  }
 
-  function build(){
-    const tbody = document.getElementById('rows');
-    for(let i=0;i<9;i++){ tbody.appendChild(addRow()); }
-  }
+const STORAGE_KEY="incoming_goods_v1"
 
-  function clearForm(){
-    document.querySelectorAll('input,select,textarea').forEach(el=>{
-      if(el.tagName==='SELECT'){ el.selectedIndex = 0; }
-      else { el.value=''; }
-    });
-  }
+function buildRow(){
 
-  function saveForm(){
-    alert('Saved (connect to Firebase later).');
-  }
+const tr=document.createElement("tr")
 
-  build();
+for(let i=0;i<8;i++){
+
+const td=document.createElement("td")
+const input=document.createElement("input")
+
+td.appendChild(input)
+tr.appendChild(td)
+
+}
+
+return tr
+
+}
+
+function loadRows(){
+
+const tbody=document.getElementById("tbody")
+
+for(let i=0;i<15;i++){
+
+tbody.appendChild(buildRow())
+
+}
+
+const saved=localStorage.getItem(STORAGE_KEY)
+
+if(saved){
+
+const data=JSON.parse(saved)
+const inputs=document.querySelectorAll("#tbody input")
+
+inputs.forEach((i,index)=>{
+
+i.value=data[index]||""
+
+})
+
+}
+
+}
+
+function saveForm(){
+
+const inputs=document.querySelectorAll("#tbody input")
+
+const data=Array.from(inputs).map(i=>i.value)
+
+localStorage.setItem(STORAGE_KEY,JSON.stringify(data))
+
+alert("Saved")
+
+}
+
+function clearForm(){
+
+if(!confirm("Clear form?")) return
+
+document.querySelectorAll("#tbody input").forEach(i=>i.value="")
+
+localStorage.removeItem(STORAGE_KEY)
+
+}
+
+loadRows()
+
 </script>
+
 </body>
 </html>
