@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 6b – Weekly Cleaning</title>
+
+<link rel="stylesheet" href="site.css">
+
+<style>
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+border:1px solid black;
+padding:8px;
+font-size:14px;
+}
+
+th{
+background:#f1f1f1;
+}
+
+.area{
+width:50%;
+}
+
+.center{
+text-align:center;
+}
+
+.chk{
+transform:scale(1.2);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="mdk-toolbar">
+
+<a class="mdk-btn--back" href="kitchen.html">Back</a>
+
+<button class="mdk-btn--pill" onclick="window.print()">Print</button>
+
+<button class="mdk-btn--pill" onclick="clearForm()">Clear</button>
+
+<button class="mdk-btn--primary" onclick="saveForm()">Save</button>
+
+</div>
+
+
+<div class="card-white">
+
+<h2>Record 6b – Weekly Cleaning Schedule</h2>
+
+<div style="margin-bottom:15px;font-weight:600">
+
+Week Starting:
+<input id="weekStart" type="text" placeholder="DD / MM / YYYY">
+
+&nbsp;&nbsp;
+
+Week Ending:
+<span id="weekEnd"></span>
+
+</div>
+
+
+<table>
+
+<tr>
+<th class="area">Area / Equipment</th>
+<th class="center">✓</th>
+<th class="center">Initials</th>
+</tr>
+
+<tr>
+<td>Clean inside refrigerators</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean inside freezers</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean dry storage shelves</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean walls</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean behind equipment</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Clean drains</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+<tr>
+<td>Check pest traps</td>
+<td class="center"><input type="checkbox" class="chk"></td>
+<td><input></td>
+</tr>
+
+</table>
+
+</div>
+
+</main>
+
+
+<script>
+
+function formatDate(d){
+return String(d.getDate()).padStart(2,'0')+" / "+
+String(d.getMonth()+1).padStart(2,'0')+" / "+
+d.getFullYear()
+}
+
+function updateWeek(){
+
+let txt=document.getElementById("weekStart").value
+
+let p=txt.split("/")
+
+if(p.length!==3) return
+
+let start=new Date(p[2],p[1]-1,p[0])
+
+let end=new Date(start)
+
+end.setDate(start.getDate()+6)
+
+document.getElementById("weekEnd").innerText=formatDate(end)
+
+}
+
+document.getElementById("weekStart").addEventListener("input",updateWeek)
+
+</script>
+
+</body>
+</html>
