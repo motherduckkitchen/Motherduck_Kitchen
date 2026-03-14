@@ -113,6 +113,11 @@
       height:22px;
       margin-top:6px;
     }
+    .warn{
+      background:#ffe2e2 !important;
+      color:#9b1c1c;
+      font-weight:700;
+    }
     @page{
       size:A4 landscape;
       margin:10mm;
@@ -201,7 +206,7 @@
   </main>
 
   <script>
-    const STORAGE_KEY = "thermometer_calibration_v1";
+    const STORAGE_KEY = "thermometer_calibration_v2";
 
     function todayDate() {
       const d = new Date();
@@ -211,23 +216,42 @@
       return dd + "/" + mm + "/" + yyyy;
     }
 
+    function checkWarning(input, rowLabel) {
+      const raw = input.value.trim().replace(",", ".");
+      const value = parseFloat(raw);
+
+      input.classList.remove("warn");
+      input.title = "";
+
+      if (raw === "" || Number.isNaN(value)) return;
+
+      if (rowLabel === "Ice Point" && value > 1) {
+        input.classList.add("warn");
+        input.title = "Warning: above 1°C";
+      }
+
+      if (rowLabel === "Boiling Point" && value < 95) {
+        input.classList.add("warn");
+        input.title = "Warning: below 95°C";
+      }
+    }
+
     function buildRows() {
       const tbody = document.getElementById("rows");
       tbody.innerHTML = "";
 
       for (let thermo = 0; thermo < 3; thermo++) {
-        const labels = ["Date", "Initials", "Ice point - Boiling Point"];
+        const labels = ["Date", "Initials", "Ice Point", "Boiling Point"];
 
-        for (let r = 0; r < 3; r++) {
+        for (let r = 0; r < labels.length; r++) {
           const tr = document.createElement("tr");
 
           if (r === 0) {
             const tdThermo = document.createElement("td");
-            tdThermo.rowSpan = 3;
+            tdThermo.rowSpan = 4;
             const inputThermo = document.createElement("input");
             inputThermo.type = "text";
             inputThermo.placeholder = "Thermometer name";
-            inputThermo.dataset.kind = "thermo";
             tdThermo.appendChild(inputThermo);
             tr.appendChild(tdThermo);
           }
@@ -240,10 +264,18 @@
             const td = document.createElement("td");
             const input = document.createElement("input");
             input.type = "text";
+            input.dataset.rowlabel = labels[r];
 
-            if (r === 0) {
+            if (labels[r] === "Date") {
               input.addEventListener("focus", function () {
                 if (!input.value) input.value = todayDate();
+              });
+            }
+
+            if (labels[r] === "Ice Point" || labels[r] === "Boiling Point") {
+              input.placeholder = "°C";
+              input.addEventListener("input", function () {
+                checkWarning(input, labels[r]);
               });
             }
 
@@ -272,6 +304,10 @@
       const fields = document.querySelectorAll("table input");
       fields.forEach(function(field, i) {
         field.value = data[i] || "";
+        const rowLabel = field.dataset.rowlabel;
+        if (rowLabel === "Ice Point" || rowLabel === "Boiling Point") {
+          checkWarning(field, rowLabel);
+        }
       });
     }
 
@@ -279,6 +315,8 @@
       if (!confirm("Clear form?")) return;
       document.querySelectorAll("table input").forEach(function(el) {
         el.value = "";
+        el.classList.remove("warn");
+        el.title = "";
       });
       localStorage.removeItem(STORAGE_KEY);
     }
