@@ -1,101 +1,116 @@
 <script>
+const STORAGE_KEY = "record5a_exact_v3";
 
-function todayDate(){
+function todayDate() {
   const d = new Date();
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 }
 
-function nowTime(){
+function currentTime() {
   const d = new Date();
-  const hh = String(d.getHours()).padStart(2,'0');
-  const mm = String(d.getMinutes()).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
   return `${hh}:${mm}`;
 }
 
-function buildRows(){
+function makeProcessSelect() {
+  const select = document.createElement("select");
 
-const tbody=document.getElementById("rows");
+  const opts = ["", "Ck", "Cl", "Rh"];
+  opts.forEach(val => {
+    const option = document.createElement("option");
+    option.value = val;
+    option.textContent = val;
+    select.appendChild(option);
+  });
 
-for(let i=0;i<12;i++){
+  select.style.width = "100%";
+  select.style.border = "none";
+  select.style.background = "transparent";
+  select.style.fontSize = "12px";
+  select.style.textAlign = "center";
+  select.style.outline = "none";
 
-let tr=document.createElement("tr");
-
-for(let c=0;c<15;c++){
-
-let td=document.createElement("td");
-
-let input=document.createElement("input");
-input.type="text";
-
-/* DATE FIELD */
-if(c===0){
-input.addEventListener("focus",function(){
-if(!input.value) input.value=todayDate();
-});
+  return select;
 }
 
-/* TIME FIELDS */
-if(c===3 || c===4 || c===6 || c===8 || c===10 || c===12){
-input.addEventListener("focus",function(){
-if(!input.value) input.value=nowTime();
-});
+function buildRows() {
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
+
+  for (let i = 0; i < 12; i++) {
+    const tr = document.createElement("tr");
+
+    for (let c = 0; c < 15; c++) {
+      const td = document.createElement("td");
+
+      // Process column
+      if (c === 2) {
+        const select = makeProcessSelect();
+        td.appendChild(select);
+        tr.appendChild(td);
+        continue;
+      }
+
+      const input = document.createElement("input");
+      input.type = "text";
+
+      // Date Produced/Batch No
+      if (c === 0) {
+        input.addEventListener("focus", function () {
+          if (!input.value) input.value = todayDate();
+        });
+      }
+
+      // Time columns
+      if (c === 3 || c === 4 || c === 6 || c === 8 || c === 10 || c === 12) {
+        input.addEventListener("focus", function () {
+          if (!input.value) input.value = currentTime();
+        });
+      }
+
+      td.appendChild(input);
+      tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+  }
 }
 
-td.appendChild(input);
-tr.appendChild(td);
-
+function saveForm() {
+  const data = [];
+  document.querySelectorAll("#rows input, #rows select").forEach(el => {
+    data.push(el.value);
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  alert("Saved");
 }
 
-tbody.appendChild(tr);
+function loadForm() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
 
+  const data = JSON.parse(saved);
+  const fields = document.querySelectorAll("#rows input, #rows select");
+
+  fields.forEach((field, index) => {
+    field.value = data[index] || "";
+  });
 }
 
-}
+function clearForm() {
+  if (!confirm("Clear form?")) return;
 
-function saveForm(){
+  document.querySelectorAll("#rows input, #rows select").forEach(el => {
+    el.value = "";
+  });
 
-let data=[];
-
-document.querySelectorAll("input").forEach(i=>{
-data.push(i.value);
-});
-
-localStorage.setItem("record5a",JSON.stringify(data));
-
-alert("Saved");
-
-}
-
-function clearForm(){
-
-if(!confirm("Clear form?")) return;
-
-document.querySelectorAll("input").forEach(i=>{
-i.value="";
-});
-
-localStorage.removeItem("record5a");
-
-}
-
-function loadForm(){
-
-let data=localStorage.getItem("record5a");
-
-if(!data) return;
-
-data=JSON.parse(data);
-
-document.querySelectorAll("input").forEach((i,index)=>{
-i.value=data[index]||"";
-});
-
+  localStorage.removeItem(STORAGE_KEY);
 }
 
 buildRows();
 loadForm();
-
 </script>
