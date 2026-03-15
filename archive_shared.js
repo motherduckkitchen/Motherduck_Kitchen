@@ -21,6 +21,7 @@
 
   function parseDDMMYYYY(text) {
     if (!text || typeof text !== "string") return null;
+
     const parts = text.split("/").map(s => s.trim());
     if (parts.length !== 3) return null;
 
@@ -86,7 +87,10 @@
 
     let fileInfo = null;
     if (file) {
-      fileInfo = await uploadFile(file, `records/${year}/${pad(monthNum)}_${monthName(monthNum)}`);
+      fileInfo = await uploadFile(
+        file,
+        `records/${year}/${pad(monthNum)}_${monthName(monthNum)}`
+      );
     }
 
     const payload = {
@@ -135,6 +139,10 @@
       return bTime - aTime;
     });
 
+    rows.forEach(row => {
+      window.MDKArchiveCache[row.id] = row;
+    });
+
     return rows;
   }
 
@@ -168,14 +176,56 @@
       return bTime - aTime;
     });
 
+    rows.forEach(row => {
+      window.MDKArchiveCache[row.id] = row;
+    });
+
     return rows;
   }
+
+  async function loadRecord(id) {
+    if (!id) return null;
+
+    if (window.MDKArchiveCache[id]) {
+      return window.MDKArchiveCache[id];
+    }
+
+    const doc = await db.collection("auditRecords").doc(id).get();
+    if (!doc.exists) return null;
+
+    const record = {
+      id: doc.id,
+      ...doc.data()
+    };
+
+    window.MDKArchiveCache[id] = record;
+    return record;
+  }
+
+  async function deleteRecord(id) {
+    if (!id) return false;
+
+    const ok = window.confirm("Delete this saved record?");
+    if (!ok) return false;
+
+    await db.collection("auditRecords").doc(id).delete();
+
+    if (window.MDKArchiveCache[id]) {
+      delete window.MDKArchiveCache[id];
+    }
+
+    return true;
+  }
+
+  window.MDKArchiveCache = window.MDKArchiveCache || {};
 
   window.MDKArchive = {
     saveRecord,
     listRecords,
     listMonthCounts,
     getAllRecords,
+    loadRecord,
+    deleteRecord,
     formatDDMMYYYY,
     parseDDMMYYYY,
     monthName
