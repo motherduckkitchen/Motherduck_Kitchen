@@ -530,6 +530,13 @@ textarea{
   </div>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
 const STORAGE_KEY = "record13_review_v1";
 
@@ -549,7 +556,7 @@ function fillDates(){
   });
 }
 
-function saveForm(){
+async function saveForm(){
   const fields = [];
   document.querySelectorAll("input, textarea").forEach(el=>{
     if(el.type === "checkbox"){
@@ -558,8 +565,37 @@ function saveForm(){
       fields.push({t:"v", v:el.value});
     }
   });
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fields));
-  alert("Saved");
+
+  try {
+    if (window.MDKArchive) {
+      let recordDate = "";
+      document.querySelectorAll(".date-auto").forEach(el => {
+        if (!recordDate && el.value.trim()) {
+          recordDate = el.value.trim();
+        }
+      });
+
+      if (!recordDate) {
+        recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+      }
+
+      await window.MDKArchive.saveRecord({
+        type: "Food Safety Program Review",
+        site: "Kitchen",
+        recordDate: recordDate,
+        fields: {
+          values: fields
+        }
+      });
+    }
+
+    alert("Saved");
+  } catch (err) {
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
@@ -591,9 +627,3 @@ loadForm();
 </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
