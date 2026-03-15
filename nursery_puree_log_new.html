@@ -55,6 +55,11 @@
       color:#fff;
       border:none;
     }
+    .edit{
+      background:#16a34a;
+      color:#fff;
+      border:none;
+    }
     .card{
       background:rgba(255,255,255,.95);
       padding:20px;
@@ -122,6 +127,16 @@
       line-height:1.5;
       color:#222;
     }
+    .locked-note{
+      margin-bottom:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7ed;
+      color:#9a3412;
+      border:1px solid #fdba74;
+      display:none;
+      font-weight:700;
+    }
     @page{
       size:A4 landscape;
       margin:10mm;
@@ -135,6 +150,7 @@
       h1{font-size:24px;}
       th,td,input{font-size:11px;}
       .notes,.month-row{font-size:11px;}
+      .locked-note{display:none !important;}
     }
   </style>
 </head>
@@ -146,12 +162,17 @@
       <a href="nursery_new.html" class="btn back">← Back</a>
       <a href="dashboard.html" class="btn">Home</a>
       <button class="btn" onclick="window.print()" type="button">Print</button>
+      <button id="editBtn" class="btn edit" onclick="unlockForEdit()" type="button" style="display:none;">Edit</button>
       <button class="btn" onclick="clearForm()" type="button">Clear</button>
       <button class="btn save" onclick="saveForm()" type="button">Save</button>
     </div>
 
     <div class="card">
       <h1>Record 5c – Nursery Temperature &amp; Puree Reheat Log</h1>
+
+      <div id="lockedNote" class="locked-note">
+        This saved record is locked. Press Edit to make changes.
+      </div>
 
       <div class="month-row">
         Month: <input id="month">
@@ -193,15 +214,19 @@
     </div>
   </main>
 
+  <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="firebase-loader.js"></script>
   <script src="archive_shared.js"></script>
 
   <script>
-    const STORAGE_KEY = "nursery_puree_log_new_v1";
+    const params = new URLSearchParams(window.location.search);
+    const LOAD_ID = params.get("load") || "";
+    const STORAGE_KEY = "nursery_puree_log_new_v2";
+    let loadedRecordId = LOAD_ID || "";
 
     function todayDate() {
       const d = new Date();
@@ -222,10 +247,12 @@
           const td = document.createElement("td");
           const input = document.createElement("input");
           input.type = "text";
+          input.dataset.row = i;
+          input.dataset.col = c;
 
           if (c === 0 || c === 3) {
             input.addEventListener("focus", function() {
-              if (!input.value) input.value = todayDate();
+              if (!input.value && !input.disabled) input.value = todayDate();
             });
           }
 
@@ -235,6 +262,58 @@
 
         tbody.appendChild(tr);
       }
+    }
+
+    function getAllFields() {
+      return document.querySelectorAll("#month, #year, #rows input");
+    }
+
+    function lockAllFields() {
+      getAllFields().forEach(el => {
+        el.disabled = true;
+      });
+      document.getElementById("editBtn").style.display = "inline-block";
+      document.getElementById("lockedNote").style.display = "block";
+    }
+
+    function unlockForEdit() {
+      getAllFields().forEach(el => {
+        el.disabled = false;
+      });
+      document.getElementById("lockedNote").style.display = "none";
+    }
+
+    function getRowsAsObjects() {
+      const out = [];
+      document.querySelectorAll("#rows tr").forEach(tr => {
+        const fields = tr.querySelectorAll("input");
+        out.push({
+          date: fields[0]?.value?.trim() || "",
+          fridgeAM: fields[1]?.value?.trim() || "",
+          fridgePM: fields[2]?.value?.trim() || "",
+          batchDate: fields[3]?.value?.trim() || "",
+          description: fields[4]?.value?.trim() || "",
+          temp: fields[5]?.value?.trim() || "",
+          correctiveAction: fields[6]?.value?.trim() || ""
+        });
+      });
+      return out;
+    }
+
+    function flattenRows(rows) {
+      const values = [];
+      rows.forEach(row => {
+        values.push(
+          row.date || "",
+          row.fridgeAM || "",
+          row.fridgePM || "",
+          row.batchDate || "",
+          row.description || "",
+          row.temp || "",
+          row.correctiveAction || ""
+        );
+      });
+      return values;
     }
 
     async function saveForm() {
@@ -253,13 +332,11 @@
       try {
         if (window.MDKArchive) {
           let recordDate = "";
-          const rows = document.querySelectorAll("#rows tr");
+          const rows = getRowsAsObjects();
 
           rows.forEach(function(row) {
-            if (recordDate) return;
-            const firstInput = row.querySelector("td:first-child input");
-            if (firstInput && firstInput.value.trim()) {
-              recordDate = firstInput.value.trim();
+            if (!recordDate && row.date.trim()) {
+              recordDate = row.date.trim();
             }
           });
 
@@ -267,16 +344,26 @@
             recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
           }
 
-          await window.MDKArchive.saveRecord({
+          const archivePayload = {
             type: "Nursery Temperature & Puree Reheat Log",
             site: "Nursery",
             recordDate: recordDate,
             fields: {
               month: data.month,
               year: data.year,
-              values: data.fields
+              rows: rows
             }
-          });
+          };
+
+          if (loadedRecordId) {
+            await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+          } else {
+            loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+          }
+        }
+
+        if (loadedRecordId) {
+          lockAllFields();
         }
 
         alert("Saved");
@@ -300,20 +387,59 @@
       });
     }
 
+    async function loadSavedArchiveRecord() {
+      if (!loadedRecordId || !window.MDKArchive) return;
+
+      try {
+        const record = await window.MDKArchive.loadRecord(loadedRecordId);
+        if (!record || !record.fields) return;
+
+        document.getElementById("month").value = record.fields.month || "";
+        document.getElementById("year").value = record.fields.year || "";
+
+        const rows = record.fields.rows || [];
+        const values = flattenRows(rows);
+        const fields = document.querySelectorAll("#rows input");
+
+        fields.forEach((el, i) => {
+          el.value = values[i] || "";
+        });
+
+        lockAllFields();
+      } catch (err) {
+        console.error("Load archive record error:", err);
+        alert("Could not open saved archive record.");
+      }
+    }
+
     function clearForm() {
       if (!confirm("Clear form?")) return;
 
       document.getElementById("month").value = "";
       document.getElementById("year").value = "";
+
       document.querySelectorAll("#rows input").forEach(function(el) {
         el.value = "";
+        el.disabled = false;
       });
 
-      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("month").disabled = false;
+      document.getElementById("year").disabled = false;
+      document.getElementById("lockedNote").style.display = "none";
+      document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+      if (!loadedRecordId) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
 
     buildRows();
-    loadForm();
+
+    if (loadedRecordId) {
+      loadSavedArchiveRecord();
+    } else {
+      loadForm();
+    }
   </script>
 </body>
 </html>
