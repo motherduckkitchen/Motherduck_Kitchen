@@ -29,6 +29,7 @@ body{
   gap:10px;
   margin-bottom:14px;
   flex-wrap:wrap;
+  align-items:center;
 }
 .btn{
   padding:10px 16px;
@@ -50,6 +51,11 @@ body{
 .save{
   background:#007bff;
   color:white;
+  border:none;
+}
+.edit{
+  background:#16a34a;
+  color:#fff;
   border:none;
 }
 .card{
@@ -100,17 +106,27 @@ td:nth-child(7) input{
   font-size:12px;
   color:#333;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @media print{
   .toolbar{display:none;}
   body{background:white;}
   .wash{display:none;}
   .card{box-shadow:none;border-radius:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
 
 <body>
-
 <div class="wash"></div>
 
 <main class="page">
@@ -119,6 +135,7 @@ td:nth-child(7) input{
   <a href="nursery_new.html" class="btn back">← Back</a>
   <a href="dashboard.html" class="btn">🏠 Home</a>
   <button onclick="window.print()" class="btn">🖨 Print</button>
+  <button id="editBtn" onclick="unlockForEdit()" class="btn edit" style="display:none;">✏ Edit</button>
   <button onclick="clearForm()" class="btn">Clear</button>
   <button onclick="saveForm()" class="btn save">Save</button>
 </div>
@@ -126,6 +143,10 @@ td:nth-child(7) input{
 <div class="card">
 
 <h1>Record 3b - Bottle Receipt</h1>
+
+<div id="lockedNote" class="locked-note">
+  This saved record is locked. Press Edit to make changes.
+</div>
 
 <table>
   <colgroup>
@@ -168,7 +189,12 @@ td:nth-child(7) input{
 <script src="archive_shared.js"></script>
 
 <script>
-const STORAGE_KEY = "bottle_receipt_v1";
+const params = new URLSearchParams(window.location.search);
+const LOAD_ID = params.get("load") || "";
+const STORAGE_KEY = "bottle_receipt_v2";
+
+let loadedRecordId = LOAD_ID || "";
+let isLockedRecordView = false;
 
 function todayDate(){
   const d = new Date();
@@ -218,13 +244,13 @@ function buildRows(){
 
         if(c === 0){
           input.addEventListener("focus", function(){
-            if(!input.value) input.value = todayDate();
+            if(!input.value && !input.disabled) input.value = todayDate();
           });
         }
 
         if(c === 1 || c === 5){
           input.addEventListener("focus", function(){
-            if(!input.value) input.value = currentTime();
+            if(!input.value && !input.disabled) input.value = currentTime();
           });
         }
 
@@ -236,6 +262,27 @@ function buildRows(){
 
     tbody.appendChild(tr);
   }
+}
+
+function getAllFields(){
+  return document.querySelectorAll("table input, table select");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  isLockedRecordView = true;
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  isLockedRecordView = false;
+  document.getElementById("lockedNote").style.display = "none";
 }
 
 function getRowsAsObjects(){
@@ -253,6 +300,22 @@ function getRowsAsObjects(){
     });
   });
   return out;
+}
+
+function flattenRows(rows){
+  const values = [];
+  rows.forEach(row => {
+    values.push(
+      row.date || "",
+      row.time || "",
+      row.childName || "",
+      row.visualCheck || "",
+      row.bottlesDelivered || "",
+      row.fridgeTime || "",
+      row.checkedBy || ""
+    );
+  });
+  return values;
 }
 
 async function saveForm(){
@@ -279,14 +342,24 @@ async function saveForm(){
         recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
       }
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Bottle Receipt",
         site: "Nursery",
         recordDate: recordDate,
         fields: {
           rows
         }
-      });
+      };
+
+      if(loadedRecordId){
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -307,16 +380,51 @@ function loadForm(){
   });
 }
 
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
+
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
+
+    const rows = record.fields.rows || [];
+    const values = flattenRows(rows);
+    const fields = document.querySelectorAll("table input, table select");
+
+    fields.forEach((el, i) => {
+      el.value = values[i] || "";
+    });
+
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
+}
+
 function clearForm(){
   if(!confirm("Clear form?")) return;
+
   document.querySelectorAll("table input, table select").forEach(function(el){
     el.value = "";
+    el.disabled = false;
   });
-  localStorage.removeItem(STORAGE_KEY);
+
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildRows();
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 
 </body>
