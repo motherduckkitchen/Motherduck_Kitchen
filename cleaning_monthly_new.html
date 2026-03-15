@@ -236,6 +236,13 @@ th{
 </div>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
 const STORAGE_KEY = "cleaning_monthly_clean_v1";
 
@@ -253,6 +260,15 @@ const yearlyTasks = [
   "Review cleaning chemicals and supplies",
   "Check maintenance cleaning items"
 ];
+
+function formatDDMMYYYYFromISO(isoDate) {
+  if (!isoDate) return "";
+  const d = new Date(isoDate + "T00:00:00");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return dd + "/" + mm + "/" + yyyy;
+}
 
 function updateYearDisplay(){
   const val = document.getElementById("yearDate").value;
@@ -319,7 +335,7 @@ function buildYearlyRows(){
   });
 }
 
-function saveForm(){
+async function saveForm(){
   const data = {
     yearDate: document.getElementById("yearDate").value,
     monthly: [],
@@ -330,7 +346,33 @@ function saveForm(){
   document.querySelectorAll('#yearlyRows input').forEach(el => data.yearly.push(el.value));
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
+
+  try {
+    if (window.MDKArchive) {
+      const recordDate = data.yearDate
+        ? formatDDMMYYYYFromISO(data.yearDate)
+        : window.MDKArchive.formatDDMMYYYY(new Date());
+
+      await window.MDKArchive.saveRecord({
+        type: "Monthly Cleaning",
+        site: "Kitchen",
+        recordDate: recordDate,
+        fields: {
+          yearDate: data.yearDate,
+          displayYear: document.getElementById("showYear").innerText,
+          monthlyTasks: monthlyTasks,
+          yearlyTasks: yearlyTasks,
+          monthly: data.monthly,
+          yearly: data.yearly
+        }
+      });
+    }
+
+    alert("Saved");
+  } catch (err) {
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
@@ -383,9 +425,3 @@ loadForm();
 
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
