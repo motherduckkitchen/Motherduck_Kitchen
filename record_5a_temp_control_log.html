@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center/cover no-repeat fixed;
+    }
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(2px);
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      max-width:1500px;
+      margin:auto;
+      padding:20px;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#222;
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
+    }
+    .back{
+      background:#ffc107;
+      color:#4b0082;
+      border:none;
+    }
+    .save{
+      background:#007bff;
+      color:#fff;
+      border:none;
+    }
+    .card{
+      background:rgba(255,255,255,.95);
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+      overflow:auto;
+    }
+    h1{
+      margin:0 0 16px;
+      font-size:28px;
+      font-weight:700;
+      color:#1f2937;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+    th,td{
+      border:1px solid #222;
+      padding:4px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    th{
+      background:#f4f6f8;
+      font-weight:700;
+    }
+    input, select{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-size:12px;
+      padding:3px;
+      box-sizing:border-box;
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    td.left input{
+      text-align:left;
+    }
+    .note{
+      margin-top:14px;
+      font-size:13px;
+      line-height:1.55;
+      color:#222;
+    }
+    .lines{
+      margin-top:8px;
+    }
+    .line{
+      border-bottom:2px solid #666;
+      height:22px;
+      margin-top:6px;
+    }
+    .warn{
+      background:#ffe2e2 !important;
+      color:#9b1c1c;
+      font-weight:700;
+    }
+    @page{
+      size:A4 landscape;
+      margin:10mm;
+    }
+    @media print{
+      .toolbar{display:none;}
+      body{background:#fff;}
+      .wash{display:none;}
+      .page{max-width:none;padding:0;}
+      .card{box-shadow:none;border-radius:0;padding:0;}
+      h1{font-size:24px;}
+      th,td,input,select{font-size:11px;}
+      .note{font-size:11px;}
+    }
+  </style>
+</head>
+<body>
+<div class="wash"></div>
+
+<main class="page">
+  <div class="toolbar">
+    <a id="backBtn" href="kitchen.html" class="btn back">← Back</a>
+    <a href="dashboard.html" class="btn">🏠 Home</a>
+    <button class="btn" onclick="window.print()" type="button">🖨 Print</button>
+    <button class="btn" onclick="clearForm()" type="button">🧹 Clear</button>
+    <button class="btn save" onclick="saveForm()" type="button">💾 Save</button>
+  </div>
+
+  <div class="card">
+    <h1 id="pageTitle">Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</h1>
+
+    <table id="tbl">
+      <colgroup>
+        <col style="width:12%">
+        <col style="width:15%">
+        <col style="width:7%">
+        <col style="width:7%">
+        <col style="width:7%">
+        <col style="width:6%">
+        <col style="width:6%">
+        <col style="width:6%">
+        <col style="width:5%">
+        <col style="width:6%">
+        <col style="width:5%">
+        <col style="width:6%">
+        <col style="width:5%">
+        <col style="width:6%">
+        <col style="width:5%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2">Date Produced / Batch No</th>
+          <th rowspan="2">Item Description</th>
+          <th rowspan="2">Process<br>Cook (Ck)<br>Cool (Cl)<br>Reheat (Rh)</th>
+          <th colspan="2">Cook 75°C</th>
+          <th colspan="2">Reheat 60°C</th>
+          <th colspan="6">Cool 60-21°C in 2 hrs &nbsp;&nbsp; 21-5°C in 4 hrs</th>
+          <th colspan="2">Serve</th>
+        </tr>
+        <tr>
+          <th>Start Time</th>
+          <th>Finish Time</th>
+          <th>Temp °C</th>
+          <th>Time 1</th>
+          <th>Temp °C (60°)</th>
+          <th>Time 2</th>
+          <th>Temp °C (21°)</th>
+          <th>Time 3</th>
+          <th>Temp °C (5°)</th>
+          <th>Time</th>
+          <th>Temp °C</th>
+          <th>Initial</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div class="note">
+      <strong>Processes:</strong>
+      Cook all potentially hazardous food to at least 75°C.<br>
+      Reheat cooled potentially hazardous food that is to be served hot to at least 60°C.<br><br>
+      Cooked potentially hazardous food that is being cooled for later use must be cooled from:<br>
+      60°C to 21°C within the first 2 hours. It must then be cooled from<br>
+      21°C to below 5°C within the next 4 hours (6 hours in all)
+    </div>
+
+    <div class="note">
+      <strong>CORRECTIVE ACTIONS:</strong>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <div class="note">
+      Food Safety Program - Mother Duck Kallangur (1) January 2021 - Transport Amendment.docx<br>
+      Accredited Food Safety Program - Food Act 2006 (QLD) - LI/2021/0345. Accredited by Michael Taylor (Authorised Person Moreton Bay Regional Council) 23 March 2021
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const SITE = params.get("site") || "Kitchen";
+
+const STORAGE_KEY = SITE === "Brewer St"
+  ? "record5a_temp_control_brewer_v1"
+  : "record5a_temp_control_kitchen_v1";
+
+document.getElementById("backBtn").href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+document.getElementById("pageTitle").textContent =
+  SITE === "Brewer St"
+    ? "Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve (Brewer St)"
+    : "Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve (Kitchen)";
+
+function pad(n){
+  return String(n).padStart(2,"0");
+}
+
+function todayDate(){
+  const d = new Date();
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+
+function currentTime(){
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function processSelect(){
+  const select = document.createElement("select");
+  ["", "Ck", "Cl", "Rh"].forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = v;
+    select.appendChild(opt);
+  });
+  return select;
+}
+
+function warnField(input, min, max){
+  input.classList.remove("warn");
+  const raw = input.value.trim().replace(",", ".");
+  if(!raw) return;
+  const num = parseFloat(raw);
+  if(Number.isNaN(num)) return;
+  if((min !== null && num < min) || (max !== null && num > max)){
+    input.classList.add("warn");
+  }
+}
+
+function addAutoDate(input){
+  input.addEventListener("focus", function(){
+    if(!input.value) input.value = todayDate();
+  });
+}
+
+function addAutoTime(input){
+  input.addEventListener("focus", function(){
+    if(!input.value) input.value = currentTime();
+  });
+}
+
+function buildRows(){
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
+
+  for(let i = 0; i < 10; i++){
+    const tr = document.createElement("tr");
+
+    for(let c = 0; c < 15; c++){
+      const td = document.createElement("td");
+      if(c === 1) td.className = "left";
+
+      if(c === 2){
+        const sel = processSelect();
+        sel.dataset.row = i;
+        sel.dataset.col = c;
+        td.appendChild(sel);
+        tr.appendChild(td);
+        continue;
+      }
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.dataset.row = i;
+      input.dataset.col = c;
+
+      if(c === 0) addAutoDate(input);
+      if([3,4,6,8,10,12,13].includes(c)) addAutoTime(input);
+
+      if(c === 5){
+        input.placeholder = "°C";
+        input.addEventListener("input", () => warnField(input, 60, null));
+      }
+
+      if(c === 7){
+        input.placeholder = "°C";
+        input.addEventListener("input", () => warnField(input, null, 60));
+      }
+
+      if(c === 9){
+        input.placeholder = "°C";
+        input.addEventListener("input", () => warnField(input, null, 21));
+      }
+
+      if(c === 11){
+        input.placeholder = "°C";
+        input.addEventListener("input", () => warnField(input, null, 5));
+      }
+
+      if(c === 13){
+        input.placeholder = "°C";
+        input.addEventListener("input", () => warnField(input, 60, null));
+      }
+
+      td.appendChild(input);
+      tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+  }
+}
+
+function getRowsAsObjects(){
+  const out = [];
+  document.querySelectorAll("#rows tr").forEach(tr => {
+    const fields = tr.querySelectorAll("input, select");
+    out.push({
+      dateBatch: fields[0]?.value?.trim() || "",
+      itemDescription: fields[1]?.value?.trim() || "",
+      process: fields[2]?.value?.trim() || "",
+      cookStartTime: fields[3]?.value?.trim() || "",
+      cookFinishTime: fields[4]?.value?.trim() || "",
+      reheatTemp: fields[5]?.value?.trim() || "",
+      coolTime1: fields[6]?.value?.trim() || "",
+      coolTemp60: fields[7]?.value?.trim() || "",
+      coolTime2: fields[8]?.value?.trim() || "",
+      coolTemp21: fields[9]?.value?.trim() || "",
+      coolTime3: fields[10]?.value?.trim() || "",
+      coolTemp5: fields[11]?.value?.trim() || "",
+      serveTime: fields[12]?.value?.trim() || "",
+      serveTemp: fields[13]?.value?.trim() || "",
+      initial: fields[14]?.value?.trim() || ""
+    });
+  });
+  return out;
+}
+
+async function saveForm(){
+  const values = [];
+  document.querySelectorAll("#rows input, #rows select").forEach(el => {
+    values.push(el.value);
+  });
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+
+  try{
+    if(window.MDKArchive){
+      const rows = getRowsAsObjects();
+
+      let recordDate = "";
+      for(const r of rows){
+        if(r.dateBatch){
+          recordDate = r.dateBatch;
+          break;
+        }
+      }
+
+      if(!recordDate){
+        recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+      }
+
+      await window.MDKArchive.saveRecord({
+        type: "Cook Cool Reheat",
+        site: SITE,
+        recordDate: recordDate,
+        fields: { rows }
+      });
+    }
+
+    alert("Saved");
+  } catch(err){
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
+}
+
+function loadForm(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(!saved) return;
+
+  const values = JSON.parse(saved) || [];
+  const fields = document.querySelectorAll("#rows input, #rows select");
+
+  fields.forEach((el, i) => {
+    el.value = values[i] || "";
+
+    const col = Number(el.dataset.col);
+    if(col === 5) warnField(el, 60, null);
+    if(col === 7) warnField(el, null, 60);
+    if(col === 9) warnField(el, null, 21);
+    if(col === 11) warnField(el, null, 5);
+    if(col === 13) warnField(el, 60, null);
+  });
+}
+
+function clearForm(){
+  if(!confirm("Clear form?")) return;
+
+  document.querySelectorAll("#rows input, #rows select").forEach(el => {
+    el.value = "";
+    el.classList.remove("warn");
+  });
+
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+buildRows();
+loadForm();
+</script>
