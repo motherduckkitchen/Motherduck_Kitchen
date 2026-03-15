@@ -131,6 +131,13 @@ th{
 </div>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
 const STORAGE_KEY = "weekly_clean_blocks_v2";
 
@@ -184,7 +191,7 @@ function buildBlocks(){
   }
 }
 
-function saveForm(){
+async function saveForm(){
   const data = {
     weeks: [],
     ticks: []
@@ -199,7 +206,44 @@ function saveForm(){
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
+
+  try {
+    if (window.MDKArchive) {
+      for (let block = 0; block < 4; block++) {
+        const weekStart = data.weeks[block];
+        if (!weekStart) continue;
+
+        const startDate = new Date(weekStart + "T00:00:00");
+        const dd = String(startDate.getDate()).padStart(2, "0");
+        const mm = String(startDate.getMonth() + 1).padStart(2, "0");
+        const yyyy = startDate.getFullYear();
+        const recordDate = dd + "/" + mm + "/" + yyyy;
+
+        const blockTicks = [];
+        document.querySelectorAll(`input[data-type="tick"][data-block="${block}"]`).forEach(el => {
+          blockTicks.push(el.checked);
+        });
+
+        await window.MDKArchive.saveRecord({
+          type: "Weekly Cleaning",
+          site: "Kitchen",
+          recordDate: recordDate,
+          fields: {
+            weekStartISO: weekStart,
+            weekStartDisplay: recordDate,
+            block: block + 1,
+            tasks: tasks,
+            ticks: blockTicks
+          }
+        });
+      }
+    }
+
+    alert("Saved");
+  } catch (err) {
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
@@ -239,9 +283,3 @@ loadForm();
 
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
