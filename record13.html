@@ -59,6 +59,15 @@ body{
   color:white;
   cursor:pointer;
 }
+.mdk-btn--edit{
+  background:#16a34a;
+  border:none;
+  border-radius:12px;
+  padding:10px 18px;
+  font-weight:600;
+  color:white;
+  cursor:pointer;
+}
 .sheet-card{
   background:rgba(255,255,255,.95);
   border-radius:20px;
@@ -103,10 +112,6 @@ th{
 .indent{
   padding-left:18px;
 }
-.smallhead{
-  background:#f5f5f5;
-  font-weight:700;
-}
 input[type="text"]{
   width:100%;
   border:none;
@@ -133,6 +138,16 @@ textarea{
   font-size:12px;
   color:#222;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @page{
   size:A4 landscape;
   margin:10mm;
@@ -142,6 +157,7 @@ textarea{
   .wash,.mdk-toolbar{display:none;}
   .page{max-width:none;padding:0;}
   .sheet-card{box-shadow:none;border-radius:0;padding:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
@@ -150,15 +166,20 @@ textarea{
 
 <main class="page">
   <div class="mdk-toolbar">
-    <a href="kitchen.html" class="mdk-btn--back">← Back</a>
+    <a id="backBtn" href="kitchen.html" class="mdk-btn--back">← Back</a>
     <a href="dashboard.html" class="mdk-btn--pill">Home</a>
     <button class="mdk-btn--pill" onclick="window.print()" type="button">Print</button>
+    <button id="editBtn" class="mdk-btn--edit" onclick="unlockForEdit()" type="button" style="display:none;">Edit</button>
     <button class="mdk-btn--pill" onclick="clearForm()" type="button">Clear</button>
     <button class="mdk-btn--primary" onclick="saveForm()" type="button">Save</button>
   </div>
 
   <div class="sheet-card">
-    <h1 class="sheet-title">Record 13 – Food Safety Program Review</h1>
+    <h1 id="pageTitle" class="sheet-title">Record 13 – Food Safety Program Review</h1>
+
+    <div id="lockedNote" class="locked-note">
+      This saved record is locked. Press Edit to make changes.
+    </div>
 
     <table>
       <colgroup>
@@ -279,7 +300,7 @@ textarea{
           <div class="blue">8. Cooling food</div>
           <div class="tickline">✔ Are staff following the checks contained in Activity 9?</div>
           <div class="tickline">✔ Have the following records been completed?</div>
-          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool Reheat &amp; Serve</div>
+          <div class="indent">• Record No. 5a - Temperature Control Log Cook/Cool/Reheat &amp; Serve</div>
         </td>
         <td class="center"><input class="chk" type="checkbox"></td>
         <td class="center"><input class="chk" type="checkbox"></td>
@@ -530,15 +551,32 @@ textarea{
   </div>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
-const STORAGE_KEY = "record13_review_v1";
+const params = new URLSearchParams(window.location.search);
+const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
+
+const STORAGE_KEY = SITE === "Brewer St"
+  ? "record13_review_brewer_v2"
+  : "record13_review_kitchen_v2";
+
+let loadedRecordId = LOAD_ID || "";
+
+const backBtn = document.getElementById("backBtn");
+backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+
+const pageTitle = document.getElementById("pageTitle");
+pageTitle.textContent = SITE === "Brewer St"
+  ? "Record 13 – Food Safety Program Review (Brewer St)"
+  : "Record 13 – Food Safety Program Review (Kitchen)";
 
 function todayDate() {
   const d = new Date();
@@ -551,9 +589,28 @@ function todayDate() {
 function fillDates(){
   document.querySelectorAll(".date-auto").forEach(el=>{
     el.addEventListener("focus", function(){
-      if(!el.value) el.value = todayDate();
+      if(!el.value && !el.disabled) el.value = todayDate();
     });
   });
+}
+
+function getAllFields(){
+  return document.querySelectorAll("input, textarea");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById("lockedNote").style.display = "none";
 }
 
 async function saveForm(){
@@ -581,14 +638,24 @@ async function saveForm(){
         recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
       }
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Food Safety Program Review",
-        site: "Kitchen",
+        site: SITE,
         recordDate: recordDate,
         fields: {
           values: fields
         }
-      });
+      };
+
+      if (loadedRecordId) {
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -613,17 +680,54 @@ function loadForm(){
   });
 }
 
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
+
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields || !record.fields.values) return;
+
+    const fields = record.fields.values;
+    const els = document.querySelectorAll("input, textarea");
+    els.forEach((el,i)=>{
+      if(!fields[i]) return;
+      if(el.type === "checkbox"){
+        el.checked = !!fields[i].v;
+      } else {
+        el.value = fields[i].v || "";
+      }
+    });
+
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
+}
+
 function clearForm(){
   if(!confirm("Clear this form?")) return;
   document.querySelectorAll("input, textarea").forEach(el=>{
     if(el.type === "checkbox") el.checked = false;
     else el.value = "";
+    el.disabled = false;
   });
-  localStorage.removeItem(STORAGE_KEY);
+
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 fillDates();
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 </body>
 </html>
