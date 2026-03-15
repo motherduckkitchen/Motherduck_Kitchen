@@ -2,65 +2,78 @@
 <html lang="en">
 <head>
   <!-- 🔒 MDK auth guard + 30-min inactivity logout -->
-<style id="mdk-hide">html{visibility:hidden}</style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script>
-(function(){
-  const cfg = {
-    apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
-    authDomain: "mother-duck-kitchen.firebaseapp.com",
-    projectId: "mother-duck-kitchen",
-    storageBucket: "mother-duck-kitchen.appspot.com",
-    messagingSenderId: "925762762893",
-    appId: "1:925762762893:web:715285c11b9b30c9bccac4",
-    measurementId: "G-1EGZ0PWQYE"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(cfg);
-  const auth = firebase.auth();
+  <style id="mdk-hide">html{visibility:hidden}</style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+  (function(){
+    const cfg = {
+      apiKey: "AIzaSyDxnmPRp_Kr_FZj9Q_E8Dy1cxv1_D2kWhQ",
+      authDomain: "mother-duck-kitchen.firebaseapp.com",
+      projectId: "mother-duck-kitchen",
+      storageBucket: "mother-duck-kitchen.appspot.com",
+      messagingSenderId: "925762762893",
+      appId: "1:925762762893:web:715285c11b9b30c9bccac4",
+      measurementId: "G-1EGZ0PWQYE"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    const auth = firebase.auth();
 
-  // 30-minute inactivity
-  const TIMEOUT = 30*60*1000; let t;
-  function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
-  ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
+    const TIMEOUT = 30*60*1000; let t;
+    function reset(){ clearTimeout(t); t = setTimeout(()=>auth.signOut().then(()=>location.replace("login.html?msg=expired")), TIMEOUT); }
+    ["click","keydown","mousemove","touchstart","scroll","focus"].forEach(e=>window.addEventListener(e, reset, {passive:true}));
 
-  auth.onAuthStateChanged(u=>{
-    if(!u){ location.replace("login.html"); }
-    else { document.getElementById("mdk-hide")?.remove(); reset(); window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html")); }
-  });
-})();
-</script>
-<!-- 🔒 end guard --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Record 5b — Transport (Dispatch)</title>
-<style>
-  :root{--ink:#111827;--line:#e5e7eb;--grid:#eef2f7;--head:#f6f8fb;--muted:#6b7280;}
-  body{margin:0;font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:url("kitchen.jpg") center/cover fixed no-repeat;padding:20px;color:var(--ink)}
-  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:-1}
-  .wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,.1);padding:18px 20px 22px}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-  .btn{border:0;border-radius:12px;padding:8px 14px;font-weight:700;background:#eef2f7;color:#0f172a;cursor:pointer;box-shadow:0 2px 6px rgba(2,6,23,.06)}
-  .btn:hover{filter:brightness(.97)} .btn--back{background:#ffc107;color:#1f2937} .btn--primary{background:#0d6efd;color:#fff}
-  h1{font-size:20px;margin:8px 0 6px}
-  .targets{font-size:12px;color:#334155;border:1px dashed var(--grid);background:#fbfdff;border-radius:12px;padding:8px 10px;margin-bottom:8px}
-  table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:6px 8px;vertical-align:middle;background:#fff}
-  th:last-child,td:last-child{border-right:0} tr:last-child td{border-bottom:0}
-  thead th{background:var(--head);text-align:center;font-weight:700;font-size:13px}
-  input,textarea{width:100%;height:30px;border:1px solid var(--line);border-radius:10px;padding:4px 8px;font:inherit;background:#fff;box-sizing:border-box}
-  input.center{text-align:center}
-  .note{font-size:12px;color:var(--muted);margin-top:10px}
-  @page{size:A4 landscape;margin:10mm}
-  @media print{.toolbar{display:none} body{background:#fff}.overlay{display:none}}
-</style>
+    auth.onAuthStateChanged(u=>{
+      if(!u){ location.replace("login.html"); }
+      else {
+        document.getElementById("mdk-hide")?.remove();
+        reset();
+        window.mdkLogout = () => auth.signOut().then(()=>location.replace("login.html"));
+      }
+    });
+  })();
+  </script>
+  <!-- 🔒 end guard -->
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Record 5b — Transport (Dispatch)</title>
+  <style>
+    :root{--ink:#111827;--line:#e5e7eb;--grid:#eef2f7;--head:#f6f8fb;--muted:#6b7280;}
+    body{margin:0;font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:url("kitchen.jpg") center/cover fixed no-repeat;padding:20px;color:var(--ink)}
+    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:-1}
+    .wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,.1);padding:18px 20px 22px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .btn{border:0;border-radius:12px;padding:8px 14px;font-weight:700;background:#eef2f7;color:#0f172a;cursor:pointer;box-shadow:0 2px 6px rgba(2,6,23,.06)}
+    .btn:hover{filter:brightness(.97)}
+    .btn--back{background:#ffc107;color:#1f2937}
+    .btn--primary{background:#0d6efd;color:#fff}
+    h1{font-size:20px;margin:8px 0 6px}
+    .targets{font-size:12px;color:#334155;border:1px dashed var(--grid);background:#fbfdff;border-radius:12px;padding:8px 10px;margin-bottom:8px}
+    table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:6px 8px;vertical-align:middle;background:#fff}
+    th:last-child,td:last-child{border-right:0}
+    tr:last-child td{border-bottom:0}
+    thead th{background:var(--head);text-align:center;font-weight:700;font-size:13px}
+    input,textarea{width:100%;height:30px;border:1px solid var(--line);border-radius:10px;padding:4px 8px;font:inherit;background:#fff;box-sizing:border-box}
+    input.center{text-align:center}
+    .note{font-size:12px;color:var(--muted);margin-top:10px}
+    @page{size:A4 landscape;margin:10mm}
+    @media print{
+      .toolbar{display:none}
+      body{background:#fff}
+      .overlay{display:none}
+    }
+  </style>
 </head>
 <body>
 <div class="overlay"></div>
 <div class="wrap">
   <div class="toolbar">
-    <a href="kitchen.html"><button class="btn btn--back">← Back</button></a>
-    <button class="btn" onclick="window.print()">Print</button>
-    <button class="btn" onclick="clearForm()">Clear</button>
-    <button class="btn btn--primary" onclick="saveForm()">Save</button>
+    <a href="kitchen.html"><button class="btn btn--back" type="button">← Back</button></a>
+    <button class="btn" onclick="window.print()" type="button">Print</button>
+    <button class="btn" onclick="clearForm()" type="button">Clear</button>
+    <button class="btn btn--primary" onclick="saveForm()" type="button">Save</button>
   </div>
 
   <h1>Record 5b — Transport (Dispatch)</h1>
@@ -89,11 +102,23 @@
   <div class="note">If limits not met on arrival, record action (e.g., rapid chill/reheat/discard) and notify supervisor.</div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
   const KEY='mdk_rec5b_v1';
+
   function pad(n){return String(n).padStart(2,'0')}
-  function today(){const d=new Date();return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()}
-  function time(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+  function today(){
+    const d=new Date();
+    return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+  }
+  function time(){
+    const d=new Date();
+    return pad(d.getHours())+':'+pad(d.getMinutes());
+  }
 
   function row(){
     const tr=document.createElement('tr');
@@ -113,20 +138,89 @@
   function build(){
     const tb=document.getElementById('rows');
     for(let i=0;i<10;i++) tb.appendChild(row());
-    document.querySelectorAll('.d').forEach(el=>el.addEventListener('focus',()=>{if(!el.value) el.value=today()}));
-    document.querySelectorAll('.t').forEach(el=>el.addEventListener('focus',()=>{if(!el.value) el.value=time()}));
+
+    document.querySelectorAll('.d').forEach(el=>
+      el.addEventListener('focus',()=>{ if(!el.value) el.value=today(); })
+    );
+
+    document.querySelectorAll('.t').forEach(el=>
+      el.addEventListener('focus',()=>{ if(!el.value) el.value=time(); })
+    );
   }
 
-  function saveForm(){const v=[...document.querySelectorAll('#tbl input')].map(i=>i.value);localStorage.setItem(KEY,JSON.stringify(v));alert('Saved locally.')}
-  function loadForm(){const r=localStorage.getItem(KEY);if(!r)return;const v=JSON.parse(r)||[];[...document.querySelectorAll('#tbl input')].forEach((el,i)=>{if(v[i])el.value=v[i]})}
-  function clearForm(){document.querySelectorAll('#tbl input').forEach(el=>el.value='');localStorage.removeItem(KEY)}
-  build();loadForm();
+  function getAllValues(){
+    return [...document.querySelectorAll('#tbl input')].map(i=>i.value);
+  }
+
+  function getRowsAsObjects(){
+    const trs = [...document.querySelectorAll('#rows tr')];
+    return trs.map(tr => {
+      const inputs = tr.querySelectorAll('input');
+      return {
+        date: inputs[0]?.value?.trim() || "",
+        item: inputs[1]?.value?.trim() || "",
+        dispatchTime: inputs[2]?.value?.trim() || "",
+        dispatchTemp: inputs[3]?.value?.trim() || "",
+        arriveTime: inputs[4]?.value?.trim() || "",
+        arriveTemp: inputs[5]?.value?.trim() || "",
+        initials: inputs[6]?.value?.trim() || "",
+        notes: inputs[7]?.value?.trim() || ""
+      };
+    });
+  }
+
+  async function saveForm(){
+    const values = getAllValues();
+    localStorage.setItem(KEY, JSON.stringify(values));
+
+    try {
+      if (window.MDKArchive) {
+        const rows = getRowsAsObjects();
+
+        let recordDate = "";
+        for (const r of rows) {
+          if (r.date) {
+            recordDate = r.date;
+            break;
+          }
+        }
+        if (!recordDate) {
+          recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+        }
+
+        await window.MDKArchive.saveRecord({
+          type: "Transfer Log",
+          site: "Kitchen",
+          recordDate: recordDate,
+          fields: {
+            rows: rows
+          }
+        });
+      }
+
+      alert('Saved');
+    } catch (err) {
+      console.error("Archive save error:", err);
+      alert("Saved locally, but archive sync failed");
+    }
+  }
+
+  function loadForm(){
+    const r = localStorage.getItem(KEY);
+    if(!r) return;
+    const v = JSON.parse(r) || [];
+    [...document.querySelectorAll('#tbl input')].forEach((el,i)=>{
+      if(v[i]) el.value = v[i];
+    });
+  }
+
+  function clearForm(){
+    document.querySelectorAll('#tbl input').forEach(el=>el.value='');
+    localStorage.removeItem(KEY);
+  }
+
+  build();
+  loadForm();
 </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
