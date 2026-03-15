@@ -100,6 +100,7 @@ select, button{
 .record strong{
   display:block;
   margin-bottom:6px;
+  font-size:22px;
 }
 .meta{
   font-size:14px;
@@ -112,6 +113,32 @@ select, button{
   text-decoration:none;
   font-weight:700;
   color:#204a9b;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.action-btn{
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.open-btn{
+  background:#204a9b;
+  color:#fff;
+}
+.delete-btn{
+  background:#b42318;
+  color:#fff;
+}
+.message{
+  font-size:16px;
+  color:#444;
+  padding:12px 4px;
 }
 @media (max-width: 760px){
   .month-grid{
@@ -135,6 +162,7 @@ select, button{
 
     <div class="filters">
       <select id="yearSelect"></select>
+
       <select id="siteSelect">
         <option value="">All Sites</option>
         <option value="Kitchen">Kitchen</option>
@@ -142,26 +170,28 @@ select, button{
         <option value="Nursery">Nursery</option>
         <option value="Home">Home</option>
       </select>
+
       <select id="typeSelect">
         <option value="">All Record Types</option>
-        <option>Incoming Goods</option>
-        <option>Food Safety Program Review</option>
-        <option>Cook / Cool / Reheat</option>
-        <option>Transfer Log</option>
-        <option>Appliance Temps</option>
-        <option>Daily Cleaning</option>
-        <option>Weekly Cleaning</option>
-        <option>Monthly Cleaning</option>
-        <option>Equipment Log</option>
-        <option>Thermometer Calibration</option>
-        <option>Customer Complaints</option>
-        <option>Staff Training</option>
-        <option>Staff Illness / Accident</option>
-        <option>Bottle Receipt</option>
-        <option>Nursery Temperature & Puree Reheat Log</option>
-        <option>Invoices</option>
-        <option>Pest Control</option>
-        <option>Food Recall</option>
+        <option value="Incoming Goods">Incoming Goods</option>
+        <option value="Food Safety Program Review">Food Safety Program Review</option>
+        <option value="Cook Cool Reheat">Cook Cool Reheat</option>
+        <option value="Transfer Log">Transfer Log</option>
+        <option value="Appliance Temps">Appliance Temps</option>
+        <option value="Daily Cleaning">Daily Cleaning</option>
+        <option value="Weekly Cleaning">Weekly Cleaning</option>
+        <option value="Monthly Cleaning">Monthly Cleaning</option>
+        <option value="Equipment Log">Equipment Log</option>
+        <option value="Thermometer Calibration">Thermometer Calibration</option>
+        <option value="Customer Complaints">Customer Complaints</option>
+        <option value="Staff Training">Staff Training</option>
+        <option value="Staff Illness / Accident">Staff Illness / Accident</option>
+        <option value="Bottle Receipt">Bottle Receipt</option>
+        <option value="Nursery Temperature & Puree Reheat Log">Nursery Temperature & Puree Reheat Log</option>
+        <option value="Invoices">Invoices</option>
+        <option value="Pest Control">Pest Control</option>
+        <option value="Food Recall">Food Recall</option>
+        <option value="Heating Log">Heating Log</option>
       </select>
     </div>
 
@@ -170,12 +200,14 @@ select, button{
   </section>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
+
 <script>
 const monthGrid = document.getElementById("monthGrid");
 const recordsWrap = document.getElementById("recordsWrap");
@@ -187,6 +219,8 @@ let activeMonth = new Date().getMonth() + 1;
 
 function buildYears() {
   const currentYear = new Date().getFullYear();
+  yearSelect.innerHTML = "";
+
   for (let y = currentYear - 2; y <= currentYear + 1; y++) {
     const opt = document.createElement("option");
     opt.value = y;
@@ -204,17 +238,69 @@ async function buildMonths() {
     const btn = document.createElement("button");
     btn.className = "month-btn" + (i === activeMonth ? " active" : "");
     btn.textContent = `${window.MDKArchive.monthName(i)} (${counts[i] || 0})`;
-    btn.onclick = function() {
+    btn.onclick = async function() {
       activeMonth = i;
-      buildMonths();
-      loadRecords();
+      await buildMonths();
+      await loadRecords();
     };
     monthGrid.appendChild(btn);
   }
 }
 
+function getOpenPage(record) {
+  const pageMap = {
+    "Cook Cool Reheat": "record_5a_temp_control_log.html",
+    "Bottle Receipt": "bottle_receipt.html",
+    "Daily Cleaning": "cleaning_schedule_new.html",
+    "Weekly Cleaning": "cleaning_weekly_new.html",
+    "Monthly Cleaning": "cleaning_monthly_new.html",
+    "Appliance Temps": "appliance_temps.html",
+    "Heating Log": "record_5_heating_log.html",
+    "Thermometer Calibration": "thermometer_calibration.html",
+    "Pest Control": "pest_control.html",
+    "Customer Complaints": "customer_complaints.html",
+    "Staff Training": "staff_training.html",
+    "Food Recall": "food_recall.html",
+    "Equipment Log": "equipment_log.html",
+    "Food Safety Program Review": "record13.html",
+    "Nursery Temperature & Puree Reheat Log": "nursery_puree_log_new.html"
+  };
+
+  return pageMap[record.type] || "";
+}
+
+function openSavedRecord(id) {
+  const record = window.MDKArchiveCache[id];
+  if (!record) {
+    alert("Saved record not found.");
+    return;
+  }
+
+  const page = getOpenPage(record);
+  if (!page) {
+    alert("No page linked for this record type yet.");
+    return;
+  }
+
+  const siteParam = record.site ? `&site=${encodeURIComponent(record.site)}` : "";
+  window.location.href = `${page}?load=${encodeURIComponent(id)}${siteParam}`;
+}
+
+async function deleteSavedRecord(id) {
+  try {
+    const deleted = await window.MDKArchive.deleteRecord(id);
+    if (deleted) {
+      await buildMonths();
+      await loadRecords();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Could not delete record.");
+  }
+}
+
 async function loadRecords() {
-  recordsWrap.innerHTML = "Loading...";
+  recordsWrap.innerHTML = '<div class="message">Loading...</div>';
 
   try {
     const items = await window.MDKArchive.listRecords({
@@ -225,11 +311,12 @@ async function loadRecords() {
     });
 
     if (!items.length) {
-      recordsWrap.innerHTML = "<div>No saved records for this month.</div>";
+      recordsWrap.innerHTML = '<div class="message">No saved records for this month.</div>';
       return;
     }
 
     recordsWrap.innerHTML = "";
+
     items.forEach(item => {
       const card = document.createElement("div");
       card.className = "record";
@@ -241,6 +328,10 @@ async function loadRecords() {
         <div class="meta"><b>Month:</b> ${item.monthName || ""} ${item.year || ""}</div>
         <div class="meta"><b>Notes:</b> ${item.notes || ""}</div>
         <div class="meta"><b>Fields saved:</b> ${item.fields ? Object.keys(item.fields).length : 0}</div>
+        <div class="actions">
+          <button class="action-btn open-btn" onclick="openSavedRecord('${item.id}')">Open</button>
+          <button class="action-btn delete-btn" onclick="deleteSavedRecord('${item.id}')">Delete</button>
+        </div>
       `;
 
       if (item.fileInfo && item.fileInfo.downloadURL) {
@@ -255,8 +346,8 @@ async function loadRecords() {
       recordsWrap.appendChild(card);
     });
   } catch (err) {
-    recordsWrap.innerHTML = "Archive query error. Some Firestore filters may need an index.";
     console.error(err);
+    recordsWrap.innerHTML = '<div class="message">Archive query error.</div>';
   }
 }
 
@@ -264,6 +355,7 @@ yearSelect.addEventListener("change", async function() {
   await buildMonths();
   await loadRecords();
 });
+
 siteSelect.addEventListener("change", loadRecords);
 typeSelect.addEventListener("change", loadRecords);
 
