@@ -55,6 +55,11 @@
       color:#fff;
       border:none;
     }
+    .edit{
+      background:#16a34a;
+      color:#fff;
+      border:none;
+    }
     .card{
       background:rgba(255,255,255,.95);
       padding:20px;
@@ -138,6 +143,16 @@
       font-size:12px;
       color:#333;
     }
+    .locked-note{
+      margin-bottom:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7ed;
+      color:#9a3412;
+      border:1px solid #fdba74;
+      display:none;
+      font-weight:700;
+    }
     @page{
       size:A4 landscape;
       margin:10mm;
@@ -151,6 +166,7 @@
       h1,.title-row .left,.title-row .main,.driver{font-size:22px;}
       th,td,input{font-size:11px;}
       .footer{font-size:11px;}
+      .locked-note{display:none !important;}
     }
   </style>
 </head>
@@ -162,11 +178,16 @@
       <a href="kitchen.html" class="btn back">← Back</a>
       <a href="dashboard.html" class="btn">Home</a>
       <button class="btn" onclick="window.print()" type="button">Print</button>
+      <button id="editBtn" class="btn edit" onclick="unlockForEdit()" type="button" style="display:none;">Edit</button>
       <button class="btn" onclick="clearForm()" type="button">Clear</button>
       <button class="btn save" onclick="saveForm()" type="button">Save</button>
     </div>
 
     <div class="card">
+      <div id="lockedNote" class="locked-note">
+        This saved record is locked. Press Edit to make changes.
+      </div>
+
       <div class="driver">
         Drivers Name:
         <input type="text" id="driverName">
@@ -210,15 +231,19 @@
     </div>
   </main>
 
+  <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="firebase-loader.js"></script>
   <script src="archive_shared.js"></script>
 
   <script>
-    const STORAGE_KEY = "transport_log_shared_v1";
+    const params = new URLSearchParams(window.location.search);
+    const LOAD_ID = params.get("load") || "";
+    const STORAGE_KEY = "transport_log_brewer_v2";
+    let loadedRecordId = LOAD_ID || "";
 
     function todayDate() {
       const d = new Date();
@@ -263,13 +288,13 @@
 
           if (c === 0) {
             input.addEventListener("focus", function () {
-              if (!input.value) input.value = todayDate();
+              if (!input.value && !input.disabled) input.value = todayDate();
             });
           }
 
           if (c === 2 || c === 4) {
             input.addEventListener("focus", function () {
-              if (!input.value) input.value = currentTime();
+              if (!input.value && !input.disabled) input.value = currentTime();
             });
 
             input.addEventListener("input", function () {
@@ -297,6 +322,27 @@
       transit.value = minutesBetween(dispatch.value, delivery.value);
     }
 
+    function getAllFields() {
+      return document.querySelectorAll("#driverName, #rows input");
+    }
+
+    function lockAllFields() {
+      getAllFields().forEach(el => {
+        if (el.dataset.col === "6") return;
+        el.disabled = true;
+      });
+      document.getElementById("editBtn").style.display = "inline-flex";
+      document.getElementById("lockedNote").style.display = "block";
+    }
+
+    function unlockForEdit() {
+      getAllFields().forEach(el => {
+        if (el.dataset.col === "6") return;
+        el.disabled = false;
+      });
+      document.getElementById("lockedNote").style.display = "none";
+    }
+
     function getRowsAsObjects() {
       const allRows = [];
       for (let r = 0; r < 16; r++) {
@@ -317,6 +363,23 @@
         });
       }
       return allRows;
+    }
+
+    function flattenRows(rows) {
+      const values = [];
+      rows.forEach(row => {
+        values.push(
+          row.date || "",
+          row.description || "",
+          row.dispatchTime || "",
+          row.dispatchTemp || "",
+          row.deliveryTime || "",
+          row.deliveryTemp || "",
+          row.transitTime || "",
+          row.signOff || ""
+        );
+      });
+      return values;
     }
 
     async function saveForm() {
@@ -350,7 +413,7 @@
             recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
           }
 
-          await window.MDKArchive.saveRecord({
+          const archivePayload = {
             type: "Transfer Log",
             site: "Brewer St",
             recordDate: recordDate,
@@ -358,7 +421,17 @@
               driverName: data.driverName,
               rows: getRowsAsObjects()
             }
-          });
+          };
+
+          if (loadedRecordId) {
+            await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+          } else {
+            loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+          }
+        }
+
+        if (loadedRecordId) {
+          lockAllFields();
         }
 
         alert("Saved");
@@ -386,19 +459,59 @@
       }
     }
 
+    async function loadSavedArchiveRecord() {
+      if (!loadedRecordId || !window.MDKArchive) return;
+
+      try {
+        const record = await window.MDKArchive.loadRecord(loadedRecordId);
+        if (!record || !record.fields) return;
+
+        document.getElementById("driverName").value = record.fields.driverName || "";
+
+        const values = flattenRows(record.fields.rows || []);
+        const fields = document.querySelectorAll("#rows input");
+        fields.forEach((field, i) => {
+          field.value = values[i] || "";
+        });
+
+        for (let r = 0; r < 16; r++) {
+          updateTransit(r);
+        }
+
+        lockAllFields();
+      } catch (err) {
+        console.error("Load archive record error:", err);
+        alert("Could not open saved archive record.");
+      }
+    }
+
     function clearForm() {
       if (!confirm("Clear form?")) return;
 
       document.getElementById("driverName").value = "";
       document.querySelectorAll("#rows input").forEach(function (el) {
         el.value = "";
+        if (el.dataset.col !== "6") {
+          el.disabled = false;
+        }
       });
 
-      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("driverName").disabled = false;
+      document.getElementById("lockedNote").style.display = "none";
+      document.getElementById("editBtn").style.display = loadedRecordId ? "inline-flex" : "none";
+
+      if (!loadedRecordId) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
 
     buildRows();
-    loadForm();
+
+    if (loadedRecordId) {
+      loadSavedArchiveRecord();
+    } else {
+      loadForm();
+    }
   </script>
 </body>
 </html>
