@@ -97,7 +97,7 @@
       font-weight:600;
       color:#333;
     }
-    input, select, textarea{
+    input, textarea{
       width:100%;
       box-sizing:border-box;
       border:1px solid #cfd6dd;
@@ -189,26 +189,18 @@
     <div class="top">
       <img class="logo" src="logo.png" alt="Mother Duck Logo">
       <div class="site-title">Mother Duck Kitchen</div>
-      <div class="subtitle">Invoices</div>
+      <div id="pageSubtitle" class="subtitle">Invoices</div>
     </div>
 
     <section class="card-wide">
       <div class="toolbar">
         <a class="nav-btn" href="dashboard.html">Home</a>
-        <a class="nav-btn" href="kitchen.html">Kitchen</a>
-        <a class="nav-btn" href="brewer_st.html">Brewer St</a>
+        <a id="backSiteBtn" class="nav-btn" href="kitchen.html">Back to Site</a>
       </div>
 
       <div class="panes">
         <div class="pane">
-          <h2>Add Invoice</h2>
-
-          <label for="site">Site</label>
-          <select id="site">
-            <option>Kitchen</option>
-            <option>Brewer St</option>
-            <option>Nursery</option>
-          </select>
+          <h2 id="addTitle">Add Invoice</h2>
 
           <label for="item">Item</label>
           <input id="item" type="text" placeholder="Item name">
@@ -224,11 +216,11 @@
 
           <button class="save-btn" onclick="saveInvoice()">Save Invoice</button>
 
-          <div class="helper">Auto date/time stamp is added when saved.</div>
+          <div class="helper">This page is for one site only.</div>
         </div>
 
         <div class="pane">
-          <h2>Saved Invoices</h2>
+          <h2 id="savedTitle">Saved Invoices</h2>
           <div id="invoiceList" class="invoice-list"></div>
         </div>
       </div>
@@ -244,7 +236,20 @@
   <script src="archive_shared.js"></script>
 
   <script>
-    const STORAGE_KEY = "mdk_invoices_v3";
+    const params = new URLSearchParams(window.location.search);
+    const SITE = params.get("site") || "Kitchen";
+
+    const STORAGE_KEY = SITE === "Brewer St"
+      ? "mdk_invoices_brewer_v1"
+      : "mdk_invoices_kitchen_v1";
+
+    document.getElementById("pageSubtitle").textContent = SITE + " Invoices";
+    document.getElementById("addTitle").textContent = "Add Invoice - " + SITE;
+    document.getElementById("savedTitle").textContent = "Saved Invoices - " + SITE;
+
+    const backSiteBtn = document.getElementById("backSiteBtn");
+    backSiteBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+    backSiteBtn.textContent = SITE === "Brewer St" ? "Brewer St" : "Kitchen";
 
     function nowStamp() {
       const d = new Date();
@@ -282,7 +287,7 @@
 
         card.innerHTML = `
           <strong>${inv.item || "No item entered"}</strong>
-          <div class="meta"><b>Site:</b> ${inv.site || ""}</div>
+          <div class="meta"><b>Site:</b> ${SITE}</div>
           <div class="meta"><b>Temp °C:</b> ${inv.temp || ""}</div>
           <div class="meta"><b>Note:</b> ${inv.note || ""}</div>
           <div class="meta"><b>Saved:</b> ${inv.savedAt || ""}</div>
@@ -306,7 +311,6 @@
     }
 
     async function saveInvoice() {
-      const site = document.getElementById("site").value;
       const item = document.getElementById("item").value.trim();
       const temp = document.getElementById("temp").value.trim();
       const note = document.getElementById("note").value.trim();
@@ -316,7 +320,6 @@
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
       saved.push({
-        site,
         item,
         temp,
         note,
@@ -330,7 +333,7 @@
         if (window.MDKArchive) {
           await window.MDKArchive.saveRecord({
             type: "Invoices",
-            site: site,
+            site: SITE,
             recordDate: todayDateOnly(),
             notes: note,
             file: photo,
