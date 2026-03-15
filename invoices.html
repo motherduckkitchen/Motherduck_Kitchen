@@ -46,7 +46,7 @@
       margin-top:4px;
     }
     .card-wide{
-      max-width:780px;
+      max-width:900px;
       margin:0 auto;
       background:rgba(255,255,255,.82);
       backdrop-filter:blur(10px);
@@ -151,6 +151,23 @@
       font-size:14px;
       margin:3px 0;
     }
+    .invoice-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .mini-btn{
+      padding:8px 12px;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .delete-btn{
+      background:#b42318;
+      color:#fff;
+    }
     .empty{
       color:#777;
       font-size:14px;
@@ -203,7 +220,7 @@
           <textarea id="note" placeholder="Supplier or note"></textarea>
 
           <label for="photo">Photo upload</label>
-          <input id="photo" type="file" accept="image/*">
+          <input id="photo" type="file" accept="image/*,application/pdf">
 
           <button class="save-btn" onclick="saveInvoice()">Save Invoice</button>
 
@@ -218,15 +235,16 @@
     </section>
   </main>
 
+  <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="firebase-loader.js"></script>
   <script src="archive_shared.js"></script>
 
   <script>
-    const STORAGE_KEY = "mdk_invoices_v2";
+    const STORAGE_KEY = "mdk_invoices_v3";
 
     function nowStamp() {
       const d = new Date();
@@ -257,7 +275,8 @@
         return;
       }
 
-      saved.slice().reverse().forEach(function(inv) {
+      saved.slice().reverse().forEach(function(inv, reverseIndex) {
+        const realIndex = saved.length - 1 - reverseIndex;
         const card = document.createElement("div");
         card.className = "invoice-card";
 
@@ -268,10 +287,22 @@
           <div class="meta"><b>Note:</b> ${inv.note || ""}</div>
           <div class="meta"><b>Saved:</b> ${inv.savedAt || ""}</div>
           <div class="meta"><b>Photo:</b> ${inv.photoName || "No photo uploaded"}</div>
+          <div class="invoice-actions">
+            <button class="mini-btn delete-btn" onclick="deleteLocalInvoice(${realIndex})">Delete</button>
+          </div>
         `;
 
         wrap.appendChild(card);
       });
+    }
+
+    function deleteLocalInvoice(index) {
+      if (!confirm("Delete this local invoice card?")) return;
+
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      saved.splice(index, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      loadInvoices();
     }
 
     async function saveInvoice() {
