@@ -1,4 +1,4 @@
-  <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -190,6 +190,13 @@ textarea{
 
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
 const STORAGE_KEY = "staff_illness_v3";
 
@@ -326,7 +333,7 @@ function updateAlertBanner(){
   document.getElementById("illnessAlert").style.display = show ? "block" : "none";
 }
 
-function saveForm(){
+async function saveForm(){
   const data = {
     fields: [],
     notes: document.getElementById("notesBox").value
@@ -340,7 +347,38 @@ function saveForm(){
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
+
+  try {
+    if (window.MDKArchive) {
+      let recordDate = "";
+      const dateInputs = document.querySelectorAll('#rows tr td:nth-child(2) input');
+
+      dateInputs.forEach(function(el){
+        if (!recordDate && el.value.trim()) {
+          recordDate = el.value.trim();
+        }
+      });
+
+      if (!recordDate) {
+        recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+      }
+
+      await window.MDKArchive.saveRecord({
+        type: "Staff Illness / Accident",
+        site: "Home",
+        recordDate: recordDate,
+        notes: data.notes,
+        fields: {
+          values: data.fields
+        }
+      });
+    }
+
+    alert("Saved");
+  } catch (err) {
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
@@ -390,9 +428,3 @@ loadForm();
 
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
