@@ -168,6 +168,13 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
     const STORAGE_KEY = "food_recall_v2";
 
@@ -190,13 +197,85 @@
       }
     }
 
-    function saveForm() {
+    function parseAnyDate(text) {
+      if (!text) return null;
+
+      const trimmed = text.trim();
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        const d = new Date(trimmed + "T00:00:00");
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      const parts = trimmed.split("/").map(s => s.trim());
+      if (parts.length === 3) {
+        const dd = parseInt(parts[0], 10);
+        const mm = parseInt(parts[1], 10);
+        const yyyy = parseInt(parts[2], 10);
+        if (dd && mm && yyyy) {
+          const d = new Date(yyyy, mm - 1, dd);
+          if (
+            d.getFullYear() === yyyy &&
+            d.getMonth() === mm - 1 &&
+            d.getDate() === dd
+          ) {
+            return d;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function formatDDMMYYYY(date) {
+      const dd = String(date.getDate()).padStart(2, "0");
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const yyyy = date.getFullYear();
+      return dd + "/" + mm + "/" + yyyy;
+    }
+
+    async function saveForm() {
       const data = [];
       document.querySelectorAll("#rows input").forEach(function(el) {
         data.push(el.value);
       });
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      alert("Saved");
+
+      try {
+        if (window.MDKArchive) {
+          let recordDate = "";
+
+          const rows = document.querySelectorAll("#rows tr");
+          rows.forEach(function(row) {
+            if (recordDate) return;
+            const cells = row.querySelectorAll("input");
+            const useBy = cells[4] ? cells[4].value.trim() : "";
+            const parsed = parseAnyDate(useBy);
+            if (parsed) {
+              recordDate = formatDDMMYYYY(parsed);
+            }
+          });
+
+          if (!recordDate) {
+            recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+          }
+
+          await window.MDKArchive.saveRecord({
+            type: "Food Recall",
+            site: "Home",
+            recordDate: recordDate,
+            fields: {
+              values: data
+            }
+          });
+        }
+
+        alert("Saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     function loadForm() {
@@ -222,9 +301,3 @@
   </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
