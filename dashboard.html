@@ -10,66 +10,116 @@ body{
   margin:0;
   font-family:Arial,Helvetica,sans-serif;
   background:url("kitchen.jpg") center/cover no-repeat fixed;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  min-height:100vh;
 }
 .wash{
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,.45);
-  backdrop-filter:blur(3px);
+  background:rgba(255,255,255,.42);
+  backdrop-filter:blur(4px);
 }
 .page{
   position:relative;
   z-index:1;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.wrap{
+  width:100%;
+  max-width:980px;
   text-align:center;
 }
 .logo{
-  width:90px;
+  width:105px;
   display:block;
-  margin:auto;
+  margin:0 auto 8px;
 }
 .site-title{
-  font-size:38px;
-  font-weight:700;
-  color:white;
-  margin-top:10px;
-  margin-bottom:25px;
-  text-shadow:0 2px 6px rgba(0,0,0,.4);
+  font-size:42px;
+  font-weight:800;
+  color:#fff;
+  text-shadow:0 3px 10px rgba(0,0,0,.30);
+  margin-bottom:18px;
 }
-.card-wide{
-  width:600px;
-  max-width:90%;
-  margin:auto;
-  background:rgba(255,255,255,.85);
-  backdrop-filter:blur(10px);
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
+.card{
+  max-width:860px;
+  margin:0 auto;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(12px);
+  border-radius:28px;
+  padding:34px 34px 24px;
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.5);
 }
 .menu-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:20px;
+  gap:24px 28px;
 }
 .btn{
-  padding:18px;
-  background:#204a9b;
-  color:white;
-  border-radius:14px;
-  font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:84px;
+  padding:16px 20px;
+  background:#2c52a0;
+  color:#fff;
   text-decoration:none;
-  display:block;
-  font-size:18px;
+  border-radius:20px;
+  font-weight:800;
+  font-size:20px;
+  letter-spacing:.2px;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.18),
+    0 0 16px rgba(255,255,255,.24);
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
 .btn:hover{
-  background:#183c80;
+  transform:translateY(-2px);
+  background:#244996;
+  box-shadow:
+    0 16px 28px rgba(0,0,0,.22),
+    0 0 22px rgba(255,255,255,.34);
 }
-.secondary{
-  background:#ddd;
+.logout-wrap{
+  margin-top:28px;
+  display:flex;
+  justify-content:center;
+}
+.logout{
+  min-width:260px;
+  min-height:80px;
+  background:#dddde2;
   color:#333;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.10),
+    0 0 14px rgba(255,255,255,.30);
+}
+.logout:hover{
+  background:#d2d2d8;
+}
+@media (max-width: 760px){
+  .site-title{
+    font-size:34px;
+  }
+  .card{
+    padding:24px 20px 20px;
+  }
+  .menu-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+  .btn{
+    min-height:74px;
+    font-size:18px;
+  }
+  .logout{
+    min-width:220px;
+  }
 }
 </style>
 </head>
@@ -78,25 +128,30 @@ body{
 <div class="wash"></div>
 
 <main class="page">
-  <img class="logo" src="logo.png" alt="Mother Duck Logo">
-  <div class="site-title">Mother Duck Kitchen</div>
+  <div class="wrap">
+    <img class="logo" src="logo.png" alt="Mother Duck Logo">
+    <div class="site-title">Mother Duck Kitchen</div>
 
-  <section class="card-wide">
-    <div class="menu-grid">
-      <a class="btn" href="kitchen.html">Kitchen</a>
-      <a class="btn" href="brewer_st.html">Brewer St</a>
-      <a class="btn" href="invoices.html">Invoices</a>
-      <a class="btn" href="nursery_new.html">Nursery</a>
-      <a class="btn" href="food_safety_bible_new.html">Food Safety Bible</a>
-      <a class="btn" href="pest_control.html">Pest Control</a>
-      <a class="btn" href="food_recall.html">Food Recall</a>
-      <a class="btn" href="staff_illness.html">Staff Illness / Accident</a>    
-    </div>
+    <section class="card">
+      <div class="menu-grid">
+        <a class="btn" href="kitchen.html">Kitchen</a>
+        <a class="btn" href="brewer_st.html">Brewer St</a>
 
-    <div style="margin-top:20px">
-      <a class="btn secondary" style="display:inline-block;width:200px" href="index.html">Log out</a>
-    </div>
-  </section>
+        <a class="btn" href="invoices.html">Invoices</a>
+        <a class="btn" href="nursery_new.html">Nursery</a>
+
+        <a class="btn" href="food_safety_bible.pdf" target="_blank">Food Safety Bible</a>
+        <a class="btn" href="pest_control.html">Pest Control</a>
+
+        <a class="btn" href="food_recall.html">Food Recall</a>
+        <a class="btn" href="staff_illness.html">Staff Illness / Accident</a>
+      </div>
+
+      <div class="logout-wrap">
+        <a class="btn logout" href="index.html">Log out</a>
+      </div>
+    </section>
+  </div>
 </main>
 </body>
 </html>
