@@ -29,6 +29,7 @@ body{
   gap:10px;
   margin-bottom:14px;
   flex-wrap:wrap;
+  align-items:center;
 }
 .btn{
   padding:10px 16px;
@@ -43,6 +44,10 @@ body{
 .back{
   background:#ffc107;
   color:black;
+}
+.edit{
+  background:#16a34a;
+  color:white;
 }
 .card{
   background:white;
@@ -111,6 +116,16 @@ th{
   font-size:12px;
   color:#333;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @page{
   size:A4 landscape;
   margin:10mm;
@@ -121,6 +136,7 @@ th{
   .wash{display:none;}
   .page{max-width:none;padding:0;}
   .card{box-shadow:none;border-radius:0;padding:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
@@ -131,15 +147,20 @@ th{
 <main class="page">
 
 <div class="toolbar">
-  <a class="btn back" href="kitchen.html">Back</a>
+  <a id="backBtn" class="btn back" href="kitchen.html">Back</a>
   <button class="btn" onclick="window.print()">Print</button>
+  <button id="editBtn" class="btn edit" onclick="unlockForEdit()" style="display:none;">Edit</button>
   <button class="btn" onclick="clearForm()">Clear</button>
   <button class="btn" onclick="saveForm()">Save</button>
 </div>
 
 <div class="card">
 
-<h1>Record 6c – Cleaning Schedule - Monthly</h1>
+<h1 id="pageTitle">Record 6c – Cleaning Schedule - Monthly</h1>
+
+<div id="lockedNote" class="locked-note">
+  This saved record is locked. Press Edit to make changes.
+</div>
 
 <div class="topline">
   <label>
@@ -236,15 +257,30 @@ th{
 </div>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
-const STORAGE_KEY = "cleaning_monthly_clean_v1";
+const params = new URLSearchParams(window.location.search);
+const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
+
+const STORAGE_KEY = SITE === "Brewer St"
+  ? "cleaning_monthly_clean_brewer_v2"
+  : "cleaning_monthly_clean_kitchen_v2";
+
+let loadedRecordId = LOAD_ID || "";
+
+document.getElementById("backBtn").href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+document.getElementById("pageTitle").textContent =
+  SITE === "Brewer St"
+    ? "Record 6c – Cleaning Schedule - Monthly (Brewer St)"
+    : "Record 6c – Cleaning Schedule - Monthly (Kitchen)";
 
 const monthlyTasks = [
   "Clear out cupboards and wipe over shelves. Kitchen and Pantry",
@@ -335,16 +371,62 @@ function buildYearlyRows(){
   });
 }
 
-async function saveForm(){
+function getAllFields(){
+  return document.querySelectorAll("#yearDate, #monthlyRows input, #yearlyRows input");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById("lockedNote").style.display = "none";
+}
+
+function collectFormData(){
   const data = {
     yearDate: document.getElementById("yearDate").value,
+    displayYear: document.getElementById("showYear").innerText,
+    monthlyTasks: monthlyTasks,
+    yearlyTasks: yearlyTasks,
     monthly: [],
     yearly: []
   };
 
-  document.querySelectorAll('#monthlyRows input').forEach(el => data.monthly.push(el.value));
-  document.querySelectorAll('#yearlyRows input').forEach(el => data.yearly.push(el.value));
+  document.querySelectorAll("#monthlyRows input").forEach(el => data.monthly.push(el.value));
+  document.querySelectorAll("#yearlyRows input").forEach(el => data.yearly.push(el.value));
 
+  return data;
+}
+
+function applyFormData(data){
+  document.getElementById("yearDate").value = data.yearDate || "";
+  updateYearDisplay();
+
+  const monthlyInputs = document.querySelectorAll("#monthlyRows input");
+  monthlyInputs.forEach((el, i) => {
+    el.value = (data.monthly && data.monthly[i]) || "";
+  });
+
+  const yearlyInputs = document.querySelectorAll("#yearlyRows input");
+  yearlyInputs.forEach((el, i) => {
+    if ((i % 5) === 0) {
+      el.value = (data.yearly && data.yearly[i]) || yearlyTasks[Math.floor(i / 5)] || "";
+    } else {
+      el.value = (data.yearly && data.yearly[i]) || "";
+    }
+  });
+}
+
+async function saveForm(){
+  const data = collectFormData();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
   try {
@@ -353,19 +435,22 @@ async function saveForm(){
         ? formatDDMMYYYYFromISO(data.yearDate)
         : window.MDKArchive.formatDDMMYYYY(new Date());
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Monthly Cleaning",
-        site: "Kitchen",
+        site: SITE,
         recordDate: recordDate,
-        fields: {
-          yearDate: data.yearDate,
-          displayYear: document.getElementById("showYear").innerText,
-          monthlyTasks: monthlyTasks,
-          yearlyTasks: yearlyTasks,
-          monthly: data.monthly,
-          yearly: data.yearly
-        }
-      });
+        fields: data
+      };
+
+      if (loadedRecordId) {
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -378,25 +463,23 @@ async function saveForm(){
 function loadForm(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(!saved) return;
-
   const data = JSON.parse(saved);
+  applyFormData(data);
+}
 
-  document.getElementById("yearDate").value = data.yearDate || "";
-  updateYearDisplay();
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
 
-  const monthlyInputs = document.querySelectorAll('#monthlyRows input');
-  monthlyInputs.forEach((el, i) => {
-    el.value = (data.monthly && data.monthly[i]) || "";
-  });
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
 
-  const yearlyInputs = document.querySelectorAll('#yearlyRows input');
-  yearlyInputs.forEach((el, i) => {
-    if((i % 5) === 0){
-      el.value = (data.yearly && data.yearly[i]) || el.value || "";
-    } else {
-      el.value = (data.yearly && data.yearly[i]) || "";
-    }
-  });
+    applyFormData(record.fields);
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
 }
 
 function clearForm(){
@@ -405,8 +488,13 @@ function clearForm(){
   document.getElementById("yearDate").value = "";
   document.getElementById("showYear").innerText = "";
 
-  document.querySelectorAll('#monthlyRows input').forEach(el => el.value = "");
-  document.querySelectorAll('#yearlyRows input').forEach((el, i) => {
+  document.querySelectorAll("#monthlyRows input").forEach(el => {
+    el.value = "";
+    el.disabled = false;
+  });
+
+  document.querySelectorAll("#yearlyRows input").forEach((el, i) => {
+    el.disabled = false;
     if((i % 5) === 0){
       el.value = yearlyTasks[Math.floor(i / 5)] || "";
     } else {
@@ -414,13 +502,24 @@ function clearForm(){
     }
   });
 
-  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("yearDate").disabled = false;
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildMonthlyRows();
 buildYearlyRows();
 document.getElementById("yearDate").addEventListener("change", updateYearDisplay);
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 
 </body>
