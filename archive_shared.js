@@ -8,8 +8,8 @@
     firebase.initializeApp(window.MDK_FIREBASE_CONFIG);
   }
 
-  const db = firebase.firestore();
-  const storage = firebase.storage ? firebase.storage() : null;
+  const db = window.MDK_DB || firebase.firestore();
+  const storage = window.MDK_STORAGE || (firebase.storage ? firebase.storage() : null);
 
   function pad(n) {
     return String(n).padStart(2, "0");
@@ -112,23 +112,30 @@
 
     let query = db.collection("auditRecords")
       .where("year", "==", year)
-      .where("monthNum", "==", monthNum)
-      .orderBy("savedAt", "desc");
+      .where("monthNum", "==", monthNum);
 
-    if (filters.site) {
+    if (filters.site && filters.site !== "All Sites") {
       query = query.where("site", "==", filters.site);
     }
 
-    if (filters.type) {
+    if (filters.type && filters.type !== "All Record Types") {
       query = query.where("type", "==", filters.type);
     }
 
     const snap = await query.get();
 
-    return snap.docs.map(doc => ({
+    const rows = snap.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    rows.sort((a, b) => {
+      const aTime = a.savedAt && a.savedAt.toMillis ? a.savedAt.toMillis() : 0;
+      const bTime = b.savedAt && b.savedAt.toMillis ? b.savedAt.toMillis() : 0;
+      return bTime - aTime;
+    });
+
+    return rows;
   }
 
   async function listMonthCounts(year) {
@@ -148,49 +155,26 @@
   }
 
   async function getAllRecords() {
-    const snap = await db.collection("auditRecords")
-      .orderBy("savedAt", "desc")
-      .get();
+    const snap = await db.collection("auditRecords").get();
 
-    return snap.docs.map(doc => ({
+    const rows = snap.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    rows.sort((a, b) => {
+      const aTime = a.savedAt && a.savedAt.toMillis ? a.savedAt.toMillis() : 0;
+      const bTime = b.savedAt && b.savedAt.toMillis ? b.savedAt.toMillis() : 0;
+      return bTime - aTime;
+    });
+
+    return rows;
   }
 
   window.MDKArchive = {
     saveRecord,
-    async function listRecords(filters) {
-  const year = parseInt(filters.year, 10);
-  const monthNum = parseInt(filters.monthNum, 10);
-
-  let query = db.collection("auditRecords")
-    .where("year", "==", year)
-    .where("monthNum", "==", monthNum);
-
-  if (filters.site && filters.site !== "All Sites") {
-    query = query.where("site", "==", filters.site);
-  }
-
-  if (filters.type && filters.type !== "All Record Types") {
-    query = query.where("type", "==", filters.type);
-  }
-
-  const snap = await query.get();
-
-  const rows = snap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-  rows.sort((a, b) => {
-    const aTime = a.savedAt && a.savedAt.toMillis ? a.savedAt.toMillis() : 0;
-    const bTime = b.savedAt && b.savedAt.toMillis ? b.savedAt.toMillis() : 0;
-    return bTime - aTime;
-  });
-
-  return rows;
-}    listMonthCounts,
+    listRecords,
+    listMonthCounts,
     getAllRecords,
     formatDDMMYYYY,
     parseDDMMYYYY,
