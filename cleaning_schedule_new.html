@@ -123,7 +123,7 @@ th{
 <main class="page">
 
 <div class="toolbar">
-  <a class="btn back" href="kitchen.html">Back</a>
+  <a id="backBtn" class="btn back" href="kitchen.html">Back</a>
   <button class="btn" onclick="window.print()">Print</button>
   <button class="btn" onclick="clearForm()">Clear</button>
   <button class="btn" onclick="saveForm()">Save</button>
@@ -131,7 +131,7 @@ th{
 
 <div class="card">
 
-<h1>Record 6a - Daily Cleaning & Sanitising Schedule</h1>
+<h1 id="pageTitle">Record 6a - Daily Cleaning & Sanitising Schedule</h1>
 
 <div class="topline">
   <label>Week Starting:
@@ -194,7 +194,20 @@ th{
 <script src="archive_shared.js"></script>
 
 <script>
-const STORAGE_KEY = "cleaning_schedule_ticks_v1";
+const params = new URLSearchParams(window.location.search);
+const SITE = params.get("site") || "Kitchen";
+
+const STORAGE_KEY = SITE === "Brewer St"
+  ? "cleaning_schedule_ticks_brewer_v1"
+  : "cleaning_schedule_ticks_kitchen_v1";
+
+const backBtn = document.getElementById("backBtn");
+backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+
+const pageTitle = document.getElementById("pageTitle");
+pageTitle.textContent = SITE === "Brewer St"
+  ? "Record 6a - Daily Cleaning & Sanitising Schedule (Brewer St)"
+  : "Record 6a - Daily Cleaning & Sanitising Schedule (Kitchen)";
 
 const tasks = [
   "AFTER EACH USE - Chopping boards (if knife marks discard and order new ones)",
@@ -303,19 +316,24 @@ function buildRows(){
   });
 }
 
-async function saveForm(){
-  const data = {
-    weekStart: document.getElementById("weekStart").value,
-    weekEnd: document.getElementById("weekEnd").innerText,
-    checks: []
-  };
-
+function getChecks(){
+  const checks = [];
   document.querySelectorAll("#rows input").forEach(el => {
-    data.checks.push({
+    checks.push({
       type: el.dataset.type,
       value: el.type === "checkbox" ? el.checked : el.value
     });
   });
+  return checks;
+}
+
+async function saveForm(){
+  const data = {
+    site: SITE,
+    weekStart: document.getElementById("weekStart").value,
+    weekEnd: document.getElementById("weekEnd").innerText,
+    checks: getChecks()
+  };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
@@ -325,7 +343,7 @@ async function saveForm(){
 
       await window.MDKArchive.saveRecord({
         type: "Daily Cleaning",
-        site: "Kitchen",
+        site: SITE,
         recordDate: recordDate,
         fields: {
           weekStart: data.weekStart,
