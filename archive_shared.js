@@ -147,10 +147,22 @@
     return counts;
   }
 
+  async function getAllRecords() {
+    const snap = await db.collection("auditRecords")
+      .orderBy("savedAt", "desc")
+      .get();
+
+    return snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  }
+
   window.MDKArchive = {
     saveRecord,
     listRecords,
     listMonthCounts,
+    getAllRecords,
     formatDDMMYYYY,
     parseDDMMYYYY,
     monthName
