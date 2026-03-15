@@ -6,14 +6,7 @@
 <title>Record 3b - Bottle Receipt</title>
 
 <style>
-<script src="firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-loader.js"></script>
-<script src="archive_shared.js"></script>
-  body{
+body{
   margin:0;
   font-family:Arial,Helvetica,sans-serif;
   background:url("kitchen.jpg") center center / cover no-repeat fixed;
@@ -164,8 +157,15 @@ td:nth-child(7) input{
 </div>
 
 </div>
-
 </main>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-loader.js"></script>
+<script src="archive_shared.js"></script>
 
 <script>
 const STORAGE_KEY = "bottle_receipt_v1";
@@ -197,17 +197,20 @@ function buildRows(){
 
       if(c === 4){
         const select = document.createElement("select");
+
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "";
+        blank.selected = true;
+        select.appendChild(blank);
+
         for(let n = 1; n <= 10; n++){
           const opt = document.createElement("option");
           opt.value = n;
           opt.textContent = n;
           select.appendChild(opt);
         }
-        const blank = document.createElement("option");
-        blank.value = "";
-        blank.textContent = "";
-        blank.selected = true;
-        select.insertBefore(blank, select.firstChild);
+
         td.appendChild(select);
       } else {
         const input = document.createElement("input");
@@ -235,18 +238,68 @@ function buildRows(){
   }
 }
 
-function saveForm(){
+function getRowsAsObjects(){
+  const out = [];
+  document.querySelectorAll("#rows tr").forEach(tr => {
+    const fields = tr.querySelectorAll("input, select");
+    out.push({
+      date: fields[0]?.value?.trim() || "",
+      time: fields[1]?.value?.trim() || "",
+      childName: fields[2]?.value?.trim() || "",
+      visualCheck: fields[3]?.value?.trim() || "",
+      bottlesDelivered: fields[4]?.value?.trim() || "",
+      fridgeTime: fields[5]?.value?.trim() || "",
+      checkedBy: fields[6]?.value?.trim() || ""
+    });
+  });
+  return out;
+}
+
+async function saveForm(){
   const data = [];
   document.querySelectorAll("table input, table select").forEach(function(el){
     data.push(el.value);
   });
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
+
+  try{
+    if(window.MDKArchive){
+      const rows = getRowsAsObjects();
+      let recordDate = "";
+
+      for(const r of rows){
+        if(r.date){
+          recordDate = r.date;
+          break;
+        }
+      }
+
+      if(!recordDate){
+        recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+      }
+
+      await window.MDKArchive.saveRecord({
+        type: "Bottle Receipt",
+        site: "Nursery",
+        recordDate: recordDate,
+        fields: {
+          rows
+        }
+      });
+    }
+
+    alert("Saved");
+  } catch(err){
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(!saved) return;
+
   const data = JSON.parse(saved);
   const fields = document.querySelectorAll("table input, table select");
   fields.forEach(function(field, i){
