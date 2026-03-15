@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audit Archive</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center/cover no-repeat fixed;
+  min-height:100vh;
+}
+.wash{
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.42);
+  backdrop-filter:blur(4px);
+}
+.page{
+  position:relative;
+  z-index:1;
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px;
+}
+.card{
+  background:rgba(255,255,255,.90);
+  backdrop-filter:blur(10px);
+  border-radius:26px;
+  padding:24px;
+  box-shadow:0 18px 40px rgba(0,0,0,.18);
+}
+h1{
+  margin:0 0 18px;
+  text-align:center;
+  font-size:34px;
+  color:#1f2937;
+}
+.topbar{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.btn{
+  padding:12px 18px;
+  border-radius:16px;
+  background:#f8fafc;
+  color:#29405a;
+  border:1px solid #d6dde5;
+  text-decoration:none;
+  font-weight:700;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
+}
+.filters{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:20px;
+}
+select, button{
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid #cfd6dd;
+  font-size:15px;
+}
+.month-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+.month-btn{
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:#2c52a0;
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 10px 20px rgba(0,0,0,.16), 0 0 16px rgba(255,255,255,.22);
+}
+.month-btn.active{
+  background:#183e88;
+}
+.records{
+  display:grid;
+  gap:12px;
+}
+.record{
+  border:1px solid #d7dde4;
+  border-radius:16px;
+  padding:14px;
+  background:#fff;
+}
+.record strong{
+  display:block;
+  margin-bottom:6px;
+}
+.meta{
+  font-size:14px;
+  color:#555;
+  margin:2px 0;
+}
+.download{
+  margin-top:8px;
+  display:inline-block;
+  text-decoration:none;
+  font-weight:700;
+  color:#204a9b;
+}
+@media (max-width: 760px){
+  .month-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wash"></div>
+
+<main class="page">
+  <section class="card">
+    <h1>Audit Archive</h1>
+
+    <div class="topbar">
+      <a class="btn" href="dashboard.html">Home</a>
+      <a class="btn" href="kitchen.html">Kitchen</a>
+      <a class="btn" href="brewer_st.html">Brewer St</a>
+    </div>
+
+    <div class="filters">
+      <select id="yearSelect"></select>
+      <select id="siteSelect">
+        <option value="">All Sites</option>
+        <option value="Kitchen">Kitchen</option>
+        <option value="Brewer St">Brewer St</option>
+        <option value="Nursery">Nursery</option>
+        <option value="Home">Home</option>
+      </select>
+      <select id="typeSelect">
+        <option value="">All Record Types</option>
+        <option>Incoming Goods</option>
+        <option>Food Safety Program Review</option>
+        <option>Cook / Cool / Reheat</option>
+        <option>Transfer Log</option>
+        <option>Appliance Temps</option>
+        <option>Daily Cleaning</option>
+        <option>Weekly Cleaning</option>
+        <option>Monthly Cleaning</option>
+        <option>Equipment Log</option>
+        <option>Thermometer Calibration</option>
+        <option>Customer Complaints</option>
+        <option>Staff Training</option>
+        <option>Staff Illness / Accident</option>
+        <option>Bottle Receipt</option>
+        <option>Nursery Temperature & Puree Reheat Log</option>
+        <option>Invoices</option>
+        <option>Pest Control</option>
+        <option>Food Recall</option>
+      </select>
+    </div>
+
+    <div class="month-grid" id="monthGrid"></div>
+    <div class="records" id="recordsWrap"></div>
+  </section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+<script>
+const monthGrid = document.getElementById("monthGrid");
+const recordsWrap = document.getElementById("recordsWrap");
+const yearSelect = document.getElementById("yearSelect");
+const siteSelect = document.getElementById("siteSelect");
+const typeSelect = document.getElementById("typeSelect");
+
+let activeMonth = new Date().getMonth() + 1;
+
+function buildYears() {
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+  }
+}
+
+async function buildMonths() {
+  const counts = await window.MDKArchive.listMonthCounts(yearSelect.value);
+  monthGrid.innerHTML = "";
+
+  for (let i = 1; i <= 12; i++) {
+    const btn = document.createElement("button");
+    btn.className = "month-btn" + (i === activeMonth ? " active" : "");
+    btn.textContent = `${window.MDKArchive.monthName(i)} (${counts[i] || 0})`;
+    btn.onclick = function() {
+      activeMonth = i;
+      buildMonths();
+      loadRecords();
+    };
+    monthGrid.appendChild(btn);
+  }
+}
+
+async function loadRecords() {
+  recordsWrap.innerHTML = "Loading...";
+
+  try {
+    const items = await window.MDKArchive.listRecords({
+      year: yearSelect.value,
+      monthNum: activeMonth,
+      site: siteSelect.value,
+      type: typeSelect.value
+    });
+
+    if (!items.length) {
+      recordsWrap.innerHTML = "<div>No saved records for this month.</div>";
+      return;
+    }
+
+    recordsWrap.innerHTML = "";
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "record";
+
+      card.innerHTML = `
+        <strong>${item.type || ""}</strong>
+        <div class="meta"><b>Site:</b> ${item.site || ""}</div>
+        <div class="meta"><b>Record Date:</b> ${item.recordDate || ""}</div>
+        <div class="meta"><b>Month:</b> ${item.monthName || ""} ${item.year || ""}</div>
+        <div class="meta"><b>Notes:</b> ${item.notes || ""}</div>
+        <div class="meta"><b>Fields saved:</b> ${item.fields ? Object.keys(item.fields).length : 0}</div>
+      `;
+
+      if (item.fileInfo && item.fileInfo.downloadURL) {
+        const link = document.createElement("a");
+        link.className = "download";
+        link.href = item.fileInfo.downloadURL;
+        link.target = "_blank";
+        link.textContent = `Open file: ${item.fileInfo.name || "attachment"}`;
+        card.appendChild(link);
+      }
+
+      recordsWrap.appendChild(card);
+    });
+  } catch (err) {
+    recordsWrap.innerHTML = "Archive query error. Some Firestore filters may need an index.";
+    console.error(err);
+  }
+}
+
+yearSelect.addEventListener("change", async function() {
+  await buildMonths();
+  await loadRecords();
+});
+siteSelect.addEventListener("change", loadRecords);
+typeSelect.addEventListener("change", loadRecords);
+
+buildYears();
+buildMonths().then(loadRecords);
+</script>
+</body>
+</html>
