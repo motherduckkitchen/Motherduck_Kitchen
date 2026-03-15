@@ -178,7 +178,7 @@
 
   <main class="page">
     <div class="mdk-toolbar">
-      <a href="kitchen.html" class="mdk-btn--back">← Back</a>
+      <a id="backBtn" href="kitchen.html" class="mdk-btn--back">← Back</a>
       <a href="dashboard.html" class="mdk-btn--pill">🏠 Home</a>
       <button class="mdk-btn--pill" onclick="window.print()" type="button">🖨 Print</button>
       <button class="mdk-btn--pill" onclick="clearForm()" type="button">🧹 Clear</button>
@@ -186,7 +186,7 @@
     </div>
 
     <div class="sheet-card">
-      <h1 class="sheet-title">Record 4 – Temperature Control Log ~ Appliances</h1>
+      <h1 id="pageTitle" class="sheet-title">Record 4 – Temperature Control Log ~ Appliances</h1>
 
       <table>
         <colgroup>
@@ -242,8 +242,28 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
-    const STORAGE_KEY = "appliance_temps_v1";
+    const params = new URLSearchParams(window.location.search);
+    const SITE = params.get("site") || "Kitchen";
+
+    const STORAGE_KEY = SITE === "Brewer St"
+      ? "appliance_temps_brewer_v1"
+      : "appliance_temps_kitchen_v1";
+
+    const backBtn = document.getElementById("backBtn");
+    backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+
+    const pageTitle = document.getElementById("pageTitle");
+    pageTitle.textContent = SITE === "Brewer St"
+      ? "Record 4 – Temperature Control Log ~ Appliances (Brewer St)"
+      : "Record 4 – Temperature Control Log ~ Appliances (Kitchen)";
 
     function todayDate() {
       const d = new Date();
@@ -315,11 +335,66 @@
       }
     }
 
-    function saveForm() {
+    function getRowsAsObjects() {
+      const rows = [];
+      const tableRows = document.querySelectorAll("#tbody tr");
+
+      tableRows.forEach(tr => {
+        const inputs = tr.querySelectorAll("input");
+        rows.push({
+          date: inputs[0]?.value?.trim() || "",
+          time: inputs[1]?.value?.trim() || "",
+          fridgeItem: inputs[2]?.value?.trim() || "",
+          fridgeTemp: inputs[3]?.value?.trim() || "",
+          freezerItem: inputs[4]?.value?.trim() || "",
+          freezerTemp: inputs[5]?.value?.trim() || "",
+          dishwasher: inputs[6]?.value?.trim() || "",
+          dishwasherTemp: inputs[7]?.value?.trim() || "",
+          visualCheck: inputs[8]?.value?.trim() || "",
+          correctiveAction: inputs[9]?.value?.trim() || "",
+          sign: inputs[10]?.value?.trim() || ""
+        });
+      });
+
+      return rows;
+    }
+
+    async function saveForm() {
       const inputs = document.querySelectorAll("#tbody input");
       const data = Array.from(inputs).map(i => i.value);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      alert("Saved");
+
+      try {
+        if (window.MDKArchive) {
+          const rows = getRowsAsObjects();
+
+          let recordDate = "";
+          for (const row of rows) {
+            if (row.date) {
+              recordDate = row.date;
+              break;
+            }
+          }
+
+          if (!recordDate) {
+            recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+          }
+
+          await window.MDKArchive.saveRecord({
+            type: "Appliance Temps",
+            site: SITE,
+            recordDate: recordDate,
+            fields: {
+              rows: rows
+            }
+          });
+        }
+
+        alert("Saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     function clearForm() {
@@ -332,9 +407,3 @@
   </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
