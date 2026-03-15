@@ -1,182 +1,280 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Archive • Mother Duck Kitchen</title>
-<style>
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f1f5f9;color:#0f172a}
-  .wrap{max-width:920px;margin:28px auto;padding:0 18px}
-  .top{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-  .btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;background:#e2e8f0}
-  .btn--accent{background:#0d6efd;color:#fff}
-  .btn--warn{background:#ffc107}
-  .card{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.1);padding:16px;margin-top:12px}
-  h1{margin:6px 0 8px}
-  textarea,pre{width:100%;min-height:160px;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font-family:ui-monospace,Consolas,monospace;background:#fff}
-  label{font-weight:700;margin-right:8px}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
-  select,input[type="month"]{border:1px solid #d1d5db;border-radius:10px;padding:8px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Audit Archive</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:url("kitchen.jpg") center/cover no-repeat fixed;
+      min-height:100vh;
+    }
+    .wash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.45);
+      backdrop-filter:blur(4px);
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      min-height:100vh;
+      padding:24px;
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:12px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      background:#f8fafc;
+      border:1px solid #cfd6dd;
+      color:#222;
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
+    }
+    .back{
+      background:#ffc107;
+      color:#4b0082;
+      border:none;
+    }
+    .card{
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border-radius:24px;
+      padding:24px;
+      box-shadow:0 12px 30px rgba(0,0,0,.14);
+    }
+    h1{
+      margin:0 0 18px;
+      font-size:32px;
+      color:#1f2937;
+    }
+    .site-block{
+      margin-bottom:22px;
+      border:1px solid #d7dde4;
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .site-head{
+      background:#244996;
+      color:#fff;
+      padding:14px 18px;
+      font-size:22px;
+      font-weight:800;
+    }
+    .year-block{
+      padding:16px 18px;
+      border-top:1px solid #e5e7eb;
+    }
+    .year-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:10px;
+      color:#1f2937;
+    }
+    .month-block{
+      margin:10px 0 18px;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      overflow:hidden;
+    }
+    .month-title{
+      background:#f4f6f8;
+      padding:10px 14px;
+      font-size:17px;
+      font-weight:700;
+      color:#223;
+    }
+    .record-list{
+      padding:10px 14px 14px;
+      display:grid;
+      gap:10px;
+    }
+    .record-card{
+      border:1px solid #d9dee6;
+      border-radius:12px;
+      padding:12px 14px;
+      background:#fff;
+    }
+    .record-type{
+      font-size:16px;
+      font-weight:800;
+      color:#1f2937;
+      margin-bottom:4px;
+    }
+    .record-meta{
+      font-size:13px;
+      color:#555;
+      margin:2px 0;
+    }
+    .empty{
+      color:#666;
+      font-size:14px;
+      padding:8px 0;
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <a class="btn btn--warn" href="index.html">← Back</a>
-    <button class="btn" onclick="window.print()">Print</button>
-  </div>
+<div class="wash"></div>
 
-  <h1>Archive Center</h1>
-  <div class="card">
-    <div class="row">
-      <label for="monthPick">Month to save:</label>
-      <input type="month" id="monthPick">
-      <button class="btn btn--accent" onclick="saveMonth()">Save Month (download JSON)</button>
+<main class="page">
+  <div class="wrap">
+    <div class="toolbar">
+      <a href="dashboard.html" class="btn back">← Back</a>
+      <a href="kitchen.html" class="btn">Kitchen</a>
+      <a href="brewer_st.html" class="btn">Brewer St</a>
     </div>
-    <div class="row">
-      <label for="yearPick">Bundle year:</label>
-      <input type="text" id="yearPick" placeholder="2025" style="width:100px">
-      <input type="file" id="yearFiles" multiple accept=".json">
-      <button class="btn" onclick="bundleYear()">Bundle Year (upload 12 month files → 1 JSON)</button>
+
+    <div class="card">
+      <h1>Audit Archive</h1>
+      <div id="archiveWrap" class="empty">Loading archive...</div>
     </div>
   </div>
+</main>
 
-  <div class="card">
-    <div class="row">
-      <input type="file" id="loadFile" accept=".json">
-      <button class="btn" onclick="loadArchive()">Load</button>
-      <label for="recordSel">Record:</label>
-      <select id="recordSel"></select>
-      <button class="btn btn--accent" onclick="renderRecord()">View / Print</button>
-    </div>
-    <pre id="viewer" style="min-height:220px"></pre>
-  </div>
-
-  <div class="card">
-    <h3>What gets archived?</h3>
-    <p>All known record keys from this browser:</p>
-    <ul id="knownList" style="margin:6px 0 0 16px"></ul>
-  </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
 
 <script>
-// Add any extra keys here if you create new logs later.
-const KNOWN_KEYS = [
-  'mdk_5a_v1',
-  'mdk_cleaning_daily',
-  'mdk_cleaning_weekly',
-  'mdk_cleaning_monthly',
-  'mdk_suppliers_v1',
-  'mdk_supplier_agreements_v1',
-  'mdk_incoming_v1',
-  'mdk_appliances_v1',
-  'mdk_heatinglog_v1',
-  'mdk_transport_v1',
-  'mdk_supervisor_checklist_v1'
+const MONTH_NAMES = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
 ];
 
-document.getElementById('knownList').innerHTML =
-  KNOWN_KEYS.map(k=>`<li><code>${k}</code></li>`).join('');
+function parseDDMMYYYY(str){
+  if(!str) return null;
+  const parts = str.split("/").map(s => s.trim());
+  if(parts.length !== 3) return null;
 
-// ------------- Save Month -------------
-function saveMonth(){
-  const month = document.getElementById('monthPick').value; // "YYYY-MM"
-  const stamp = month || new Date().toISOString().slice(0,7);
-  const bundle = { version:'mdk-archive-1', month: stamp, created: new Date().toISOString(), data:{} };
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const year = parseInt(parts[2], 10);
+  if(!day || !month || !year) return null;
 
-  KNOWN_KEYS.forEach(k=>{
-    const v = localStorage.getItem(k);
-    if (v) bundle.data[k] = JSON.parse(v);
+  const d = new Date(year, month - 1, day);
+  if(
+    d.getFullYear() !== year ||
+    d.getMonth() !== month - 1 ||
+    d.getDate() !== day
+  ) return null;
+
+  return d;
+}
+
+function groupRecords(records){
+  const grouped = {};
+
+  records.forEach(record => {
+    const site = record.site || "Unknown";
+    const dateObj = parseDDMMYYYY(record.recordDate || "");
+    const year = dateObj ? String(dateObj.getFullYear()) : "No Year";
+    const monthIndex = dateObj ? dateObj.getMonth() : -1;
+    const monthName = monthIndex >= 0 ? MONTH_NAMES[monthIndex] : "No Month";
+
+    if(!grouped[site]) grouped[site] = {};
+    if(!grouped[site][year]) grouped[site][year] = {};
+    if(!grouped[site][year][monthName]) grouped[site][year][monthName] = [];
+
+    grouped[site][year][monthName].push(record);
   });
 
-  const blob = new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `MDK_${stamp}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  alert('Month archive downloaded.');
+  return grouped;
 }
 
-// ------------- Bundle Year -------------
-async function bundleYear(){
-  const year = (document.getElementById('yearPick').value || '').trim();
-  if(!year){ alert('Type a year (e.g., 2025)'); return; }
-  const files = Array.from(document.getElementById('yearFiles').files);
-  if(files.length === 0){ alert('Select the 12 month JSON files for that year.'); return; }
+function monthSortValue(monthName){
+  const idx = MONTH_NAMES.indexOf(monthName);
+  return idx === -1 ? 999 : idx;
+}
 
-  const months = {};
-  for(const f of files){
-    const text = await f.text();
-    try{
-      const obj = JSON.parse(text);
-      if(obj?.version === 'mdk-archive-1'){
-        months[obj.month] = obj;
-      }
-    }catch(_){}
+function renderArchive(records){
+  const wrap = document.getElementById("archiveWrap");
+
+  if(!records || !records.length){
+    wrap.innerHTML = `<div class="empty">No saved archive records yet.</div>`;
+    return;
   }
-  const bundle = { version:'mdk-year-1', year, created:new Date().toISOString(), months };
-  const blob = new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `MDK_${year}_YEAR.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  alert('Year bundle downloaded.');
+
+  const grouped = groupRecords(records);
+  const siteNames = Object.keys(grouped).sort();
+
+  let html = "";
+
+  siteNames.forEach(site => {
+    html += `<div class="site-block">`;
+    html += `<div class="site-head">${site}</div>`;
+
+    const years = Object.keys(grouped[site]).sort((a,b) => Number(b) - Number(a));
+
+    years.forEach(year => {
+      html += `<div class="year-block">`;
+      html += `<div class="year-title">${year}</div>`;
+
+      const months = Object.keys(grouped[site][year]).sort((a,b) => monthSortValue(a) - monthSortValue(b));
+
+      months.forEach(month => {
+        html += `<div class="month-block">`;
+        html += `<div class="month-title">${month}</div>`;
+        html += `<div class="record-list">`;
+
+        grouped[site][year][month].forEach(record => {
+          html += `
+            <div class="record-card">
+              <div class="record-type">${record.type || "Record"}</div>
+              <div class="record-meta"><strong>Date:</strong> ${record.recordDate || ""}</div>
+              <div class="record-meta"><strong>Site:</strong> ${record.site || ""}</div>
+              <div class="record-meta"><strong>ID:</strong> ${record.id || ""}</div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  wrap.innerHTML = html;
 }
 
-// ------------- Load & View -------------
-let ARCHIVE = null;
+async function loadArchive(){
+  const wrap = document.getElementById("archiveWrap");
 
-function loadArchive(){
-  const f = document.getElementById('loadFile').files[0];
-  if(!f){ alert('Choose a JSON file.'); return; }
-  const r = new FileReader();
-  r.onload = () => {
-    try{
-      const obj = JSON.parse(r.result);
-      ARCHIVE = obj;
-      const sel = document.getElementById('recordSel');
-      sel.innerHTML = '';
-      // Month archive
-      if(obj.version === 'mdk-archive-1'){
-        Object.keys(obj.data).forEach(k=>{
-          const opt = document.createElement('option');
-          opt.value = k; opt.textContent = `${k} (month ${obj.month})`;
-          sel.appendChild(opt);
-        });
-      }
-      // Year bundle
-      else if(obj.version === 'mdk-year-1'){
-        Object.keys(obj.months).sort().forEach(m=>{
-          Object.keys(obj.months[m].data).forEach(k=>{
-            const opt = document.createElement('option');
-            opt.value = `${m}::${k}`; opt.textContent = `${k} – ${m}`;
-            sel.appendChild(opt);
-          });
-        });
-      }
-      document.getElementById('viewer').textContent = 'Loaded. Choose a record above and click "View / Print".';
-    }catch(e){
-      ARCHIVE = null;
-      document.getElementById('viewer').textContent = 'Invalid JSON.';
+  try{
+    if(window.MDKArchive && window.MDKArchive.getAllRecords){
+      const records = await window.MDKArchive.getAllRecords();
+      renderArchive(records);
+      return;
     }
-  };
-  r.readAsText(f);
+
+    wrap.innerHTML = `<div class="empty">Archive tool not ready yet.</div>`;
+  } catch(err){
+    console.error(err);
+    wrap.innerHTML = `<div class="empty">Could not load archive.</div>`;
+  }
 }
 
-function renderRecord(){
-  if(!ARCHIVE){ alert('Load a file first.'); return; }
-  const sel = document.getElementById('recordSel').value;
-  let payload = null;
-  if(ARCHIVE.version === 'mdk-archive-1'){
-    payload = ARCHIVE.data[sel] || null;
-  }else if(ARCHIVE.version === 'mdk-year-1'){
-    const [m,k] = sel.split('::');
-    payload = ARCHIVE.months[m]?.data?.[k] || null;
-  }
-  document.getElementById('viewer').textContent = payload ? JSON.stringify(payload,null,2) : 'No data.';
-}
+loadArchive();
 </script>
 </body>
 </html>
