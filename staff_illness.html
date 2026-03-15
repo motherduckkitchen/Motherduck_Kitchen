@@ -1,4 +1,4 @@
-<!doctype html>
+  <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -80,7 +80,7 @@ th{
   background:#f4f6f8;
   text-align:center;
 }
-input,select{
+input,select,textarea{
   width:100%;
   border:none;
   outline:none;
@@ -89,6 +89,15 @@ input,select{
   padding:4px;
   box-sizing:border-box;
   font-family:Arial,Helvetica,sans-serif;
+}
+textarea{
+  min-height:120px;
+  margin-top:10px;
+  border:1px solid #999;
+  border-radius:8px;
+  background:white;
+  padding:10px;
+  resize:vertical;
 }
 .note{
   margin-top:16px;
@@ -104,6 +113,16 @@ input,select{
   background:#eef8ee !important;
   color:#1f6b2d;
   font-weight:700;
+}
+.alert-box{
+  display:none;
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:12px;
+  background:#ffe2e2;
+  color:#9b1c1c;
+  font-weight:700;
+  border:1px solid #efb0b0;
 }
 @media print{
   .toolbar{display:none;}
@@ -137,8 +156,8 @@ input,select{
     <col style="width:18%">
     <col style="width:12%">
     <col style="width:20%">
-    <col style="width:18%">
-    <col style="width:18%">
+    <col style="width:16%">
+    <col style="width:20%">
     <col style="width:14%">
   </colgroup>
   <thead>
@@ -146,7 +165,7 @@ input,select{
       <th>Staff members name</th>
       <th>Date</th>
       <th>Type of illness</th>
-      <th>Other illness details</th>
+      <th>Other illness</th>
       <th>Exclusion</th>
       <th>Checked by</th>
     </tr>
@@ -154,28 +173,25 @@ input,select{
   <tbody id="rows"></tbody>
 </table>
 
+<div id="illnessAlert" class="alert-box">
+  ⚠ Staff must be excluded from food handling for 48 hours after symptoms stop.
+</div>
+
 <div class="note">
   Staff should not return to handling food until they have received clearance from a medical practitioner.
 </div>
 
 <div class="note">
-<strong>Notes / Illness Details:</strong>
-<div class="lines">
-<div class="line"></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line"></div>
+  <strong>Notes / Illness Details:</strong>
+  <textarea id="notesBox" placeholder="Add notes about illness, exclusion period, doctor clearance, or other details..."></textarea>
 </div>
-</div>
-  
+
 </div>
 
 </main>
 
 <script>
-const STORAGE_KEY = "staff_illness_v2";
+const STORAGE_KEY = "staff_illness_v3";
 
 const illnessOptions = [
   "",
@@ -270,6 +286,7 @@ function buildRows(){
 
     illnessSelect.addEventListener("change", function(){
       updateExclusion(i);
+      updateAlertBanner();
     });
   }
 }
@@ -299,14 +316,29 @@ function updateExclusion(row){
   }
 }
 
+function updateAlertBanner(){
+  const values = Array.from(document.querySelectorAll('select[data-row]')).map(s => s.value);
+  const show = values.includes("Vomiting") ||
+               values.includes("Diarrhoea") ||
+               values.includes("Vomiting and diarrhoea") ||
+               values.includes("Gastroenteritis");
+
+  document.getElementById("illnessAlert").style.display = show ? "block" : "none";
+}
+
 function saveForm(){
-  const data = [];
+  const data = {
+    fields: [],
+    notes: document.getElementById("notesBox").value
+  };
+
   document.querySelectorAll("table input, table select").forEach(function(el){
-    data.push({
+    data.fields.push({
       tag: el.tagName,
       value: el.value
     });
   });
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   alert("Saved");
 }
@@ -319,23 +351,34 @@ function loadForm(){
   const fields = document.querySelectorAll("table input, table select");
 
   fields.forEach(function(field, i){
-    if(data[i]) field.value = data[i].value || "";
+    if(data.fields && data.fields[i]){
+      field.value = data.fields[i].value || "";
+    }
   });
+
+  document.getElementById("notesBox").value = data.notes || "";
 
   for(let i = 0; i < 12; i++){
     updateExclusion(i);
   }
+  updateAlertBanner();
 }
 
 function clearForm(){
   if(!confirm("Clear form?")) return;
+
   document.querySelectorAll("table input, table select").forEach(function(el){
     el.value = "";
   });
+
+  document.getElementById("notesBox").value = "";
+
   localStorage.removeItem(STORAGE_KEY);
+
   for(let i = 0; i < 12; i++){
     updateExclusion(i);
   }
+  updateAlertBanner();
 }
 
 buildRows();
