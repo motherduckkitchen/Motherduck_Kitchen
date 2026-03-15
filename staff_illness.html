@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record 11 – Staff Illness / Accident</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:url("kitchen.jpg") center center / cover no-repeat fixed;
+}
+
+.wash{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.45);
+backdrop-filter:blur(2px);
+}
+
+.page{
+position:relative;
+z-index:1;
+max-width:1200px;
+margin:auto;
+padding:20px;
+}
+
+.toolbar{
+display:flex;
+gap:10px;
+margin-bottom:14px;
+flex-wrap:wrap;
+}
+
+.btn{
+padding:10px 16px;
+border-radius:12px;
+border:none;
+font-weight:700;
+cursor:pointer;
+background:#f8fafc;
+border:1px solid #cfd6dd;
+text-decoration:none;
+color:#222;
+box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+
+.back{
+background:#ffc107;
+}
+
+.save{
+background:#007bff;
+color:white;
+}
+
+.card{
+background:rgba(255,255,255,.95);
+padding:20px;
+border-radius:20px;
+box-shadow:0 12px 30px rgba(0,0,0,.14);
+}
+
+h1{
+margin:0 0 16px;
+font-size:28px;
+color:#1f2937;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+th,td{
+border:1px solid #222;
+padding:6px;
+font-size:13px;
+}
+
+th{
+background:#f4f6f8;
+}
+
+input{
+width:100%;
+border:none;
+outline:none;
+background:transparent;
+font-size:13px;
+padding:4px;
+}
+
+td:first-child input{
+text-align:left;
+}
+
+.note{
+margin-top:16px;
+font-size:13px;
+color:#333;
+}
+
+@media print{
+
+.toolbar{display:none;}
+body{background:white;}
+.wash{display:none;}
+.card{box-shadow:none;border-radius:0;}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wash"></div>
+
+<main class="page">
+
+<div class="toolbar">
+<a href="dashboard.html" class="btn back">← Back</a>
+<a href="dashboard.html" class="btn">🏠 Home</a>
+<button onclick="window.print()" class="btn">🖨 Print</button>
+<button onclick="clearForm()" class="btn">Clear</button>
+<button onclick="saveForm()" class="btn save">Save</button>
+</div>
+
+<div class="card">
+
+<h1>Record 11 – Staff Illness / Accident</h1>
+
+<table>
+
+<thead>
+<tr>
+<th>Staff members name</th>
+<th>Date</th>
+<th>Type of illness</th>
+<th>Checked by</th>
+</tr>
+</thead>
+
+<tbody id="rows"></tbody>
+
+</table>
+
+<div class="note">
+Staff should not return to handling food until they have received clearance from a medical practitioner.
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+const STORAGE_KEY="staff_illness_v1";
+
+function todayDate(){
+
+const d=new Date();
+
+const dd=String(d.getDate()).padStart(2,"0");
+const mm=String(d.getMonth()+1).padStart(2,"0");
+const yyyy=d.getFullYear();
+
+return dd+"/"+mm+"/"+yyyy;
+
+}
+
+function buildRows(){
+
+const tbody=document.getElementById("rows");
+
+for(let i=0;i<12;i++){
+
+const tr=document.createElement("tr");
+
+for(let c=0;c<4;c++){
+
+const td=document.createElement("td");
+const input=document.createElement("input");
+
+input.type="text";
+
+if(c===1){
+
+input.addEventListener("focus",function(){
+
+if(!input.value) input.value=todayDate();
+
+});
+
+}
+
+td.appendChild(input);
+tr.appendChild(td);
+
+}
+
+tbody.appendChild(tr);
+
+}
+
+}
+
+function saveForm(){
+
+const data=[];
+
+document.querySelectorAll("table input").forEach(el=>{
+data.push(el.value);
+});
+
+localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+
+alert("Saved");
+
+}
+
+function loadForm(){
+
+const saved=localStorage.getItem(STORAGE_KEY);
+
+if(!saved) return;
+
+const data=JSON.parse(saved);
+
+const fields=document.querySelectorAll("table input");
+
+fields.forEach((field,i)=>{
+
+field.value=data[i]||"";
+
+});
+
+}
+
+function clearForm(){
+
+if(!confirm("Clear form?")) return;
+
+document.querySelectorAll("table input").forEach(el=>{
+
+el.value="";
+
+});
+
+localStorage.removeItem(STORAGE_KEY);
+
+}
+
+buildRows();
+loadForm();
+
+</script>
+
+</body>
+</html>
