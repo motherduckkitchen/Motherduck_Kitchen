@@ -106,18 +106,23 @@
       line-height:1.55;
       color:#222;
     }
-    .lines{
-      margin-top:8px;
-    }
-    .line{
-      border-bottom:2px solid #666;
-      height:22px;
-      margin-top:6px;
-    }
     .warn{
       background:#ffe2e2 !important;
       color:#9b1c1c;
       font-weight:700;
+    }
+    .corrective-box{
+      width:100%;
+      min-height:120px;
+      margin-top:8px;
+      border:1px solid #999;
+      border-radius:10px;
+      background:#fff;
+      padding:10px;
+      resize:vertical;
+      font-size:13px;
+      font-family:Arial,Helvetica,sans-serif;
+      box-sizing:border-box;
     }
     @page{
       size:A4 landscape;
@@ -132,6 +137,10 @@
       h1{font-size:24px;}
       th,td,input,select{font-size:11px;}
       .note{font-size:11px;}
+      .corrective-box{
+        border:1px solid #999;
+        min-height:90px;
+      }
     }
   </style>
 </head>
@@ -197,7 +206,7 @@
     </table>
 
     <div class="note">
-      <strong>Processes:</strong>
+      <strong>Processes:</strong><br>
       Cook all potentially hazardous food to at least 75°C.<br>
       Reheat cooled potentially hazardous food that is to be served hot to at least 60°C.<br><br>
       Cooked potentially hazardous food that is being cooled for later use must be cooled from:<br>
@@ -207,12 +216,7 @@
 
     <div class="note">
       <strong>CORRECTIVE ACTIONS:</strong>
-      <div class="lines">
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-      </div>
+      <textarea id="correctiveActions" class="corrective-box" placeholder="Type corrective actions here..."></textarea>
     </div>
 
     <div class="note">
@@ -234,8 +238,8 @@ const params = new URLSearchParams(window.location.search);
 const SITE = params.get("site") || "Kitchen";
 
 const STORAGE_KEY = SITE === "Brewer St"
-  ? "record5a_temp_control_brewer_v1"
-  : "record5a_temp_control_kitchen_v1";
+  ? "record5a_temp_control_brewer_v2"
+  : "record5a_temp_control_kitchen_v2";
 
 document.getElementById("backBtn").href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
 document.getElementById("pageTitle").textContent =
@@ -317,7 +321,7 @@ function buildRows(){
       input.dataset.col = c;
 
       if(c === 0) addAutoDate(input);
-      if([3,4,6,8,10,12,13].includes(c)) addAutoTime(input);
+      if([3,4,6,8,10,12].includes(c)) addAutoTime(input);
 
       if(c === 5){
         input.placeholder = "°C";
@@ -383,7 +387,12 @@ async function saveForm(){
     values.push(el.value);
   });
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+  const payload = {
+    values: values,
+    correctiveActions: document.getElementById("correctiveActions").value
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 
   try{
     if(window.MDKArchive){
@@ -405,7 +414,10 @@ async function saveForm(){
         type: "Cook Cool Reheat",
         site: SITE,
         recordDate: recordDate,
-        fields: { rows }
+        fields: {
+          rows,
+          correctiveActions: document.getElementById("correctiveActions").value
+        }
       });
     }
 
@@ -420,7 +432,8 @@ function loadForm(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(!saved) return;
 
-  const values = JSON.parse(saved) || [];
+  const payload = JSON.parse(saved);
+  const values = payload.values || [];
   const fields = document.querySelectorAll("#rows input, #rows select");
 
   fields.forEach((el, i) => {
@@ -433,6 +446,8 @@ function loadForm(){
     if(col === 11) warnField(el, null, 5);
     if(col === 13) warnField(el, 60, null);
   });
+
+  document.getElementById("correctiveActions").value = payload.correctiveActions || "";
 }
 
 function clearForm(){
@@ -443,9 +458,12 @@ function clearForm(){
     el.classList.remove("warn");
   });
 
+  document.getElementById("correctiveActions").value = "";
   localStorage.removeItem(STORAGE_KEY);
 }
 
 buildRows();
 loadForm();
 </script>
+</body>
+</html>
