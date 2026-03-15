@@ -29,6 +29,7 @@ body{
   gap:10px;
   margin-bottom:14px;
   flex-wrap:wrap;
+  align-items:center;
 }
 .btn{
   padding:10px 16px;
@@ -50,6 +51,11 @@ body{
 .save{
   background:#007bff;
   color:white;
+  border:none;
+}
+.edit{
+  background:#16a34a;
+  color:#fff;
   border:none;
 }
 .card{
@@ -110,11 +116,22 @@ td:nth-child(6) textarea{
   font-size:12px;
   color:#333;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @media print{
   .toolbar{display:none;}
   body{background:white;}
   .wash{display:none;}
   .card{box-shadow:none;border-radius:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
@@ -126,16 +143,21 @@ td:nth-child(6) textarea{
 <main class="page">
 
 <div class="toolbar">
-  <a href="kitchen.html" class="btn back">← Back</a>
+  <a id="backBtn" href="kitchen.html" class="btn back">← Back</a>
   <a href="dashboard.html" class="btn">🏠 Home</a>
   <button onclick="window.print()" class="btn">🖨 Print</button>
+  <button id="editBtn" onclick="unlockForEdit()" class="btn edit" style="display:none;">✏ Edit</button>
   <button onclick="clearForm()" class="btn">Clear</button>
   <button onclick="saveForm()" class="btn save">Save</button>
 </div>
 
 <div class="card">
 
-<h1>Record 10 – Customer Complaints</h1>
+<h1 id="pageTitle">Record 10 – Customer Complaints</h1>
+
+<div id="lockedNote" class="locked-note">
+  This saved record is locked. Press Edit to make changes.
+</div>
 
 <table>
   <colgroup>
@@ -174,15 +196,30 @@ td:nth-child(6) textarea{
 
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
-const STORAGE_KEY = "customer_complaints_v1";
+const params = new URLSearchParams(window.location.search);
+const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
+
+const STORAGE_KEY = SITE === "Brewer St"
+  ? "customer_complaints_brewer_v2"
+  : "customer_complaints_kitchen_v2";
+
+let loadedRecordId = LOAD_ID || "";
+
+document.getElementById("backBtn").href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+document.getElementById("pageTitle").textContent =
+  SITE === "Brewer St"
+    ? "Record 10 – Customer Complaints (Brewer St)"
+    : "Record 10 – Customer Complaints (Kitchen)";
 
 function todayDate(){
   const d = new Date();
@@ -211,20 +248,24 @@ function buildRows(){
 
       if(c === 3 || c === 4 || c === 5){
         const area = document.createElement("textarea");
+        area.dataset.row = i;
+        area.dataset.col = c;
         td.appendChild(area);
       } else {
         const input = document.createElement("input");
         input.type = "text";
+        input.dataset.row = i;
+        input.dataset.col = c;
 
         if(c === 0){
           input.addEventListener("focus", function(){
-            if(!input.value) input.value = todayDate();
+            if(!input.value && !input.disabled) input.value = todayDate();
           });
         }
 
         if(c === 1){
           input.addEventListener("focus", function(){
-            if(!input.value) input.value = currentTime();
+            if(!input.value && !input.disabled) input.value = currentTime();
           });
         }
 
@@ -238,6 +279,58 @@ function buildRows(){
   }
 }
 
+function getAllFields(){
+  return document.querySelectorAll("table input, table textarea");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById("lockedNote").style.display = "none";
+}
+
+function getRowsAsObjects(){
+  const out = [];
+  document.querySelectorAll("#rows tr").forEach(tr => {
+    const fields = tr.querySelectorAll("input, textarea");
+    out.push({
+      date: fields[0]?.value?.trim() || "",
+      time: fields[1]?.value?.trim() || "",
+      complainant: fields[2]?.value?.trim() || "",
+      complaintDetails: fields[3]?.value?.trim() || "",
+      investigationDetails: fields[4]?.value?.trim() || "",
+      correctiveAction: fields[5]?.value?.trim() || "",
+      checkedBy: fields[6]?.value?.trim() || ""
+    });
+  });
+  return out;
+}
+
+function flattenRows(rows){
+  const values = [];
+  rows.forEach(row => {
+    values.push(
+      row.date || "",
+      row.time || "",
+      row.complainant || "",
+      row.complaintDetails || "",
+      row.investigationDetails || "",
+      row.correctiveAction || "",
+      row.checkedBy || ""
+    );
+  });
+  return values;
+}
+
 async function saveForm(){
   const data = [];
   document.querySelectorAll("table input, table textarea").forEach(function(el){
@@ -248,11 +341,12 @@ async function saveForm(){
 
   try {
     if (window.MDKArchive) {
+      const rows = getRowsAsObjects();
+
       let recordDate = "";
-      const dateInputs = document.querySelectorAll("#rows tr td:first-child input");
-      dateInputs.forEach(function(el){
-        if (!recordDate && el.value.trim()) {
-          recordDate = el.value.trim();
+      rows.forEach(function(row){
+        if (!recordDate && row.date.trim()) {
+          recordDate = row.date.trim();
         }
       });
 
@@ -260,14 +354,24 @@ async function saveForm(){
         recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
       }
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Customer Complaints",
-        site: "Kitchen",
+        site: SITE,
         recordDate: recordDate,
         fields: {
-          values: data
+          rows: rows
         }
-      });
+      };
+
+      if (loadedRecordId) {
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -280,6 +384,7 @@ async function saveForm(){
 function loadForm(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(!saved) return;
+
   const data = JSON.parse(saved);
   const fields = document.querySelectorAll("table input, table textarea");
   fields.forEach(function(field, i){
@@ -287,16 +392,51 @@ function loadForm(){
   });
 }
 
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
+
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
+
+    const rows = record.fields.rows || [];
+    const values = flattenRows(rows);
+    const fields = document.querySelectorAll("table input, table textarea");
+
+    fields.forEach((el, i) => {
+      el.value = values[i] || "";
+    });
+
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
+}
+
 function clearForm(){
   if(!confirm("Clear form?")) return;
+
   document.querySelectorAll("table input, table textarea").forEach(function(el){
     el.value = "";
+    el.disabled = false;
   });
-  localStorage.removeItem(STORAGE_KEY);
+
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildRows();
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 
 </body>
