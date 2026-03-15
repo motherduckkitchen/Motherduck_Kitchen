@@ -44,6 +44,10 @@ body{
   background:#ffc107;
   color:black;
 }
+.edit{
+  background:#16a34a;
+  color:white;
+}
 .card{
   background:white;
   padding:20px;
@@ -91,6 +95,16 @@ th{
   font-size:12px;
   color:#333;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @page{
   size:A4 landscape;
   margin:10mm;
@@ -101,6 +115,7 @@ th{
   .wash{display:none;}
   .page{max-width:none;padding:0;}
   .card{box-shadow:none;border-radius:0;padding:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
@@ -113,6 +128,7 @@ th{
 <div class="toolbar">
   <a id="backBtn" class="btn back" href="kitchen.html">Back</a>
   <button class="btn" onclick="window.print()">Print</button>
+  <button id="editBtn" class="btn edit" onclick="unlockForEdit()" style="display:none;">Edit</button>
   <button class="btn" onclick="clearForm()">Clear</button>
   <button class="btn" onclick="saveForm()">Save</button>
 </div>
@@ -120,6 +136,10 @@ th{
 <div class="card">
 
 <h1 id="pageTitle">Record 6b – Weekly Cleaning Schedule</h1>
+
+<div id="lockedNote" class="locked-note">
+  This saved record is locked. Press Edit to make changes.
+</div>
 
 <div id="weeklyBlocks"></div>
 
@@ -131,20 +151,24 @@ th{
 </div>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
 
 const STORAGE_KEY = SITE === "Brewer St"
-  ? "weekly_clean_blocks_brewer_v2"
-  : "weekly_clean_blocks_kitchen_v2";
+  ? "weekly_clean_blocks_brewer_v3"
+  : "weekly_clean_blocks_kitchen_v3";
+
+let loadedRecordId = LOAD_ID || "";
 
 const backBtn = document.getElementById("backBtn");
 backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
@@ -204,19 +228,31 @@ function buildBlocks(){
   }
 }
 
-function getBlockTicks(block){
-  const blockTicks = [];
-  document.querySelectorAll(`input[data-type="tick"][data-block="${block}"]`).forEach(el => {
-    blockTicks.push(el.checked);
-  });
-  return blockTicks;
+function getAllFields(){
+  return document.querySelectorAll('input[data-type="weekstart"], input[data-type="tick"]');
 }
 
-async function saveForm(){
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById("lockedNote").style.display = "none";
+}
+
+function collectFormData(){
   const data = {
     site: SITE,
     weeks: [],
-    ticks: []
+    ticks: [],
+    tasks: tasks
   };
 
   document.querySelectorAll('input[data-type="weekstart"]').forEach(el => {
@@ -227,33 +263,56 @@ async function saveForm(){
     data.ticks.push(el.checked);
   });
 
+  return data;
+}
+
+function applyFormData(data){
+  const weekInputs = document.querySelectorAll('input[data-type="weekstart"]');
+  weekInputs.forEach((el, i) => {
+    el.value = (data.weeks && data.weeks[i]) || "";
+  });
+
+  const tickInputs = document.querySelectorAll('input[data-type="tick"]');
+  tickInputs.forEach((el, i) => {
+    el.checked = !!(data.ticks && data.ticks[i]);
+  });
+}
+
+async function saveForm(){
+  const data = collectFormData();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
   try {
     if (window.MDKArchive) {
-      for (let block = 0; block < 4; block++) {
-        const weekStart = data.weeks[block];
-        if (!weekStart) continue;
+      let recordDate = "";
+      const firstWeek = (data.weeks || []).find(v => v && v.trim());
 
-        const startDate = new Date(weekStart + "T00:00:00");
+      if (firstWeek) {
+        const startDate = new Date(firstWeek + "T00:00:00");
         const dd = String(startDate.getDate()).padStart(2, "0");
         const mm = String(startDate.getMonth() + 1).padStart(2, "0");
         const yyyy = startDate.getFullYear();
-        const recordDate = dd + "/" + mm + "/" + yyyy;
-
-        await window.MDKArchive.saveRecord({
-          type: "Weekly Cleaning",
-          site: SITE,
-          recordDate: recordDate,
-          fields: {
-            weekStartISO: weekStart,
-            weekStartDisplay: recordDate,
-            block: block + 1,
-            tasks: tasks,
-            ticks: getBlockTicks(block)
-          }
-        });
+        recordDate = dd + "/" + mm + "/" + yyyy;
+      } else {
+        recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
       }
+
+      const archivePayload = {
+        type: "Weekly Cleaning",
+        site: SITE,
+        recordDate: recordDate,
+        fields: data
+      };
+
+      if (loadedRecordId) {
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -266,18 +325,23 @@ async function saveForm(){
 function loadForm(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(!saved) return;
-
   const data = JSON.parse(saved);
+  applyFormData(data);
+}
 
-  const weekInputs = document.querySelectorAll('input[data-type="weekstart"]');
-  weekInputs.forEach((el, i) => {
-    el.value = (data.weeks && data.weeks[i]) || "";
-  });
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
 
-  const tickInputs = document.querySelectorAll('input[data-type="tick"]');
-  tickInputs.forEach((el, i) => {
-    el.checked = !!(data.ticks && data.ticks[i]);
-  });
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
+
+    applyFormData(record.fields);
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
 }
 
 function clearForm(){
@@ -285,17 +349,29 @@ function clearForm(){
 
   document.querySelectorAll('input[data-type="weekstart"]').forEach(el => {
     el.value = "";
+    el.disabled = false;
   });
 
   document.querySelectorAll('input[data-type="tick"]').forEach(el => {
     el.checked = false;
+    el.disabled = false;
   });
 
-  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildBlocks();
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 
 </body>
