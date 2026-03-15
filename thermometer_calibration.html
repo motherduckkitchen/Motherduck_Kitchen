@@ -55,6 +55,11 @@
       color:#fff;
       border:none;
     }
+    .edit{
+      background:#16a34a;
+      color:#fff;
+      border:none;
+    }
     .card{
       background:rgba(255,255,255,.95);
       padding:20px;
@@ -118,6 +123,16 @@
       color:#9b1c1c;
       font-weight:700;
     }
+    .locked-note{
+      margin-bottom:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7ed;
+      color:#9a3412;
+      border:1px solid #fdba74;
+      display:none;
+      font-weight:700;
+    }
     @page{
       size:A4 landscape;
       margin:10mm;
@@ -131,6 +146,7 @@
       h1{font-size:24px;}
       th,td,input{font-size:11px;}
       .notes{font-size:11px;}
+      .locked-note{display:none !important;}
     }
   </style>
 </head>
@@ -142,12 +158,17 @@
       <a id="backBtn" href="kitchen.html" class="btn back">← Back</a>
       <a href="dashboard.html" class="btn">🏠 Home</a>
       <button class="btn" onclick="window.print()" type="button">🖨 Print</button>
+      <button id="editBtn" class="btn edit" onclick="unlockForEdit()" type="button" style="display:none;">✏ Edit</button>
       <button class="btn" onclick="clearForm()" type="button">🧹 Clear</button>
       <button class="btn save" onclick="saveForm()" type="button">💾 Save</button>
     </div>
 
     <div class="card">
       <h1 id="pageTitle">Record 7a - Thermometer Calibration Log</h1>
+
+      <div id="lockedNote" class="locked-note">
+        This saved record is locked. Press Edit to make changes.
+      </div>
 
       <table>
         <colgroup>
@@ -205,20 +226,24 @@
     </div>
   </main>
 
+  <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="firebase-loader.js"></script>
   <script src="archive_shared.js"></script>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const SITE = params.get("site") || "Kitchen";
+    const LOAD_ID = params.get("load") || "";
 
     const STORAGE_KEY = SITE === "Brewer St"
-      ? "thermometer_calibration_brewer_v2"
-      : "thermometer_calibration_kitchen_v2";
+      ? "thermometer_calibration_brewer_v3"
+      : "thermometer_calibration_kitchen_v3";
+
+    let loadedRecordId = LOAD_ID || "";
 
     const backBtn = document.getElementById("backBtn");
     backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
@@ -272,6 +297,8 @@
             const inputThermo = document.createElement("input");
             inputThermo.type = "text";
             inputThermo.placeholder = "Thermometer name";
+            inputThermo.dataset.kind = "thermometerName";
+            inputThermo.dataset.thermo = thermo;
             tdThermo.appendChild(inputThermo);
             tr.appendChild(tdThermo);
           }
@@ -290,7 +317,7 @@
 
             if (labels[r] === "Date") {
               input.addEventListener("focus", function () {
-                if (!input.value) input.value = todayDate();
+                if (!input.value && !input.disabled) input.value = todayDate();
               });
             }
 
@@ -308,6 +335,74 @@
           tbody.appendChild(tr);
         }
       }
+    }
+
+    function getAllFields() {
+      return document.querySelectorAll("table input");
+    }
+
+    function lockAllFields() {
+      getAllFields().forEach(el => {
+        el.disabled = true;
+      });
+      document.getElementById("editBtn").style.display = "inline-flex";
+      document.getElementById("lockedNote").style.display = "block";
+    }
+
+    function unlockForEdit() {
+      getAllFields().forEach(el => {
+        el.disabled = false;
+      });
+      document.getElementById("lockedNote").style.display = "none";
+    }
+
+    function getStructuredData() {
+      const thermometers = [];
+
+      for (let thermo = 0; thermo < 3; thermo++) {
+        const nameInput = document.querySelector(`input[data-kind="thermometerName"][data-thermo="${thermo}"]`);
+
+        const months = [];
+        for (let m = 0; m < 12; m++) {
+          months.push({
+            date: document.querySelector(`input[data-rowlabel="Date"][data-thermo="${thermo}"][data-month="${m}"]`)?.value?.trim() || "",
+            initials: document.querySelector(`input[data-rowlabel="Initials"][data-thermo="${thermo}"][data-month="${m}"]`)?.value?.trim() || "",
+            icePoint: document.querySelector(`input[data-rowlabel="Ice Point"][data-thermo="${thermo}"][data-month="${m}"]`)?.value?.trim() || "",
+            boilingPoint: document.querySelector(`input[data-rowlabel="Boiling Point"][data-thermo="${thermo}"][data-month="${m}"]`)?.value?.trim() || ""
+          });
+        }
+
+        thermometers.push({
+          thermometerName: nameInput?.value?.trim() || "",
+          months: months
+        });
+      }
+
+      return { thermometers };
+    }
+
+    function flattenStructuredData(data) {
+      const values = [];
+      (data.thermometers || []).forEach(t => {
+        values.push(t.thermometerName || "");
+        (t.months || []).forEach(m => {
+          values.push(m.date || "");
+          values.push(m.initials || "");
+          values.push(m.icePoint || "");
+          values.push(m.boilingPoint || "");
+        });
+      });
+      return values;
+    }
+
+    function applyWarnings() {
+      const fields = document.querySelectorAll("table input");
+      fields.forEach(function(field) {
+        const rowLabel = field.dataset.rowlabel;
+        if (rowLabel === "Ice Point" || rowLabel === "Boiling Point") {
+          checkWarning(field, rowLabel);
+        }
+      });
     }
 
     async function saveForm() {
@@ -333,14 +428,22 @@
             recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
           }
 
-          await window.MDKArchive.saveRecord({
+          const archivePayload = {
             type: "Thermometer Calibration",
             site: SITE,
             recordDate: recordDate,
-            fields: {
-              values: data
-            }
-          });
+            fields: getStructuredData()
+          };
+
+          if (loadedRecordId) {
+            await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+          } else {
+            loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+          }
+        }
+
+        if (loadedRecordId) {
+          lockAllFields();
         }
 
         alert("Saved");
@@ -357,11 +460,29 @@
       const fields = document.querySelectorAll("table input");
       fields.forEach(function(field, i) {
         field.value = data[i] || "";
-        const rowLabel = field.dataset.rowlabel;
-        if (rowLabel === "Ice Point" || rowLabel === "Boiling Point") {
-          checkWarning(field, rowLabel);
-        }
       });
+      applyWarnings();
+    }
+
+    async function loadSavedArchiveRecord() {
+      if (!loadedRecordId || !window.MDKArchive) return;
+
+      try {
+        const record = await window.MDKArchive.loadRecord(loadedRecordId);
+        if (!record || !record.fields) return;
+
+        const values = flattenStructuredData(record.fields);
+        const fields = document.querySelectorAll("table input");
+        fields.forEach((field, i) => {
+          field.value = values[i] || "";
+        });
+
+        applyWarnings();
+        lockAllFields();
+      } catch (err) {
+        console.error("Load archive record error:", err);
+        alert("Could not open saved archive record.");
+      }
     }
 
     function clearForm() {
@@ -370,12 +491,24 @@
         el.value = "";
         el.classList.remove("warn");
         el.title = "";
+        el.disabled = false;
       });
-      localStorage.removeItem(STORAGE_KEY);
+
+      document.getElementById("lockedNote").style.display = "none";
+      document.getElementById("editBtn").style.display = loadedRecordId ? "inline-flex" : "none";
+
+      if (!loadedRecordId) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
 
     buildRows();
-    loadForm();
+
+    if (loadedRecordId) {
+      loadSavedArchiveRecord();
+    } else {
+      loadForm();
+    }
   </script>
 </body>
 </html>
