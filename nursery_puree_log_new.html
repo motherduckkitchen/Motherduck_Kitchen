@@ -193,6 +193,13 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
     const STORAGE_KEY = "nursery_puree_log_new_v1";
 
@@ -230,7 +237,7 @@
       }
     }
 
-    function saveForm() {
+    async function saveForm() {
       const data = {
         month: document.getElementById("month").value,
         year: document.getElementById("year").value,
@@ -242,7 +249,41 @@
       });
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      alert("Saved");
+
+      try {
+        if (window.MDKArchive) {
+          let recordDate = "";
+          const rows = document.querySelectorAll("#rows tr");
+
+          rows.forEach(function(row) {
+            if (recordDate) return;
+            const firstInput = row.querySelector("td:first-child input");
+            if (firstInput && firstInput.value.trim()) {
+              recordDate = firstInput.value.trim();
+            }
+          });
+
+          if (!recordDate) {
+            recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+          }
+
+          await window.MDKArchive.saveRecord({
+            type: "Nursery Temperature & Puree Reheat Log",
+            site: "Nursery",
+            recordDate: recordDate,
+            fields: {
+              month: data.month,
+              year: data.year,
+              values: data.fields
+            }
+          });
+        }
+
+        alert("Saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     function loadForm() {
