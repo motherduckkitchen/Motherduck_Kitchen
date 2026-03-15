@@ -210,6 +210,13 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
     const STORAGE_KEY = "transport_log_shared_v1";
 
@@ -290,7 +297,29 @@
       transit.value = minutesBetween(dispatch.value, delivery.value);
     }
 
-    function saveForm() {
+    function getRowsAsObjects() {
+      const allRows = [];
+      for (let r = 0; r < 16; r++) {
+        const row = [];
+        for (let c = 0; c < 8; c++) {
+          const field = document.querySelector(`#rows input[data-row="${r}"][data-col="${c}"]`);
+          row.push(field ? field.value : "");
+        }
+        allRows.push({
+          date: row[0] || "",
+          description: row[1] || "",
+          dispatchTime: row[2] || "",
+          dispatchTemp: row[3] || "",
+          deliveryTime: row[4] || "",
+          deliveryTemp: row[5] || "",
+          transitTime: row[6] || "",
+          signOff: row[7] || ""
+        });
+      }
+      return allRows;
+    }
+
+    async function saveForm() {
       const data = {
         driverName: document.getElementById("driverName").value,
         rows: []
@@ -306,7 +335,37 @@
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      alert("Saved");
+
+      try {
+        if (window.MDKArchive) {
+          let recordDate = "";
+          for (const row of data.rows) {
+            if (row[0] && row[0].trim()) {
+              recordDate = row[0].trim();
+              break;
+            }
+          }
+
+          if (!recordDate) {
+            recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+          }
+
+          await window.MDKArchive.saveRecord({
+            type: "Transfer Log",
+            site: "Brewer St",
+            recordDate: recordDate,
+            fields: {
+              driverName: data.driverName,
+              rows: getRowsAsObjects()
+            }
+          });
+        }
+
+        alert("Saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     function loadForm() {
@@ -343,9 +402,3 @@
   </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
