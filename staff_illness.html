@@ -6,114 +6,111 @@
 <title>Record 11 – Staff Illness / Accident</title>
 
 <style>
-
 body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:url("kitchen.jpg") center center / cover no-repeat fixed;
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center center / cover no-repeat fixed;
 }
-
 .wash{
-position:fixed;
-inset:0;
-background:rgba(255,255,255,.45);
-backdrop-filter:blur(2px);
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.45);
+  backdrop-filter:blur(2px);
 }
-
 .page{
-position:relative;
-z-index:1;
-max-width:1200px;
-margin:auto;
-padding:20px;
+  position:relative;
+  z-index:1;
+  max-width:1400px;
+  margin:auto;
+  padding:20px;
 }
-
 .toolbar{
-display:flex;
-gap:10px;
-margin-bottom:14px;
-flex-wrap:wrap;
+  display:flex;
+  gap:10px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
 }
-
 .btn{
-padding:10px 16px;
-border-radius:12px;
-border:none;
-font-weight:700;
-cursor:pointer;
-background:#f8fafc;
-border:1px solid #cfd6dd;
-text-decoration:none;
-color:#222;
-box-shadow:0 2px 8px rgba(0,0,0,.12);
+  padding:10px 16px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  background:#f8fafc;
+  border:1px solid #cfd6dd;
+  text-decoration:none;
+  color:#222;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
-
 .back{
-background:#ffc107;
+  background:#ffc107;
+  color:#4b0082;
+  border:none;
 }
-
 .save{
-background:#007bff;
-color:white;
+  background:#007bff;
+  color:white;
+  border:none;
 }
-
 .card{
-background:rgba(255,255,255,.95);
-padding:20px;
-border-radius:20px;
-box-shadow:0 12px 30px rgba(0,0,0,.14);
+  background:rgba(255,255,255,.95);
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
+  overflow:auto;
 }
-
 h1{
-margin:0 0 16px;
-font-size:28px;
-color:#1f2937;
+  margin:0 0 16px;
+  font-size:28px;
+  color:#1f2937;
 }
-
 table{
-width:100%;
-border-collapse:collapse;
-background:white;
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  background:white;
 }
-
 th,td{
-border:1px solid #222;
-padding:6px;
-font-size:13px;
+  border:1px solid #222;
+  padding:6px;
+  font-size:13px;
+  vertical-align:middle;
 }
-
 th{
-background:#f4f6f8;
+  background:#f4f6f8;
+  text-align:center;
 }
-
-input{
-width:100%;
-border:none;
-outline:none;
-background:transparent;
-font-size:13px;
-padding:4px;
+input,select{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  font-size:13px;
+  padding:4px;
+  box-sizing:border-box;
+  font-family:Arial,Helvetica,sans-serif;
 }
-
-td:first-child input{
-text-align:left;
-}
-
 .note{
-margin-top:16px;
-font-size:13px;
-color:#333;
+  margin-top:16px;
+  font-size:13px;
+  color:#333;
 }
-
+.warn{
+  background:#ffe2e2 !important;
+  color:#9b1c1c;
+  font-weight:700;
+}
+.ok{
+  background:#eef8ee !important;
+  color:#1f6b2d;
+  font-weight:700;
+}
 @media print{
-
-.toolbar{display:none;}
-body{background:white;}
-.wash{display:none;}
-.card{box-shadow:none;border-radius:0;}
-
+  .toolbar{display:none;}
+  body{background:white;}
+  .wash{display:none;}
+  .card{box-shadow:none;border-radius:0;}
 }
-
 </style>
 </head>
 
@@ -124,11 +121,11 @@ body{background:white;}
 <main class="page">
 
 <div class="toolbar">
-<a href="dashboard.html" class="btn back">← Back</a>
-<a href="dashboard.html" class="btn">🏠 Home</a>
-<button onclick="window.print()" class="btn">🖨 Print</button>
-<button onclick="clearForm()" class="btn">Clear</button>
-<button onclick="saveForm()" class="btn save">Save</button>
+  <a href="dashboard.html" class="btn back">← Back</a>
+  <a href="dashboard.html" class="btn">🏠 Home</a>
+  <button onclick="window.print()" class="btn">🖨 Print</button>
+  <button onclick="clearForm()" class="btn">Clear</button>
+  <button onclick="saveForm()" class="btn save">Save</button>
 </div>
 
 <div class="card">
@@ -136,22 +133,29 @@ body{background:white;}
 <h1>Record 11 – Staff Illness / Accident</h1>
 
 <table>
-
-<thead>
-<tr>
-<th>Staff members name</th>
-<th>Date</th>
-<th>Type of illness</th>
-<th>Checked by</th>
-</tr>
-</thead>
-
-<tbody id="rows"></tbody>
-
+  <colgroup>
+    <col style="width:18%">
+    <col style="width:12%">
+    <col style="width:20%">
+    <col style="width:18%">
+    <col style="width:18%">
+    <col style="width:14%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Staff members name</th>
+      <th>Date</th>
+      <th>Type of illness</th>
+      <th>Other illness details</th>
+      <th>Exclusion</th>
+      <th>Checked by</th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
 </table>
 
 <div class="note">
-Staff should not return to handling food until they have received clearance from a medical practitioner.
+  Staff should not return to handling food until they have received clearance from a medical practitioner.
 </div>
 
 </div>
@@ -159,106 +163,174 @@ Staff should not return to handling food until they have received clearance from
 </main>
 
 <script>
+const STORAGE_KEY = "staff_illness_v2";
 
-const STORAGE_KEY="staff_illness_v1";
+const illnessOptions = [
+  "",
+  "Vomiting",
+  "Diarrhoea",
+  "Vomiting and diarrhoea",
+  "Gastroenteritis",
+  "Fever with sore throat",
+  "Food-borne illness symptoms",
+  "Infected skin sore / wound",
+  "Jaundice",
+  "Other"
+];
+
+const exclusionRules = {
+  "Vomiting": "Exclude 48 hrs after symptoms stop",
+  "Diarrhoea": "Exclude 48 hrs after symptoms stop",
+  "Vomiting and diarrhoea": "Exclude 48 hrs after symptoms stop",
+  "Gastroenteritis": "Exclude 48 hrs after symptoms stop",
+  "Fever with sore throat": "Exclude until medically cleared",
+  "Food-borne illness symptoms": "Exclude and seek medical advice",
+  "Infected skin sore / wound": "Cover wound; exclude if cannot protect",
+  "Jaundice": "Exclude and seek urgent medical advice",
+  "Other": "Assess case / add note"
+};
 
 function todayDate(){
-
-const d=new Date();
-
-const dd=String(d.getDate()).padStart(2,"0");
-const mm=String(d.getMonth()+1).padStart(2,"0");
-const yyyy=d.getFullYear();
-
-return dd+"/"+mm+"/"+yyyy;
-
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return dd + "/" + mm + "/" + yyyy;
 }
 
 function buildRows(){
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
 
-const tbody=document.getElementById("rows");
+  for(let i = 0; i < 12; i++){
+    const tr = document.createElement("tr");
 
-for(let i=0;i<12;i++){
+    const nameTd = document.createElement("td");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameTd.appendChild(nameInput);
+    tr.appendChild(nameTd);
 
-const tr=document.createElement("tr");
+    const dateTd = document.createElement("td");
+    const dateInput = document.createElement("input");
+    dateInput.type = "text";
+    dateInput.addEventListener("focus", function(){
+      if(!dateInput.value) dateInput.value = todayDate();
+    });
+    dateTd.appendChild(dateInput);
+    tr.appendChild(dateTd);
 
-for(let c=0;c<4;c++){
+    const illnessTd = document.createElement("td");
+    const illnessSelect = document.createElement("select");
+    illnessSelect.dataset.row = i;
+    illnessOptions.forEach(function(opt){
+      const o = document.createElement("option");
+      o.value = opt;
+      o.textContent = opt || "Select illness";
+      illnessSelect.appendChild(o);
+    });
+    illnessTd.appendChild(illnessSelect);
+    tr.appendChild(illnessTd);
 
-const td=document.createElement("td");
-const input=document.createElement("input");
+    const otherTd = document.createElement("td");
+    const otherInput = document.createElement("input");
+    otherInput.type = "text";
+    otherInput.placeholder = "Only if Other";
+    otherInput.dataset.otherRow = i;
+    otherTd.appendChild(otherInput);
+    tr.appendChild(otherTd);
 
-input.type="text";
+    const exclTd = document.createElement("td");
+    const exclInput = document.createElement("input");
+    exclInput.type = "text";
+    exclInput.readOnly = true;
+    exclInput.dataset.exclRow = i;
+    exclTd.appendChild(exclInput);
+    tr.appendChild(exclTd);
 
-if(c===1){
+    const checkedTd = document.createElement("td");
+    const checkedInput = document.createElement("input");
+    checkedInput.type = "text";
+    checkedTd.appendChild(checkedInput);
+    tr.appendChild(checkedTd);
 
-input.addEventListener("focus",function(){
+    tbody.appendChild(tr);
 
-if(!input.value) input.value=todayDate();
-
-});
-
+    illnessSelect.addEventListener("change", function(){
+      updateExclusion(i);
+    });
+  }
 }
 
-td.appendChild(input);
-tr.appendChild(td);
+function updateExclusion(row){
+  const select = document.querySelector(`select[data-row="${row}"]`);
+  const excl = document.querySelector(`input[data-excl-row="${row}"]`);
+  const other = document.querySelector(`input[data-other-row="${row}"]`);
 
-}
+  const value = select.value;
+  excl.value = exclusionRules[value] || "";
+  excl.classList.remove("warn","ok");
 
-tbody.appendChild(tr);
+  if(value === "Vomiting" || value === "Diarrhoea" || value === "Vomiting and diarrhoea" || value === "Gastroenteritis"){
+    excl.classList.add("warn");
+  } else if(value){
+    excl.classList.add("ok");
+  }
 
-}
-
+  if(value === "Other"){
+    other.disabled = false;
+    other.style.background = "transparent";
+  } else {
+    other.disabled = true;
+    other.value = "";
+    other.style.background = "#f3f4f6";
+  }
 }
 
 function saveForm(){
-
-const data=[];
-
-document.querySelectorAll("table input").forEach(el=>{
-data.push(el.value);
-});
-
-localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-
-alert("Saved");
-
+  const data = [];
+  document.querySelectorAll("table input, table select").forEach(function(el){
+    data.push({
+      tag: el.tagName,
+      value: el.value
+    });
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  alert("Saved");
 }
 
 function loadForm(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(!saved) return;
 
-const saved=localStorage.getItem(STORAGE_KEY);
+  const data = JSON.parse(saved);
+  const fields = document.querySelectorAll("table input, table select");
 
-if(!saved) return;
+  fields.forEach(function(field, i){
+    if(data[i]) field.value = data[i].value || "";
+  });
 
-const data=JSON.parse(saved);
-
-const fields=document.querySelectorAll("table input");
-
-fields.forEach((field,i)=>{
-
-field.value=data[i]||"";
-
-});
-
+  for(let i = 0; i < 12; i++){
+    updateExclusion(i);
+  }
 }
 
 function clearForm(){
-
-if(!confirm("Clear form?")) return;
-
-document.querySelectorAll("table input").forEach(el=>{
-
-el.value="";
-
-});
-
-localStorage.removeItem(STORAGE_KEY);
-
+  if(!confirm("Clear form?")) return;
+  document.querySelectorAll("table input, table select").forEach(function(el){
+    el.value = "";
+  });
+  localStorage.removeItem(STORAGE_KEY);
+  for(let i = 0; i < 12; i++){
+    updateExclusion(i);
+  }
 }
 
 buildRows();
+for(let i = 0; i < 12; i++){
+  updateExclusion(i);
+}
 loadForm();
-
 </script>
 
 </body>
