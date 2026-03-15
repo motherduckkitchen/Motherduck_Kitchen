@@ -29,7 +29,7 @@ body{
 }
 .wrap{
   width:100%;
-  max-width:980px;
+  max-width:1100px;
   text-align:center;
 }
 .logo{
@@ -50,7 +50,7 @@ body{
   text-shadow:0 2px 8px rgba(0,0,0,.35);
 }
 .card{
-  max-width:860px;
+  max-width:960px;
   margin:0 auto;
   background:rgba(255,255,255,.86);
   backdrop-filter:blur(12px);
@@ -68,6 +68,7 @@ body{
   flex-wrap:wrap;
 }
 .top-btn{
+  min-width:110px;
   padding:12px 20px;
   border-radius:18px;
   background:#f8fafc;
@@ -96,6 +97,7 @@ body{
   border-radius:20px;
   font-weight:800;
   font-size:18px;
+  text-align:center;
   box-shadow:
     0 10px 20px rgba(0,0,0,.18),
     0 0 16px rgba(255,255,255,.24);
@@ -117,44 +119,42 @@ body{
 </head>
 
 <body>
-
 <div class="wash"></div>
 
 <main class="page">
+  <div class="wrap">
+    <img class="logo" src="logo.png" alt="Mother Duck Logo">
+    <div class="site-title">Mother Duck Kitchen</div>
+    <div class="subtitle">Kitchen</div>
 
-<div class="wrap">
+    <section class="card">
+      <div class="toolbar">
+        <a class="top-btn" href="dashboard.html">Home</a>
+        <a class="top-btn" href="brewer_st.html">Brewer St</a>
+        <a class="top-btn" href="invoices.html">Invoices</a>
+      </div>
 
-<img class="logo" src="logo.png" alt="Mother Duck Logo">
-<div class="site-title">Mother Duck Kitchen</div>
-<div class="subtitle">Kitchen</div>
+      <div class="menu-grid">
+        <a class="btn" href="record13.html">Food Safety Program Review</a>
+        <a class="btn" href="record_5a_temp_control_log.html?site=Kitchen">Cook / Cool / Reheat</a>
 
-<section class="card">
+        <a class="btn" href="transport_log.html?site=Kitchen">Transfer Log</a>
+        <a class="btn" href="appliance_temps.html?site=Kitchen">Appliance Temps</a>
 
-<div class="menu-grid">
-  <a class="btn" href="record13.html">Food Safety Program Review</a>
-  <a class="btn" href="record_5a_temp_control_log.html?site=Kitchen">Cook / Cool / Reheat</a>
-  <a class="btn" href="transport_log.html?site=Kitchen">Transfer Log</a>
-  <a class="btn" href="appliance_temps.html?site=Kitchen">Appliance Temps</a>
+        <a class="btn" href="cleaning_schedule_new.html?site=Kitchen">Daily Cleaning</a>
+        <a class="btn" href="cleaning_weekly_new.html?site=Kitchen">Weekly Cleaning</a>
 
-  <a class="btn" href="cleaning_schedule_new.html?site=Kitchen">Daily Cleaning</a>
-  <a class="btn" href="cleaning_weekly_new.html?site=Kitchen">Weekly Cleaning</a>
+        <a class="btn" href="cleaning_monthly_new.html?site=Kitchen">Monthly Cleaning</a>
+        <a class="btn" href="equipment_log.html?site=Kitchen">Equipment Log</a>
 
-  <a class="btn" href="cleaning_monthly_new.html?site=Kitchen">Monthly Cleaning</a>
-  <a class="btn" href="equipment_log.html?site=Kitchen">Equipment Log</a>
+        <a class="btn" href="thermometer_calibration.html?site=Kitchen">Thermometer Calibration</a>
+        <a class="btn" href="staff_training.html?site=Kitchen">Staff Training</a>
 
-  <a class="btn" href="thermometer_calibration.html?site=Kitchen">Thermometer Calibration</a>
-  <a class="btn" href="staff_training.html?site=Kitchen">Staff Training</a>
-
-  <a class="btn" href="customer_complaints.html?site=Kitchen">Customer Complaints</a>
-  <a class="btn" href="pest_control.html?site=Kitchen">Pest Control</a>
-</div>
-
-</div>
-
-</section>
-
-</div>
-
+        <a class="btn" href="customer_complaints.html?site=Kitchen">Customer Complaints</a>
+        <a class="btn" href="pest_control.html?site=Kitchen">Pest Control</a>
+      </div>
+    </section>
+  </div>
 </main>
 
 </body>
