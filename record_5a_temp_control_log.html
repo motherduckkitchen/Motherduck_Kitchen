@@ -56,6 +56,11 @@
       color:#fff;
       border:none;
     }
+    .edit{
+      background:#16a34a;
+      color:#fff;
+      border:none;
+    }
     .card{
       background:rgba(255,255,255,.95);
       padding:20px;
@@ -124,6 +129,16 @@
       font-family:Arial,Helvetica,sans-serif;
       box-sizing:border-box;
     }
+    .locked-note{
+      margin-bottom:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7ed;
+      color:#9a3412;
+      border:1px solid #fdba74;
+      display:none;
+      font-weight:700;
+    }
     @page{
       size:A4 landscape;
       margin:10mm;
@@ -138,6 +153,7 @@
       th,td,input,select{font-size:11px;}
       .note{font-size:11px;}
       .corrective-box{min-height:90px;}
+      .locked-note{display:none !important;}
     }
   </style>
 </head>
@@ -149,12 +165,17 @@
     <a id="backBtn" href="kitchen.html" class="btn back">← Back</a>
     <a href="dashboard.html" class="btn">🏠 Home</a>
     <button class="btn" onclick="window.print()" type="button">🖨 Print</button>
+    <button id="editBtn" class="btn edit" onclick="unlockForEdit()" type="button" style="display:none;">✏ Edit</button>
     <button class="btn" onclick="clearForm()" type="button">🧹 Clear</button>
     <button class="btn save" onclick="saveForm()" type="button">💾 Save</button>
   </div>
 
   <div class="card">
     <h1 id="pageTitle">Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</h1>
+
+    <div id="lockedNote" class="locked-note">
+      This saved record is locked. Press Edit to make changes.
+    </div>
 
     <table id="tbl">
       <colgroup>
@@ -234,10 +255,14 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
 
 const STORAGE_KEY = SITE === "Brewer St"
-  ? "record5a_temp_control_brewer_v2"
-  : "record5a_temp_control_kitchen_v2";
+  ? "record5a_temp_control_brewer_v3"
+  : "record5a_temp_control_kitchen_v3";
+
+let loadedRecordId = LOAD_ID || "";
+let isLockedRecordView = false;
 
 document.getElementById("backBtn").href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
 document.getElementById("pageTitle").textContent =
@@ -283,13 +308,13 @@ function warnField(input, min, max){
 
 function addAutoDate(input){
   input.addEventListener("focus", function(){
-    if(!input.value) input.value = todayDate();
+    if(!input.value && !input.disabled) input.value = todayDate();
   });
 }
 
 function addAutoTime(input){
   input.addEventListener("focus", function(){
-    if(!input.value) input.value = currentTime();
+    if(!input.value && !input.disabled) input.value = currentTime();
   });
 }
 
@@ -335,6 +360,27 @@ function buildRows(){
   }
 }
 
+function getAllFields(){
+  return document.querySelectorAll("#rows input, #rows select, #correctiveActions");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  isLockedRecordView = true;
+  document.getElementById("editBtn").style.display = "inline-flex";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  isLockedRecordView = false;
+  document.getElementById("lockedNote").style.display = "none";
+}
+
 function getRowsAsObjects(){
   const out = [];
   document.querySelectorAll("#rows tr").forEach(tr => {
@@ -360,15 +406,53 @@ function getRowsAsObjects(){
   return out;
 }
 
+function flattenRows(rows){
+  const values = [];
+  rows.forEach(row => {
+    values.push(
+      row.dateBatch || "",
+      row.itemDescription || "",
+      row.process || "",
+      row.cookStartTime || "",
+      row.cookFinishTime || "",
+      row.reheatTemp || "",
+      row.coolTime1 || "",
+      row.coolTemp60 || "",
+      row.coolTime2 || "",
+      row.coolTemp21 || "",
+      row.coolTime3 || "",
+      row.coolTemp5 || "",
+      row.serveTime || "",
+      row.serveTemp || "",
+      row.initial || ""
+    );
+  });
+  return values;
+}
+
+function applyWarnings(){
+  const fields = document.querySelectorAll("#rows input, #rows select");
+  fields.forEach((el) => {
+    const col = Number(el.dataset.col);
+    if(col === 5) warnField(el, 60, null);
+    if(col === 7) warnField(el, null, 60);
+    if(col === 9) warnField(el, null, 21);
+    if(col === 11) warnField(el, null, 5);
+    if(col === 13) warnField(el, 60, null);
+  });
+}
+
 async function saveForm(){
   const values = [];
   document.querySelectorAll("#rows input, #rows select").forEach(el => {
     values.push(el.value);
   });
 
+  const correctiveActions = document.getElementById("correctiveActions").value;
+
   const payload = {
     values,
-    correctiveActions: document.getElementById("correctiveActions").value
+    correctiveActions
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -389,15 +473,25 @@ async function saveForm(){
         recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
       }
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Cook Cool Reheat",
         site: SITE,
         recordDate: recordDate,
         fields: {
           rows,
-          correctiveActions: document.getElementById("correctiveActions").value
+          correctiveActions
         }
-      });
+      };
+
+      if(loadedRecordId){
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -417,15 +511,36 @@ function loadForm(){
 
   fields.forEach((el, i) => {
     el.value = values[i] || "";
-    const col = Number(el.dataset.col);
-    if(col === 5) warnField(el, 60, null);
-    if(col === 7) warnField(el, null, 60);
-    if(col === 9) warnField(el, null, 21);
-    if(col === 11) warnField(el, null, 5);
-    if(col === 13) warnField(el, 60, null);
   });
 
   document.getElementById("correctiveActions").value = payload.correctiveActions || "";
+  applyWarnings();
+}
+
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
+
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
+
+    const rows = record.fields.rows || [];
+    const values = flattenRows(rows);
+    const fields = document.querySelectorAll("#rows input, #rows select");
+
+    fields.forEach((el, i) => {
+      el.value = values[i] || "";
+    });
+
+    document.getElementById("correctiveActions").value =
+      record.fields.correctiveActions || "";
+
+    applyWarnings();
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
+  }
 }
 
 function clearForm(){
@@ -434,14 +549,26 @@ function clearForm(){
   document.querySelectorAll("#rows input, #rows select").forEach(el => {
     el.value = "";
     el.classList.remove("warn");
+    el.disabled = false;
   });
 
   document.getElementById("correctiveActions").value = "";
-  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("correctiveActions").disabled = false;
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-flex" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildRows();
-loadForm();
+
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  loadForm();
+}
 </script>
 </body>
 </html>
