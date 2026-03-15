@@ -1,42 +1,167 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mother Duck Kitchen - Brewer St</title>
-  <link rel="stylesheet" href="site.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mother Duck Kitchen - Brewer St</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:url("kitchen.jpg") center/cover no-repeat fixed;
+  min-height:100vh;
+}
+.wash{
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.42);
+  backdrop-filter:blur(4px);
+}
+.page{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.wrap{
+  width:100%;
+  max-width:980px;
+  text-align:center;
+}
+.logo{
+  width:100px;
+  display:block;
+  margin:0 auto 8px;
+}
+.site-title{
+  font-size:40px;
+  font-weight:800;
+  color:#fff;
+  text-shadow:0 3px 10px rgba(0,0,0,.30);
+}
+.subtitle{
+  color:#fff;
+  margin-bottom:18px;
+  font-size:20px;
+  text-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.card{
+  max-width:860px;
+  margin:0 auto;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(12px);
+  border-radius:28px;
+  padding:34px 34px 24px;
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.5);
+}
+.toolbar{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:20px;
+}
+.top-btn{
+  padding:12px 20px;
+  border-radius:18px;
+  background:#f8fafc;
+  color:#29405a;
+  border:1px solid #d6dde5;
+  text-decoration:none;
+  font-weight:700;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.10),
+    0 0 14px rgba(255,255,255,.45);
+}
+.menu-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+}
+.btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:82px;
+  padding:16px 20px;
+  background:#2c52a0;
+  color:#fff;
+  text-decoration:none;
+  border-radius:20px;
+  font-weight:800;
+  font-size:18px;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.18),
+    0 0 16px rgba(255,255,255,.24);
+  transition:all .15s ease;
+}
+.btn:hover{
+  transform:translateY(-2px);
+  background:#244996;
+  box-shadow:
+    0 16px 28px rgba(0,0,0,.22),
+    0 0 22px rgba(255,255,255,.34);
+}
+@media (max-width:760px){
+  .menu-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div class="wash"></div>
 
-  <main class="page">
-    <div class="top">
-      <img class="logo" src="logo.png" alt="Mother Duck Logo">
-      <div class="site-title">Mother Duck Kitchen</div>
-      <div class="subtitle">Brewer St</div>
-    </div>
+<div class="wash"></div>
 
-    <section class="card-wide">
-      <div class="toolbar">
-        <a class="btn secondary" href="dashboard.html">Home</a>
-        <a class="btn secondary" href="kitchen.html">Kitchen</a>
-        <a class="btn secondary" href="invoices.html">Invoices</a>
-        <a class="btn" href="transport_log.html">Receive Transport</a>
-      </div>
+<main class="page">
 
-      <div class="menu-grid">
-        <a class="btn" href="transport_log.html">Receive Transport</a>
-        <a class="btn" href="appliance_temps.html">Appliance Temps</a>
-        <a class="btn" href="record_5a_cook_cool_reheat.html">Cook / Cool / Reheat</a>
-        <a class="btn" href="cleaning_monthly_new.html">Monthly Cleaning</a>
-        <a class="btn" href="cleaning_schedule_new.html">Daily Cleaning</a>
-        <a class="btn" href="cleaning_weekly_new.html">Weekly Cleaning</a>
-        <a class="btn" href="equipment_log.html">Equipment Log</a>
-        <a class="btn" href="thermometer_calibration.html">Thermometer Calibration</a>
-        <a class="btn" href="staff_training.html">Staff Training</a>
-        <a class="btn" href="customer_complaints.html">Customer Complaints</a>
-      </div>
-    </section>
-  </main  
+<div class="wrap">
+
+<img class="logo" src="logo.png">
+<div class="site-title">Mother Duck Kitchen</div>
+<div class="subtitle">Brewer St</div>
+
+<section class="card">
+
+<div class="toolbar">
+<a class="top-btn" href="dashboard.html">Home</a>
+<a class="top-btn" href="kitchen.html">Kitchen</a>
+<a class="top-btn" href="invoices.html">Invoices</a>
+</div>
+
+<div class="menu-grid">
+
+<a class="btn" href="incoming_goods_new.html">Incoming Goods</a>
+<a class="btn" href="record13.html">Food Safety Program Review</a>
+
+<a class="btn" href="record_5a_cook_cool_reheat.html">Cook / Cool / Reheat</a>
+<a class="btn" href="transport_log.html">Transfer Log</a>
+
+<a class="btn" href="appliance_temps.html">Appliance Temps</a>
+<a class="btn" href="cleaning_schedule_new.html">Daily Cleaning</a>
+
+<a class="btn" href="cleaning_weekly_new.html">Weekly Cleaning</a>
+<a class="btn" href="cleaning_monthly_new.html">Monthly Cleaning</a>
+
+<a class="btn" href="equipment_log.html">Equipment Log</a>
+<a class="btn" href="thermometer_calibration.html">Thermometer Calibration</a>
+
+<a class="btn" href="staff_training.html">Staff Training</a>
+<a class="btn" href="customer_complaints.html">Customer Complaints</a>
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
 </body>
 </html>
