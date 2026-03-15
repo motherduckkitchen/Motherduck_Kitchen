@@ -65,7 +65,7 @@ h1{
   flex-wrap:wrap;
   align-items:center;
 }
-.topline input[type="date"]{
+.topline input[type="text"]{
   padding:6px;
   font-size:14px;
 }
@@ -131,7 +131,7 @@ th{
 
 <div class="card">
 
-<h1>Record 6a – Daily Cleaning & Sanitising Schedule</h1>
+<h1>Record 6a - Daily Cleaning & Sanitising Schedule</h1>
 
 <div class="topline">
   <label>Week Starting:
@@ -186,6 +186,13 @@ th{
 </div>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="archive_shared.js"></script>
+
 <script>
 const STORAGE_KEY = "cleaning_schedule_ticks_v1";
 
@@ -218,11 +225,39 @@ function formatDate(date){
   return d + " / " + m + " / " + y;
 }
 
-function updateWeek(){
-  let startVal = document.getElementById("weekStart").value;
-  if(!startVal) return;
+function parseAusDate(str){
+  if(!str) return null;
+  const parts = str.split("/").map(s => s.trim());
+  if(parts.length !== 3) return null;
 
-  let start = new Date(startVal + "T00:00:00");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const year = parseInt(parts[2], 10);
+
+  if(!day || !month || !year) return null;
+
+  const d = new Date(year, month - 1, day);
+
+  if(
+    d.getFullYear() !== year ||
+    d.getMonth() !== month - 1 ||
+    d.getDate() !== day
+  ){
+    return null;
+  }
+
+  return d;
+}
+
+function updateWeek(){
+  let startVal = document.getElementById("weekStart").value.trim();
+  let start = parseAusDate(startVal);
+
+  if(!start){
+    document.getElementById("weekEnd").innerText = "";
+    return;
+  }
+
   let end = new Date(start);
   end.setDate(start.getDate() + 4);
 
@@ -268,9 +303,10 @@ function buildRows(){
   });
 }
 
-function saveForm(){
+async function saveForm(){
   const data = {
     weekStart: document.getElementById("weekStart").value,
+    weekEnd: document.getElementById("weekEnd").innerText,
     checks: []
   };
 
@@ -282,7 +318,29 @@ function saveForm(){
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert("Saved");
+
+  try {
+    if (window.MDKArchive) {
+      const recordDate = data.weekStart || window.MDKArchive.formatDDMMYYYY(new Date());
+
+      await window.MDKArchive.saveRecord({
+        type: "Daily Cleaning",
+        site: "Kitchen",
+        recordDate: recordDate,
+        fields: {
+          weekStart: data.weekStart,
+          weekEnd: data.weekEnd,
+          tasks: tasks,
+          checks: data.checks
+        }
+      });
+    }
+
+    alert("Saved");
+  } catch (err) {
+    console.error("Archive save error:", err);
+    alert("Saved locally, but archive sync failed");
+  }
 }
 
 function loadForm(){
@@ -326,18 +384,12 @@ function clearForm(){
 buildRows();
 
 const today = new Date();
-document.getElementById("weekStart").value = today.toISOString().substring(0,10);
+document.getElementById("weekStart").value = formatDate(today);
 updateWeek();
-document.getElementById("weekStart").addEventListener("change", updateWeek);
+document.getElementById("weekStart").addEventListener("input", updateWeek);
 
 loadForm();
 </script>
 
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
