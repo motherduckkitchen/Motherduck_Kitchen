@@ -6,14 +6,6 @@
   <title>Record 5a - Temperature Control Log - Cook/Cool/Reheat & Serve</title>
 
   <style>
-    <script src="firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-loader.js"></script>
-<script src="archive_shared.js"></script
-   <style>
     body{
       margin:0;
       font-family:Arial,Helvetica,sans-serif;
@@ -145,10 +137,7 @@
       h1{font-size:24px;}
       th,td,input,select{font-size:11px;}
       .note{font-size:11px;}
-      .corrective-box{
-        border:1px solid #999;
-        min-height:90px;
-      }
+      .corrective-box{min-height:90px;}
     }
   </style>
 </head>
@@ -234,11 +223,12 @@
   </div>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
@@ -331,30 +321,11 @@ function buildRows(){
       if(c === 0) addAutoDate(input);
       if([3,4,6,8,10,12].includes(c)) addAutoTime(input);
 
-      if(c === 5){
-        input.placeholder = "°C";
-        input.addEventListener("input", () => warnField(input, 60, null));
-      }
-
-      if(c === 7){
-        input.placeholder = "°C";
-        input.addEventListener("input", () => warnField(input, null, 60));
-      }
-
-      if(c === 9){
-        input.placeholder = "°C";
-        input.addEventListener("input", () => warnField(input, null, 21));
-      }
-
-      if(c === 11){
-        input.placeholder = "°C";
-        input.addEventListener("input", () => warnField(input, null, 5));
-      }
-
-      if(c === 13){
-        input.placeholder = "°C";
-        input.addEventListener("input", () => warnField(input, 60, null));
-      }
+      if(c === 5) input.addEventListener("input", () => warnField(input, 60, null));
+      if(c === 7) input.addEventListener("input", () => warnField(input, null, 60));
+      if(c === 9) input.addEventListener("input", () => warnField(input, null, 21));
+      if(c === 11) input.addEventListener("input", () => warnField(input, null, 5));
+      if(c === 13) input.addEventListener("input", () => warnField(input, 60, null));
 
       td.appendChild(input);
       tr.appendChild(td);
@@ -396,7 +367,7 @@ async function saveForm(){
   });
 
   const payload = {
-    values: values,
+    values,
     correctiveActions: document.getElementById("correctiveActions").value
   };
 
@@ -405,8 +376,8 @@ async function saveForm(){
   try{
     if(window.MDKArchive){
       const rows = getRowsAsObjects();
-
       let recordDate = "";
+
       for(const r of rows){
         if(r.dateBatch){
           recordDate = r.dateBatch;
@@ -446,7 +417,6 @@ function loadForm(){
 
   fields.forEach((el, i) => {
     el.value = values[i] || "";
-
     const col = Number(el.dataset.col);
     if(col === 5) warnField(el, 60, null);
     if(col === 7) warnField(el, null, 60);
@@ -473,20 +443,5 @@ function clearForm(){
 buildRows();
 loadForm();
 </script>
-
-  buildRows();
-loadForm();
-</script>
-
-<!-- FIREBASE -->
-<script src="firebase-config.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script src="archive_shared.js"></script>
-
-
 </body>
 </html>
