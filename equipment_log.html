@@ -164,6 +164,13 @@
     </div>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
     const STORAGE_KEY = "equipment_log_v2";
 
@@ -201,13 +208,44 @@
       }
     }
 
-    function saveForm() {
+    async function saveForm() {
       const data = [];
       document.querySelectorAll("#rows input").forEach(function(el) {
         data.push(el.value);
       });
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      alert("Saved");
+
+      try {
+        if (window.MDKArchive) {
+          let recordDate = "";
+          const firstColumnDates = document.querySelectorAll("#rows tr td:first-child input");
+
+          firstColumnDates.forEach(function(el) {
+            if (!recordDate && el.value.trim()) {
+              recordDate = el.value.trim();
+            }
+          });
+
+          if (!recordDate) {
+            recordDate = window.MDKArchive.formatDDMMYYYY(new Date());
+          }
+
+          await window.MDKArchive.saveRecord({
+            type: "Equipment Log",
+            site: "Kitchen",
+            recordDate: recordDate,
+            fields: {
+              values: data
+            }
+          });
+        }
+
+        alert("Saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     function loadForm() {
@@ -233,9 +271,3 @@
   </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
