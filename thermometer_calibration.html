@@ -139,7 +139,7 @@
 
   <main class="page">
     <div class="toolbar">
-      <a href="kitchen.html" class="btn back">← Back</a>
+      <a id="backBtn" href="kitchen.html" class="btn back">← Back</a>
       <a href="dashboard.html" class="btn">🏠 Home</a>
       <button class="btn" onclick="window.print()" type="button">🖨 Print</button>
       <button class="btn" onclick="clearForm()" type="button">🧹 Clear</button>
@@ -147,7 +147,7 @@
     </div>
 
     <div class="card">
-      <h1>Record 7a - Thermometer Calibration Log</h1>
+      <h1 id="pageTitle">Record 7a - Thermometer Calibration Log</h1>
 
       <table>
         <colgroup>
@@ -213,7 +213,20 @@
   <script src="archive_shared.js"></script>
 
   <script>
-    const STORAGE_KEY = "thermometer_calibration_v2";
+    const params = new URLSearchParams(window.location.search);
+    const SITE = params.get("site") || "Kitchen";
+
+    const STORAGE_KEY = SITE === "Brewer St"
+      ? "thermometer_calibration_brewer_v2"
+      : "thermometer_calibration_kitchen_v2";
+
+    const backBtn = document.getElementById("backBtn");
+    backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
+
+    const pageTitle = document.getElementById("pageTitle");
+    pageTitle.textContent = SITE === "Brewer St"
+      ? "Record 7a - Thermometer Calibration Log (Brewer St)"
+      : "Record 7a - Thermometer Calibration Log (Kitchen)";
 
     function todayDate() {
       const d = new Date();
@@ -322,7 +335,7 @@
 
           await window.MDKArchive.saveRecord({
             type: "Thermometer Calibration",
-            site: "Kitchen",
+            site: SITE,
             recordDate: recordDate,
             fields: {
               values: data
