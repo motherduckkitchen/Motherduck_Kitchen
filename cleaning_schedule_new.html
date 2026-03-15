@@ -29,6 +29,7 @@ body{
   gap:10px;
   margin-bottom:14px;
   flex-wrap:wrap;
+  align-items:center;
 }
 .btn{
   padding:10px 16px;
@@ -43,6 +44,10 @@ body{
 .back{
   background:#ffc107;
   color:black;
+}
+.edit{
+  background:#16a34a;
+  color:white;
 }
 .card{
   background:white;
@@ -103,6 +108,16 @@ th{
   font-size:12px;
   color:#333;
 }
+.locked-note{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  display:none;
+  font-weight:700;
+}
 @page{
   size:A4 landscape;
   margin:10mm;
@@ -112,6 +127,7 @@ th{
   body{background:white;}
   .wash{display:none;}
   .page{max-width:none;padding:0;}
+  .locked-note{display:none !important;}
 }
 </style>
 </head>
@@ -125,6 +141,7 @@ th{
 <div class="toolbar">
   <a id="backBtn" class="btn back" href="kitchen.html">Back</a>
   <button class="btn" onclick="window.print()">Print</button>
+  <button id="editBtn" class="btn edit" onclick="unlockForEdit()" style="display:none;">Edit</button>
   <button class="btn" onclick="clearForm()">Clear</button>
   <button class="btn" onclick="saveForm()">Save</button>
 </div>
@@ -132,6 +149,10 @@ th{
 <div class="card">
 
 <h1 id="pageTitle">Record 6a - Daily Cleaning & Sanitising Schedule</h1>
+
+<div id="lockedNote" class="locked-note">
+  This saved record is locked. Press Edit to make changes.
+</div>
 
 <div class="topline">
   <label>Week Starting:
@@ -186,20 +207,24 @@ th{
 </div>
 </main>
 
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-loader.js"></script>
 <script src="archive_shared.js"></script>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const SITE = params.get("site") || "Kitchen";
+const LOAD_ID = params.get("load") || "";
 
 const STORAGE_KEY = SITE === "Brewer St"
-  ? "cleaning_schedule_ticks_brewer_v1"
-  : "cleaning_schedule_ticks_kitchen_v1";
+  ? "cleaning_schedule_ticks_brewer_v2"
+  : "cleaning_schedule_ticks_kitchen_v2";
+
+let loadedRecordId = LOAD_ID || "";
 
 const backBtn = document.getElementById("backBtn");
 backBtn.href = SITE === "Brewer St" ? "brewer_st.html" : "kitchen.html";
@@ -316,6 +341,25 @@ function buildRows(){
   });
 }
 
+function getAllFields(){
+  return document.querySelectorAll("#weekStart, #rows input");
+}
+
+function lockAllFields(){
+  getAllFields().forEach(el => {
+    el.disabled = true;
+  });
+  document.getElementById("editBtn").style.display = "inline-block";
+  document.getElementById("lockedNote").style.display = "block";
+}
+
+function unlockForEdit(){
+  getAllFields().forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById("lockedNote").style.display = "none";
+}
+
 function getChecks(){
   const checks = [];
   document.querySelectorAll("#rows input").forEach(el => {
@@ -325,6 +369,20 @@ function getChecks(){
     });
   });
   return checks;
+}
+
+function applyChecks(checks){
+  const inputs = document.querySelectorAll("#rows input");
+  if(Array.isArray(checks)){
+    inputs.forEach((el, i) => {
+      if(!checks[i]) return;
+      if(el.type === "checkbox"){
+        el.checked = !!checks[i].value;
+      } else {
+        el.value = checks[i].value || "";
+      }
+    });
+  }
 }
 
 async function saveForm(){
@@ -341,7 +399,7 @@ async function saveForm(){
     if (window.MDKArchive) {
       const recordDate = data.weekStart || window.MDKArchive.formatDDMMYYYY(new Date());
 
-      await window.MDKArchive.saveRecord({
+      const archivePayload = {
         type: "Daily Cleaning",
         site: SITE,
         recordDate: recordDate,
@@ -351,7 +409,17 @@ async function saveForm(){
           tasks: tasks,
           checks: data.checks
         }
-      });
+      };
+
+      if (loadedRecordId) {
+        await window.MDKArchive.updateRecord(loadedRecordId, archivePayload);
+      } else {
+        loadedRecordId = await window.MDKArchive.saveRecord(archivePayload);
+      }
+    }
+
+    if (loadedRecordId) {
+      lockAllFields();
     }
 
     alert("Saved");
@@ -372,16 +440,23 @@ function loadForm(){
     updateWeek();
   }
 
-  const inputs = document.querySelectorAll("#rows input");
-  if(Array.isArray(data.checks)){
-    inputs.forEach((el, i) => {
-      if(!data.checks[i]) return;
-      if(el.type === "checkbox"){
-        el.checked = !!data.checks[i].value;
-      } else {
-        el.value = data.checks[i].value || "";
-      }
-    });
+  applyChecks(data.checks);
+}
+
+async function loadSavedArchiveRecord(){
+  if(!loadedRecordId || !window.MDKArchive) return;
+
+  try{
+    const record = await window.MDKArchive.loadRecord(loadedRecordId);
+    if(!record || !record.fields) return;
+
+    document.getElementById("weekStart").value = record.fields.weekStart || "";
+    document.getElementById("weekEnd").innerText = record.fields.weekEnd || "";
+    applyChecks(record.fields.checks || []);
+    lockAllFields();
+  } catch(err){
+    console.error("Load archive record error:", err);
+    alert("Could not open saved archive record.");
   }
 }
 
@@ -392,21 +467,31 @@ function clearForm(){
   document.getElementById("weekEnd").innerText = "";
 
   document.querySelectorAll("#rows input").forEach(el => {
+    el.disabled = false;
     if(el.type === "checkbox") el.checked = false;
     else el.value = "";
   });
 
-  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("weekStart").disabled = false;
+  document.getElementById("lockedNote").style.display = "none";
+  document.getElementById("editBtn").style.display = loadedRecordId ? "inline-block" : "none";
+
+  if (!loadedRecordId) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 }
 
 buildRows();
-
-const today = new Date();
-document.getElementById("weekStart").value = formatDate(today);
-updateWeek();
 document.getElementById("weekStart").addEventListener("input", updateWeek);
 
-loadForm();
+if (loadedRecordId) {
+  loadSavedArchiveRecord();
+} else {
+  const today = new Date();
+  document.getElementById("weekStart").value = formatDate(today);
+  updateWeek();
+  loadForm();
+}
 </script>
 
 </body>
