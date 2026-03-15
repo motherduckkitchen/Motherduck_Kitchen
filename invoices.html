@@ -218,6 +218,13 @@
     </section>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="archive_shared.js"></script>
+
   <script>
     const STORAGE_KEY = "mdk_invoices_v2";
 
@@ -229,6 +236,14 @@
       const hh = String(d.getHours()).padStart(2, "0");
       const mi = String(d.getMinutes()).padStart(2, "0");
       return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+    }
+
+    function todayDateOnly() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
     }
 
     function loadInvoices() {
@@ -259,13 +274,14 @@
       });
     }
 
-    function saveInvoice() {
+    async function saveInvoice() {
       const site = document.getElementById("site").value;
       const item = document.getElementById("item").value.trim();
       const temp = document.getElementById("temp").value.trim();
       const note = document.getElementById("note").value.trim();
-      const photo = document.getElementById("photo").files[0];
+      const photo = document.getElementById("photo").files[0] || null;
 
+      const savedAt = nowStamp();
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
       saved.push({
@@ -273,28 +289,44 @@
         item,
         temp,
         note,
-        savedAt: nowStamp(),
+        savedAt,
         photoName: photo ? photo.name : ""
       });
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
 
-      document.getElementById("item").value = "";
-      document.getElementById("temp").value = "";
-      document.getElementById("note").value = "";
-      document.getElementById("photo").value = "";
+      try {
+        if (window.MDKArchive) {
+          await window.MDKArchive.saveRecord({
+            type: "Invoices",
+            site: site,
+            recordDate: todayDateOnly(),
+            notes: note,
+            file: photo,
+            fields: {
+              item: item,
+              temp: temp,
+              savedAt: savedAt,
+              photoName: photo ? photo.name : ""
+            }
+          });
+        }
 
-      loadInvoices();
-      alert("Invoice saved");
+        document.getElementById("item").value = "";
+        document.getElementById("temp").value = "";
+        document.getElementById("note").value = "";
+        document.getElementById("photo").value = "";
+
+        loadInvoices();
+        alert("Invoice saved");
+      } catch (err) {
+        console.error("Archive save error:", err);
+        loadInvoices();
+        alert("Saved locally, but archive sync failed");
+      }
     }
 
     loadInvoices();
   </script>
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="archive_shared.js"></script>
